@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/backend';
 import { utf8Length } from '../utils/validation';
 const blank = {
@@ -15,12 +15,38 @@ export default function Admin() {
     [g, setG] = useState(blank),
     [error, setError] = useState(''),
     [note, setNote] = useState(''),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [steam, setSteam] = useState({ loading: true, configured: false, error: '' }),
+    [page, setPage] = useState({ nextAppId: 0, hasMore: false });
+  const checkSteam = useCallback(async (signal) => {
+    setSteam({ loading: true, configured: false, error: '' });
+    try {
+      const data = await api('/api/admin/sync/status', { signal });
+      if (typeof data?.steamConfigured !== 'boolean') throw new Error('รูปแบบสถานะไม่ถูกต้อง');
+      if (!signal?.aborted)
+        setSteam({ loading: false, configured: data.steamConfigured, error: '' });
+    } catch (e) {
+      if (!signal?.aborted) setSteam({ loading: false, configured: false, error: e.message });
+    }
+  }, []);
+  async function importSteam(after = 0) {
+    await task(async () => {
+      const data = await api('/api/admin/sync/steam' + (after ? '?after=' + after : ''), {
+        method: 'POST',
+      });
+      setPage({ nextAppId: data.nextAppId, hasMore: data.hasMore === true });
+      setNote(
+        `นำเข้าจาก Steam ${data.imported} เกมแล้ว` +
+          (data.hasMore ? ' กดนำเข้าชุดถัดไปเพื่อดึงต่อ' : ' ตรวจครบรายการแล้ว'),
+      );
+    });
+  }
   async function load() {
     setGames(await api('/api/admin/games'));
   }
   useEffect(() => {
     const controller = new AbortController();
+    checkSteam(controller.signal);
     api('/api/admin/games', { signal: controller.signal })
       .then((data) => {
         if (!controller.signal.aborted) setGames(data);
@@ -29,7 +55,7 @@ export default function Admin() {
         if (!controller.signal.aborted) setError(e.message);
       });
     return () => controller.abort();
-  }, []);
+  }, [checkSteam]);
   async function task(fn) {
     setBusy(true);
     setError('');
@@ -101,34 +127,57 @@ export default function Admin() {
         </div>
         <div className="admin-sync-actions">
           <button
-            disabled={busy || games === null}
-            onClick={() =>
-              task(async () => {
-                const d = await api('/api/admin/sync/steam', { method: 'POST' });
-                setNote(`อัปเดตจาก Steam ${d.imported} เกมแล้ว`);
-              })
-            }
+            disabled={busy || games === null || !steam.configured || steam.loading}
+            onClick={() => importSteam()}
           >
-            อัปเดตเกมออกใหม่ Steam
+            นำเข้าเกม Steam
           </button>
-          <button
-            className="secondary"
-            disabled={busy || games === null}
-            onClick={() =>
-              task(async () => {
-                const d = await api('/api/admin/sync', { method: 'POST' });
-                setNote(`Sync ${d.imported} เกมแล้ว`);
-              })
-            }
-          >
-            Sync RAWG (40 เกม)
-          </button>
+          {page.hasMore && (
+            <button
+              className="secondary"
+              disabled={busy || games === null || !steam.configured || steam.loading}
+              onClick={() => importSteam(page.nextAppId)}
+            >
+              นำเข้าชุดถัดไป
+            </button>
+          )}
         </div>
       </div>
       <p className="muted">
-        Steam นำเข้ารายการ New Releases พร้อมภาพสูงสุด 12 เกมต่อครั้ง
-        โดยคงสถานะเผยแพร่และคำอธิบายที่ผู้ดูแลแก้ไว้ ส่วน RAWG ต้องตั้ง API key บน backend ก่อนใช้
+        นำเข้ารายชื่อเกมจาก Steam Web API ทีละไม่เกิน 12 รายการ เรียงตาม AppID
+        แล้วเติมรูปและรายละเอียดจาก Steam Store โดยคงคำอธิบายและสถานะเผยแพร่ที่ผู้ดูแลแก้ไว้
+        จำนวนที่นำเข้าอาจน้อยกว่า 12 เกมตามข้อมูลที่พร้อมใช้งาน
       </p>
+      <div className="panel">
+        <p aria-live="polite">
+          {steam.loading
+            ? 'กำลังตรวจสอบการตั้งค่า Steam…'
+            : steam.error
+              ? `ตรวจสอบสถานะ Steam ไม่สำเร็จ: ${steam.error}`
+              : steam.configured
+                ? 'ตั้งค่า Steam API key แล้ว (การนำเข้าขึ้นอยู่กับสิทธิ์และการตอบกลับของ Steam)'
+                : 'ยังไม่ได้ตั้งค่า STEAM_API_KEY บน Backend'}
+        </p>
+        <button
+          type="button"
+          className="secondary"
+          disabled={busy || steam.loading}
+          onClick={() => checkSteam()}
+        >
+          ตรวจสอบสถานะ Steam อีกครั้ง
+        </button>
+        <details>
+          <summary>วิธีตั้งค่า Steam API key</summary>
+          <p>
+            ขอ key จาก{' '}
+            <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noreferrer">
+              Steam Web API
+            </a>
+            แล้วตั้ง STEAM_API_KEY ในไฟล์ .env ของ Backend หรือ Environment Variables ของโฮสต์
+            จากนั้นรีสตาร์ต Backend และกดตรวจสอบสถานะอีกครั้ง เก็บ key ไว้ฝั่ง Backend เท่านั้น
+          </p>
+        </details>
+      </div>
       {error && <p role="alert">{error}</p>}
       {error && (
         <button className="secondary" disabled={busy} onClick={() => task()}>
@@ -231,7 +280,7 @@ export default function Admin() {
               ))}
             </tbody>
           </table>
-          {!games.length && <p>ยังไม่มีเกม กด Sync หรือเพิ่มข้อมูลด้านบน</p>}
+          {!games.length && <p>ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน</p>}
         </div>
       ) : (
         !error && <p role="status">กำลังโหลด…</p>

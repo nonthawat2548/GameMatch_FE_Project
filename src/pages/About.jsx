@@ -51,16 +51,16 @@ export default function About() {
           เลือกเฉพาะเกมที่ข้อมูลครบ ไม่ใช่อันดับรวมแบบสดหรือการรับประกันความชอบ
         </p>
         <p>
-          เกมออกใหม่ ภาพ วันที่วางจำหน่าย และแท็กจาก{' '}
+          รายชื่อเกมจาก Steam Web API ส่วนภาพ วันที่วางจำหน่าย และแท็กจาก{' '}
           <a
             className="inline-link"
-            href="https://store.steampowered.com/explore/new/"
+            href="https://store.steampowered.com/"
             target="_blank"
             rel="noreferrer"
           >
-            Steam New Releases
+            Steam Store
           </a>{' '}
-          อัปเดตโดยผู้ดูแล และรองรับข้อมูลจาก{' '}
+          อัปเดตโดยผู้ดูแล การนำเข้าปัจจุบันใช้ Steam เท่านั้น และยังแสดงแหล่งที่มาของข้อมูลเดิมจาก{' '}
           <a className="inline-link" href="https://rawg.io" target="_blank" rel="noreferrer">
             RAWG
           </a>{' '}
