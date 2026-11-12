@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { api } from '../api/backend';
 import GameGrid from '../components/GameGrid';
 import { genreLabel } from '../utils/gameLabels';
 
 export default function Discover() {
-  const [q, setQ] = useState('');
+  const { search } = useLocation();
+  const [q, setQ] = useState(() => new URLSearchParams(search).get('q') || '');
   const [genre, setGenre] = useState('all');
   const [games, setGames] = useState([]);
   const [error, setError] = useState('');
@@ -14,6 +15,11 @@ export default function Discover() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('popular');
   const pageSize = 24;
+
+  useEffect(() => {
+    setQ(new URLSearchParams(search).get('q') || '');
+    setPage(1);
+  }, [search]);
 
   useEffect(() => {
     let ignore = false;

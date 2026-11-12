@@ -53,3 +53,18 @@ test('uses a real catalog image for the featured game and links to its detail', 
   expect(await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/1');
   expect(screen.getByText('6', { selector: '.hero-stats strong' })).toBeInTheDocument();
 });
+
+test('searches the existing catalog immediately and links to a matching game', async () => {
+  api.mockResolvedValue(games);
+  page();
+  await screen.findByRole('link', { name: games[0].title });
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  HOME 6  ' } });
+  expect(screen.getByText('พบ 1 เกม')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'เปิดเกม Demo: Home 6' })).toHaveAttribute('href', '/games/6');
+  expect(screen.getByRole('link', { name: 'ดูผลการค้นหาทั้งหมด' })).toHaveAttribute('href', '/discover?q=HOME%206');
+  expect(api).toHaveBeenCalledTimes(1);
+  fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'not found' } });
+  expect(screen.getByText(/ไม่พบเกมที่ตรงกับคำค้น/)).toBeInTheDocument();
+  fireEvent.keyDown(screen.getByRole('searchbox'), { key: 'Escape' });
+  expect(screen.queryByText(/ไม่พบเกมที่ตรงกับคำค้น/)).not.toBeInTheDocument();
+});

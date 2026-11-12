@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/backend';
 import GameGrid from '../components/GameGrid';
 import FeaturedGameCarousel from '../components/FeaturedGameCarousel';
+import HomeGameSearch from '../components/HomeGameSearch';
 import { gameDate } from '../utils/gameSource';
 
 export default function Home() {
@@ -42,6 +43,7 @@ export default function Home() {
           <h1>หาเกมที่อยากเล่น</h1>
           <p className="hero-tagline">เกมที่ใช่ <span>ในสไตล์ของคุณ</span></p>
           <p className="hero-description">เลือกดูเกมในคลัง หรือบอกแนวเกมและสไตล์ที่ชอบให้ GameMatch ช่วยเลือก</p>
+          <HomeGameSearch games={games} loading={loading} error={error} />
           <div className="home-actions">
             <Link className="button" to="/discover">ดูเกมทั้งหมด <span aria-hidden="true">↗</span></Link>
             <Link className="button secondary" to="/match">ลองจับคู่เกม <span aria-hidden="true">→</span></Link>

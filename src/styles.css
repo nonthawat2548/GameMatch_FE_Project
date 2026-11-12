@@ -1378,3 +1378,96 @@ footer { background: #0d1324; border-color: var(--gm-line); }
   .cinematic-hero .hero-slide,
   .cinematic-hero .hero-slide .cinematic-art { animation: none; }
 }
+
+/* Search the already loaded game catalog directly from the homepage. */
+.cinematic-hero .home-game-search {
+  position: relative;
+  pointer-events: auto;
+  width: min(100%, 510px);
+  margin: 23px 0 0;
+  z-index: 5;
+}
+.hero-search-label {
+  display: block;
+  margin: 0 0 7px;
+  color: #e4e8f9;
+  font-size: 13px;
+  font-weight: 600;
+}
+.hero-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 6px 6px 6px 14px;
+  background: #0b1326f5;
+  border: 1px solid #7763b0;
+  border-radius: 13px;
+  box-shadow: 0 8px 24px #080b174d;
+}
+.hero-search-field:focus-within {
+  border-color: #bdaaff;
+  box-shadow: 0 0 0 3px #9c80ff35;
+}
+.hero-search-field > svg { flex-shrink: 0; color: #bdaaff; }
+.hero-search-field input {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: #f5f3ff;
+}
+.hero-search-field input:focus { border: 0; outline: none; }
+.hero-search-field button { flex-shrink: 0; margin: 0; }
+.hero-search-results {
+  margin-top: 8px;
+  padding: 9px;
+  border: 1px solid #495675;
+  border-radius: 13px;
+  background: #111a2df8;
+  box-shadow: 0 10px 28px #080b174d;
+}
+.hero-search-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 7px 6px;
+  color: #b4c0db;
+  font-size: 12px;
+}
+.hero-search-result-head .text-button { font-size: 12px; padding: 3px 7px; min-height: 28px; }
+.hero-search-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 3px; }
+.hero-search-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  padding: 7px;
+  border-radius: 9px;
+  color: #f2f4ff;
+}
+.hero-search-item:hover, .hero-search-item:focus-visible { background: #2b3351; color: #fff; }
+.hero-search-thumb { width: 62px; height: 35px; border-radius: 6px; overflow: hidden; background: #283653; flex-shrink: 0; }
+.hero-search-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hero-search-thumb img[hidden] { display: none; }
+.hero-search-title { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.hero-search-title strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-search-title small { font-size: 11px; color: #aebbd5; }
+.hero-search-arrow { color: #bdaaff; }
+.hero-search-results > p { margin: 6px 8px; color: #c3cde3; font-size: 13px; }
+.hero-search-all {
+  display: flex; align-items: center; justify-content: space-between;
+  color: #d0c3ff; font-size: 13px; border-top: 1px solid #35415b;
+  margin-top: 6px; padding: 10px 7px 3px;
+}
+@media (max-width: 760px) {
+  .cinematic-hero .home-game-search { width: 100%; }
+}
+@media (max-width: 520px) {
+  .hero-search-field { gap: 7px; padding-left: 9px; }
+  .hero-search-field button { padding: 9px 12px; }
+  .hero-search-field input { font-size: 13px; }
+}

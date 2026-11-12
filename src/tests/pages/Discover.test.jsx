@@ -102,3 +102,11 @@ test('switches between source popularity order, release dates and names locally'
   expect(document.querySelector('.game-card h2')).toHaveTextContent('Demo: Z Popular');
   expect(api).toHaveBeenCalledTimes(1);
 });
+
+test('keeps the homepage search term when opening the catalog from its URL', async () => {
+  api.mockResolvedValue([game, { ...game, id: 2, title: 'Other game' }]);
+  render(<MemoryRouter initialEntries={['/discover?q=TEST']}><Discover /></MemoryRouter>);
+  expect(screen.getByRole('searchbox')).toHaveValue('TEST');
+  expect(await screen.findByText(game.title)).toBeInTheDocument();
+  expect(screen.queryByText('Other game')).not.toBeInTheDocument();
+});
