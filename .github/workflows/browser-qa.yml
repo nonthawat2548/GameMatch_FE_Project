@@ -24,7 +24,6 @@ jobs:
       ALLOWED_ORIGINS: http://localhost:4173
       REACT_APP_API_URL: http://localhost:8080
       PORT: 8080
-      GM_PLAYWRIGHT_MODULE: ${{ runner.temp }}/gm-browser/node_modules/playwright
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -54,12 +53,11 @@ jobs:
       - run: |
           npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
           "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - run: node tests/browser/ci-browser.cjs
+      - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/ci-browser.cjs
   public-smoke:
     runs-on: ubuntu-latest
     env:
       GM_QA_MODE: production
-      GM_PLAYWRIGHT_MODULE: ${{ runner.temp }}/gm-browser/node_modules/playwright
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,4 +66,4 @@ jobs:
       - run: |
           npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
           "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - run: node tests/browser/ci-browser.cjs
+      - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/ci-browser.cjs
