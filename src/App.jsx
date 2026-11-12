@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom';
+import ThemeToggle from './components/ThemeToggle';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Discover from './pages/Discover';
@@ -10,7 +12,25 @@ import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Home from './pages/Home';
 import About from './pages/About';
+const THEME_KEY = 'gamematch_theme';
+
 function Shell() {
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // ยังสลับธีมได้หากเบราว์เซอร์ไม่อนุญาตให้เก็บค่า
+    }
+    return () => document.documentElement.removeAttribute('data-theme');
+  }, [theme]);
   const { user, logout, error, retrySession, canRetrySession } = useAuth();
   return (
     <>
@@ -35,6 +55,7 @@ function Shell() {
               {user?.role === 'admin' && <NavLink to="/admin">จัดการเกม</NavLink>}
             </div>
             <div className="account-links">
+              <ThemeToggle theme={theme} onToggle={() => setTheme((value) => value === 'dark' ? 'light' : 'dark')} />
               {user ? (
                 <>
                   <NavLink to="/me/profile">{user.displayName}</NavLink>

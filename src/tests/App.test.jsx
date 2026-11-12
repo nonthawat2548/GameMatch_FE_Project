@@ -200,3 +200,20 @@ test('separates home, catalog and about routes using the main navigation', async
   expect(screen.getByRole('heading', { name: 'เกี่ยวกับ GameMatch' })).toBeInTheDocument();
   expect(window.location.pathname).toBe('/about');
 });
+
+test('switches between dark and light across routes and remembers the choice after remount', async () => {
+  const app = render(<App />);
+  expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+  fireEvent.click(screen.getByRole('button', { name: 'สลับเป็นธีมสว่าง' }));
+  expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+  expect(localStorage.getItem('gamematch_theme')).toBe('light');
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'เมนูหลัก' })).getByRole('link', { name: 'เกมทั้งหมด' }));
+  expect(await screen.findByRole('heading', { name: 'เกมทั้งหมด' })).toBeInTheDocument();
+  expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+  app.unmount();
+  render(<App />);
+  expect(document.documentElement).toHaveAttribute('data-theme', 'light');
+  fireEvent.click(screen.getByRole('button', { name: 'สลับเป็นธีมมืด' }));
+  expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+  expect(localStorage.getItem('gamematch_theme')).toBe('dark');
+});
