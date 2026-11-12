@@ -1,5 +1,5 @@
 import GameCard from './GameCard';
-export default function GameGrid({ games, action, emptyText }) {
+export default function GameGrid({ games, action, emptyText, view = "grid" }) {
   if (!games.length)
     return (
       <p className="empty">
@@ -7,7 +7,7 @@ export default function GameGrid({ games, action, emptyText }) {
       </p>
     );
   return (
-    <div className="game-grid">
+    <div className={view === "list" ? "game-grid game-list-view" : "game-grid"}>
       {games.map((game) => (
         <GameCard key={game.id} game={game} action={action?.(game)} />
       ))}

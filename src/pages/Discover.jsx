@@ -7,7 +7,8 @@ import { genreLabel } from '../utils/gameLabels';
 export default function Discover() {
   const { search } = useLocation();
   const [q, setQ] = useState(() => new URLSearchParams(search).get('q') || '');
-  const [genre, setGenre] = useState('all');
+  const [genre, setGenre] = useState(() => new URLSearchParams(search).get('genre') || 'all');
+  const [view, setView] = useState('grid');
   const [games, setGames] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -17,7 +18,9 @@ export default function Discover() {
   const pageSize = 24;
 
   useEffect(() => {
-    setQ(new URLSearchParams(search).get('q') || '');
+    const params = new URLSearchParams(search);
+    setQ(params.get('q') || '');
+    setGenre(params.get('genre') || 'all');
     setPage(1);
   }, [search]);
 
@@ -71,6 +74,10 @@ export default function Discover() {
       <section aria-labelledby="discover-heading" aria-busy={loading}>
         <div className="catalog-toolbar">
           <h2 id="discover-heading">รายการเกม</h2>
+          <div className="catalog-view" role="group" aria-label="รูปแบบรายการเกม">
+            <button type="button" className="secondary" aria-pressed={view === "grid"} onClick={() => setView("grid")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><rect x="2" y="2" width="6" height="6"/><rect x="12" y="2" width="6" height="6"/><rect x="2" y="12" width="6" height="6"/><rect x="12" y="12" width="6" height="6"/></svg>ตาราง</button>
+            <button type="button" className="secondary" aria-pressed={view === "list"} onClick={() => setView("list")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><path d="M2 4h16M2 10h16M2 16h16"/></svg>รายการ</button>
+          </div>
           <label className="sort-label">
             เรียงตาม
             <select
@@ -141,7 +148,7 @@ export default function Discover() {
             <p className="muted" role="status">
               พบ {shown.length} เกม
             </p>
-            <GameGrid games={pageGames} />
+            <GameGrid games={pageGames} view={view} />
             {totalPages > 1 && (
               <nav className="pagination" aria-label="หน้ารายการเกม">
                 <button

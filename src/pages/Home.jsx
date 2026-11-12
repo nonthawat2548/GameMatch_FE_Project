@@ -6,6 +6,8 @@ import FeaturedGameCarousel from '../components/FeaturedGameCarousel';
 import HomeGameSearch from '../components/HomeGameSearch';
 import SuggestedGames from '../components/SuggestedGames';
 import { gameDate } from '../utils/gameSource';
+import { genreLabel } from '../utils/gameLabels';
+import PopularGames from '../components/PopularGames';
 
 export default function Home({ user } = {}) {
   const [games, setGames] = useState([]);
@@ -43,12 +45,14 @@ export default function Home({ user } = {}) {
   // หากยังไม่มีข้อมูลอันดับ ให้แสดงเกมเด่นจากคลังโดยไม่อ้างว่าเป็นอันดับผู้เล่น
   const featured = (mostPlayed.length ? mostPlayed : withImages).slice(0, 10);
   const genreCount = new Set(games.flatMap((game) => game.genres)).size;
+  const browseGenres = [...new Set(games.flatMap(game => game.genres))].sort((a,b) => games.filter(g => g.genres.includes(b)).length - games.filter(g => g.genres.includes(a)).length || a.localeCompare(b)).slice(0, 8);
   return (
     <>
-      <section className="home-intro cinematic-hero">
+      <section className={mostPlayed.length ? "home-intro cinematic-hero storefront-hero with-ranking" : "home-intro cinematic-hero storefront-hero"}>
         <div className="hero-visual">
           <FeaturedGameCarousel games={featured} />
         </div>
+        <PopularGames games={mostPlayed} />
         <div className="hero-copy">
           <h1>หาเกมที่อยากเล่น</h1>
           <p className="hero-description">ค้นหาจากชื่อเกม หรือเลือกแนวที่ชอบให้ GameMatch ช่วยแนะนำ</p>
@@ -65,6 +69,12 @@ export default function Home({ user } = {}) {
           )}
         </div>
       </section>
+      {!loading && !error && browseGenres.length > 0 && (
+        <nav className="browse-genres" aria-label="เลือกดูตามแนวเกม">
+          <span>แนวเกม</span>
+          {browseGenres.map(genre => <Link key={genre} to={"/discover?genre=" + encodeURIComponent(genre)}>{genreLabel(genre)}</Link>)}
+        </nav>
+      )}
       {user && <SuggestedGames key={user.id} path="/api/me/recommendations" title="จากเกมโปรดของคุณ" description="เกมแนวเดียวกับที่คุณบันทึกไว้" emptyText="ลองเก็บเกมที่ชอบไว้ก่อน เราจะได้หาเกมแนวคล้ายกันให้" />}
       <section className="home-catalog" aria-labelledby="home-games-heading" aria-busy={loading}>
         <div className="section-head">

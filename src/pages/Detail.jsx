@@ -86,6 +86,7 @@ function DetailContent({ id }) {
       <Link className="back-link" to="/discover">
         ← กลับไปรายการเกม
       </Link>
+      <h1 className="game-detail-title">{game.title}</h1>
       <article className="detail-layout">
         <div className="detail-media">
           <GameTrailer game={game}>
@@ -104,7 +105,6 @@ function DetailContent({ id }) {
           </GameTrailer>
         </div>
         <div className="detail-content">
-          <h1>{game.title}</h1>
           <SteamRating key={game.id} game={game} />
           <p className="detail-description">
             {game.descriptionTh || game.description || 'ยังไม่มีคำอธิบายเพิ่มเติม'}

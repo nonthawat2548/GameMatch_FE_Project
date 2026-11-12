@@ -107,3 +107,10 @@ test('dismisses search results on outside interaction without clearing the query
   fireEvent.keyDown(screen.getByRole('button', { name: 'ปิด' }), { key: 'Escape' });
   expect(screen.queryByText('พบ 6 เกม')).not.toBeInTheDocument();
 });
+
+test('shows a Steam ranking and links real genre shortcuts to the catalog', async () => {
+  api.mockResolvedValue([{...games[0],steamId:730,imageUrl:'https://example.com/cs.jpg',popularityOrder:1,popularitySource:'Steam Most Played'}]);
+  page();
+  expect(await screen.findByRole('link',{name:'อันดับ 1: '+games[0].title})).toHaveAttribute('href','/games/1');
+  expect(screen.getByRole('link',{name:'RPG'})).toHaveAttribute('href','/discover?genre=rpg');
+});

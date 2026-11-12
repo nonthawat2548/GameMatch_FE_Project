@@ -110,3 +110,15 @@ test('keeps the homepage search term when opening the catalog from its URL', asy
   expect(await screen.findByText(game.title)).toBeInTheDocument();
   expect(screen.queryByText('Other game')).not.toBeInTheDocument();
 });
+
+test('switches between list and grid without losing the current games', async () => {
+  api.mockResolvedValue([game]);
+  page();
+  await screen.findByText(game.title);
+  fireEvent.click(screen.getByRole('button',{name:'รายการ',exact:true}));
+  expect(document.querySelector('.game-list-view')).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'รายการ',exact:true})).toHaveAttribute('aria-pressed','true');
+  expect(screen.getByText(game.title)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:'ตาราง',exact:true}));
+  expect(document.querySelector('.game-list-view')).toBeNull();
+});
