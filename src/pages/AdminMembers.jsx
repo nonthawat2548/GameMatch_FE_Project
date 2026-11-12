@@ -125,7 +125,8 @@ export default function AdminMembers() {
         </section>
       )}
       {target && (
-        <section className="panel member-confirm" role="dialog" aria-labelledby="role-confirm-title">
+        <div className="member-confirm-overlay">
+        <section className="panel member-confirm" role="dialog" aria-modal="true" aria-labelledby="role-confirm-title">
           <h2 id="role-confirm-title">ยืนยันการเปลี่ยนบทบาท</h2>
           <p><strong>{target.displayName}</strong> · {target.email}</p>
           <div className="member-role-change"><span className={'member-role ' + target.role}>{target.role}</span><span aria-hidden="true">→</span><span className={'member-role ' + nextRole}>{nextRole}</span></div>
@@ -137,6 +138,7 @@ export default function AdminMembers() {
             <button type="button" className={nextRole === 'member' ? 'danger' : ''} disabled={busy} onClick={changeRole}>{busy ? 'กำลังบันทึก…' : 'ยืนยันเปลี่ยนบทบาท'}</button>
           </div>
         </section>
+        </div>
       )}
     </>
   );

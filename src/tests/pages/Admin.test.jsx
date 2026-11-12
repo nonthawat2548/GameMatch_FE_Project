@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Admin from '../../pages/Admin';
+import { MemoryRouter } from 'react-router-dom';
 import { api } from '../../api/backend';
 
 jest.mock('../../api/backend', () => ({ api: jest.fn() }));
@@ -39,7 +40,7 @@ test('imports Steam API games and reloads the persisted catalog', async () => {
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce({ imported: 12 })
     .mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   expect(screen.queryByText(/RAWG/)).not.toBeInTheDocument();
   expect(catalogApi.mock.calls.map(([path]) => path)).toEqual(['/api/admin/games']);
@@ -51,7 +52,7 @@ test('imports Steam API games and reloads the persisted catalog', async () => {
 
 test('retries a failed initial catalog request', async () => {
   catalogApi.mockRejectedValueOnce(new Error('Catalog offline')).mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   expect(await screen.findByRole('alert')).toHaveTextContent('Catalog offline');
   fireEvent.click(screen.getByRole('button', { name: 'โหลดรายการอีกครั้ง' }));
   expect(await screen.findByText(game.title)).toBeInTheDocument();
@@ -62,7 +63,7 @@ test('a failed catalog retry does not claim that a write succeeded', async () =>
   catalogApi
     .mockRejectedValueOnce(new Error('Catalog offline'))
     .mockRejectedValueOnce(new Error('Still offline'));
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByRole('alert');
   expect(screen.getByRole('button', { name: 'นำเข้าเกม Steam' })).toBeDisabled();
   expect(screen.getByLabelText('ชื่อเกม')).toBeDisabled();
@@ -77,7 +78,7 @@ test('creates a game with normalized arrays even when submitting without blur', 
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce({ id: 8 })
     .mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   fillTitle('  Demo: New game  ');
   fireEvent.change(screen.getByLabelText('Genres เช่น rpg, action'), {
@@ -108,7 +109,7 @@ test('updates a game and its publication flag without sending response-only fiel
     .mockResolvedValueOnce([game])
     .mockResolvedValueOnce({ id: 7 })
     .mockResolvedValueOnce([{ ...game, isPublished: false }]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(game.title);
   fireEvent.click(screen.getByRole('button', { name: 'แก้ไข' }));
   expect(screen.getByLabelText('คำอธิบาย')).toHaveValue('Admin description');
@@ -131,7 +132,7 @@ test('updates a game and its publication flag without sending response-only fiel
 
 test('keeps the editing form after a failed write', async () => {
   catalogApi.mockResolvedValueOnce([game]).mockRejectedValueOnce(new Error('Write failed'));
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(game.title);
   fillTitle();
   submit();
@@ -146,7 +147,7 @@ test('retries only the catalog after a successful save followed by reload failur
     .mockResolvedValueOnce({ id: 8 })
     .mockRejectedValueOnce(new Error('Read failed'))
     .mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   fillTitle();
   submit();
@@ -163,7 +164,7 @@ test('cancels deletion or deletes the selected record after confirmation', async
     .mockResolvedValueOnce([game])
     .mockResolvedValueOnce({ ok: true })
     .mockResolvedValueOnce([]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(game.title);
   window.confirm.mockReturnValueOnce(false);
   fireEvent.click(screen.getByRole('button', { name: 'ลบ' }));
@@ -176,7 +177,7 @@ test('cancels deletion or deletes the selected record after confirmation', async
 
 test('keeps the current catalog visible when Steam sync fails', async () => {
   catalogApi.mockResolvedValueOnce([game]).mockRejectedValueOnce(new Error('Steam unavailable'));
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(game.title);
   fireEvent.click(screen.getByRole('button', { name: 'นำเข้าเกม Steam' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Steam unavailable');
@@ -189,7 +190,7 @@ test('shows the actual imported count after a successful sync', async () => {
     .mockResolvedValueOnce([])
     .mockResolvedValueOnce({ imported: 3 })
     .mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   fireEvent.click(screen.getByRole('button', { name: 'นำเข้าเกม Steam' }));
   expect(await screen.findByRole('status')).toHaveTextContent('นำเข้าจาก Steam 3 เกมแล้ว');
@@ -198,7 +199,7 @@ test('shows the actual imported count after a successful sync', async () => {
 
 test('rejects insecure images and Thai titles exceeding the backend byte limit', async () => {
   catalogApi.mockResolvedValueOnce([]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   fillTitle('ก'.repeat(84));
   submit();
@@ -215,7 +216,7 @@ test('rejects insecure images and Thai titles exceeding the backend byte limit',
 test('requires configured Steam key for imports but still allows catalog editing', async () => {
   catalogApi.mockResolvedValue([]);
   statusApi.mockResolvedValueOnce({ steamConfigured: false });
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่ได้ตั้งค่า STEAM_API_KEY บน Backend');
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   expect(screen.getByRole('button', { name: 'นำเข้าเกม Steam' })).toBeDisabled();
@@ -233,7 +234,7 @@ test('continues after the committed batch cursor, and reload retry never repeats
     .mockResolvedValueOnce([game])
     .mockResolvedValueOnce({ imported: 0, nextAppId: 514, hasMore: false })
     .mockResolvedValueOnce([game]);
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText('ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน');
   fireEvent.click(screen.getByRole('button', { name: 'นำเข้าเกม Steam' }));
   await screen.findByRole('alert');
@@ -249,7 +250,7 @@ test('continues after the committed batch cursor, and reload retry never repeats
 test('status failures do not block editing and can be retried', async () => {
   catalogApi.mockResolvedValue([game]);
   statusApi.mockRejectedValueOnce(new Error('Status offline'));
-  render(<Admin />);
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(/ตรวจสอบสถานะ Steam ไม่สำเร็จ: Status offline/);
   await screen.findByText(game.title);
   expect(screen.getByLabelText('ชื่อเกม')).toBeEnabled();

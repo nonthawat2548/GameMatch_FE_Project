@@ -1759,3 +1759,6 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 .member-role-change,.member-confirm-actions {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
 .member-confirm-actions {justify-content:flex-end}
 @media(max-width:520px){.member-metrics {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.member-metrics>div{padding:10px}.member-toolbar{align-items:stretch}.member-toolbar>div,.member-toolbar label{width:100%}.member-toolbar input{width:100%}}
+
+.member-confirm-overlay {position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px;background:#080d1cb0;overflow:auto}
+.member-confirm-overlay .member-confirm {width:min(100%,650px);max-height:calc(100vh - 36px);overflow:auto;margin:0;background:var(--gm-surface)}
