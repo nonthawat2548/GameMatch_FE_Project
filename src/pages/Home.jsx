@@ -50,10 +50,8 @@ export default function Home({ user } = {}) {
           <FeaturedGameCarousel games={featured} />
         </div>
         <div className="hero-copy">
-          <span className="eyebrow"><span aria-hidden="true" /> เกมต่อไปของคุณ เริ่มที่นี่</span>
           <h1>หาเกมที่อยากเล่น</h1>
-          <p className="hero-tagline">เกมที่ใช่ <span>ในสไตล์ของคุณ</span></p>
-          <p className="hero-description">ยังไม่รู้จะเล่นเกมอะไร? ลองค้นหาหรือตอบ 3 ข้อ ให้เราช่วยเลือกเกมที่น่าจะถูกใจ</p>
+          <p className="hero-description">ค้นหาจากชื่อเกม หรือเลือกแนวที่ชอบให้ GameMatch ช่วยแนะนำ</p>
           <HomeGameSearch games={games} loading={loading} error={error} />
           <div className="home-actions">
             <Link className="button" to="/discover">ดูเกมทั้งหมด <span aria-hidden="true">↗</span></Link>
@@ -63,26 +61,12 @@ export default function Home({ user } = {}) {
             <div className="hero-stats">
               <div><strong>{games.length}</strong><span>เกมในคลัง</span></div>
               <div><strong>{genreCount}</strong><span>แนวเกม</span></div>
-              <div><strong>3</strong><span>คำถามหาเกม</span></div>
-            </div>
+              </div>
           )}
         </div>
       </section>
-      <div className="home-paths">
-        <Link to="/discover" className="home-path">
-          <span className="path-number" aria-hidden="true">01</span>
-          <div><strong>สำรวจคลังเกม</strong><p>หาเกมแนวที่คุณชอบได้เลย</p></div>
-          <span aria-hidden="true">→</span>
-        </Link>
-        <Link to="/match" className="home-path">
-          <span className="path-number" aria-hidden="true">02</span>
-          <div><strong>หาเกมที่ใช่</strong><p>ตอบ 3 ข้อ แล้วมาดูว่ามีเกมไหนน่าเล่นบ้าง</p></div>
-          <span aria-hidden="true">→</span>
-        </Link>
-      </div>
-      {user && <SuggestedGames key={user.id} path="/api/me/recommendations" title="ถ้าชอบเกมเหล่านี้ ลองดูเกมอื่น ๆ" description="เกมที่มีแนวคล้าย ๆ กับเกมที่คุณเก็บไว้" emptyText="ลองเก็บเกมที่ชอบไว้ก่อน เราจะได้หาเกมแนวคล้ายกันให้" />}
-      <section aria-labelledby="home-games-heading" aria-busy={loading}>
-        {syncedOn && <p className="muted">ข้อมูล Steam อัปเดต {syncedOn}</p>}
+      {user && <SuggestedGames key={user.id} path="/api/me/recommendations" title="จากเกมโปรดของคุณ" description="เกมแนวเดียวกับที่คุณบันทึกไว้" emptyText="ลองเก็บเกมที่ชอบไว้ก่อน เราจะได้หาเกมแนวคล้ายกันให้" />}
+      <section className="home-catalog" aria-labelledby="home-games-heading" aria-busy={loading}>
         <div className="section-head">
           <div>
             <h2 id="home-games-heading">
@@ -92,9 +76,9 @@ export default function Home({ user } = {}) {
                   ? 'เกมออกใหม่จาก Steam'
                   : 'เลือกดูจากคลังเกม'}
             </h2>
-            <p className="muted">เจอเกมที่น่าสนใจแล้ว? กดดูรายละเอียดหรือเก็บไว้เล่นทีหลังก็ได้</p>
+            {!games.some(game => game.popularityOrder) && syncedOn && <p className="muted">อัปเดต {syncedOn}</p>}
             {games.some((game) => game.popularityOrder) && (
-              <p className="muted">อ้างอิงจากเกมที่คนเล่นเยอะและเกมขายดีบน Steam</p>
+              <p className="muted">จาก Steam Most Played และ Top Sellers{syncedOn ? ` · อัปเดต ${syncedOn}` : ""}</p>
             )}
           </div>
           <Link className="inline-link" to="/discover">

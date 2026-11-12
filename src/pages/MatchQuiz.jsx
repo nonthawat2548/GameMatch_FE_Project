@@ -108,9 +108,8 @@ export default function MatchQuiz() {
   return (
     <>
       <div className="page-banner">
-        <span className="eyebrow">หาเกมที่ใช่</span>
         <h1>แนะนำเกม</h1>
-        <p className="muted">ตอบแค่ 3 ข้อ เดี๋ยวเราช่วยหาเกมที่น่าจะถูกใจคุณ</p>
+        <p className="muted">เลือกแนวเกม รูปแบบการเล่น และสิ่งที่ชอบ</p>
         <div className="quiz-weights" aria-label="สัดส่วนคะแนนจับคู่">
           <span><b>45%</b> แนวเกม</span><span><b>25%</b> เล่นกับใคร</span><span><b>30%</b> ฟีลเกม</span>
         </div>
@@ -119,7 +118,7 @@ export default function MatchQuiz() {
       {!loading && restoring && <p role="status">กำลังโหลดความชอบที่บันทึกไว้…</p>}
       <form onSubmit={run} className="panel quiz-panel" aria-busy={formBusy}>
         <div className="finder-progress">
-          <span className="eyebrow">มาหาเกมกัน</span>
+          <strong>ความชอบของคุณ</strong>
           <span className="muted">คำถาม {step + 1} / {fields.length}</span>
         </div>
         <div className="finder-track" aria-hidden="true"><div style={{ width: ((step + 1) / fields.length * 100) + '%' }} /></div>
@@ -132,8 +131,7 @@ export default function MatchQuiz() {
         </div>
         {fields.filter((_, i) => i === step).map(([key, label, options]) => (
           <fieldset className="finder-question" key={key} disabled={formBusy}>
-            <legend>{['คุณชอบเกมแนวไหน?', 'ปกติคุณเล่นกับใคร?', 'เวลาเล่นเกม ชอบฟีลแบบไหน?'][step]}</legend>
-            <p className="muted">เลือกแบบที่ชอบที่สุดได้เลย</p>
+            <legend>{['คุณชอบเกมแนวไหน?', 'ปกติคุณเล่นกับใคร?', 'เวลาเล่นเกม ชอบอะไรที่สุด?'][step]}</legend>
             <div className="finder-options">
               {options.map(([v, text]) => (
                 <label key={v} className={p[key] === v ? 'finder-option selected' : 'finder-option'}>

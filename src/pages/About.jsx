@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 export default function About() {
   return (
     <article className="about-page">
-      <span className="eyebrow">รู้จักเรา</span>
       <h1>เกี่ยวกับ GameMatch</h1>
-      <p className="muted">ไม่รู้จะเล่นเกมอะไร? GameMatch ช่วยหาเกมจากสิ่งที่คุณชอบ</p>
+      <p className="muted">เว็บไซต์ค้นหา เปรียบเทียบ และแนะนำเกมจากข้อมูล Steam</p>
       <section className="panel">
         <h2>เริ่มใช้งาน</h2>
         <ol className="about-steps">

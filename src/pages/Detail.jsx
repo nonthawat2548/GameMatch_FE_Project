@@ -104,7 +104,6 @@ function DetailContent({ id }) {
           </GameTrailer>
         </div>
         <div className="detail-content">
-          <span className="eyebrow">รู้จักเกมนี้</span>
           <h1>{game.title}</h1>
           <SteamRating key={game.id} game={game} />
           <p className="detail-description">
@@ -159,7 +158,7 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
-      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="ถ้าชอบเกมนี้ เกมเหล่านี้ก็น่าลองเหมือนกัน" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
+      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="แนวเกมและแท็กที่ใกล้เคียงกัน" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
       <GameReviews
         key={user?.id ?? 'guest'}
         gameId={id}

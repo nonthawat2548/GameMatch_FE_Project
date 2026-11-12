@@ -42,7 +42,7 @@ export default function HomeGameSearch({ games, loading, error }) {
           <input
             id="home-game-query"
             type="search"
-            placeholder="ค้นหาชื่อเกม เช่น Dota 2..."
+            placeholder="ชื่อเกม เช่น Dota 2"
             value={query}
             autoComplete="off"
             onFocus={() => setExpanded(true)}

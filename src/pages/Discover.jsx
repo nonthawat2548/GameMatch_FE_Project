@@ -61,12 +61,11 @@ export default function Discover() {
     <>
       <section className="catalog-intro">
         <div>
-          <span className="eyebrow">หาเกมน่าเล่น</span>
           <h1>เกมทั้งหมด</h1>
-          <p className="muted">เลือกดูเกมที่สนใจ แล้วเก็บเกมที่ชอบไว้เล่นทีหลังได้</p>
+          <p className="muted">ค้นหาจากชื่อเกม หรือกรองตามแนวเกม</p>
         </div>
         <Link className="button" to="/match">
-          ช่วยเลือกเกมให้หน่อย
+          ลองจับคู่เกม
         </Link>
       </section>
       <section aria-labelledby="discover-heading" aria-busy={loading}>

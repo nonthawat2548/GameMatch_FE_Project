@@ -24,3 +24,6 @@ Game detail fetches /api/games/{id}/steam-rating independently of the member rev
 
 ### Mobile layout
 At widths up to 760px, Navbar uses a React state-controlled collapsible navigation (same links and authorization checks); the theme button remains accessible in the single-row header. The existing hero video/cover is shown before the search and actions, with compact stats and responsive touch controls. Catalog cards retain two columns, matching results stay readable in one column on small phones, and admin/compare tables scroll inside their container. CSS/Tailwind only, no new packages or API changes.
+
+### Public-facing visual direction
+The homepage is media-first: the game preview occupies its own 16:9 area, search and matching actions sit beside it on desktop and below on phones. Repeated promotional blocks were removed; the catalog uses solid neutral surfaces and the existing brand accent. The UI still uses the same components, routes, roles, APIs, videos and scoring logic. No new dependencies.
