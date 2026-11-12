@@ -73,3 +73,26 @@ test('keeps the existing placeholder when there are no images', () => {
   expect(screen.queryByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).not.toBeInTheDocument();
   expect(document.querySelector('.hero-placeholder')).toBeInTheDocument();
 });
+
+test('uses independent high resolution Steam artwork and falls back if unavailable', () => {
+  const game = { ...games[0], steamId: 730 };
+  const { container } = page([game]);
+  const current = () => container.querySelector('.cinematic-art');
+  expect(current()).toHaveAttribute('src', 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/library_hero_2x.jpg');
+  fireEvent.error(current());
+  expect(current()).toHaveAttribute('src', 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/730/library_hero.jpg');
+  fireEvent.error(current());
+  expect(current()).toHaveAttribute('src', game.imageUrl);
+  fireEvent.error(current());
+  expect(current()).toBeNull();
+});
+test('non-Steam games keep their original image', () => {
+  const { container } = page([games[0]]);
+  expect(container.querySelector('.cinematic-art')).toHaveAttribute('src', games[0].imageUrl);
+});
+test('resets the image fallback when moving to another game', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  fireEvent.error(container.querySelector('.cinematic-art'));
+  fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
+  expect(container.querySelector('.cinematic-art')).toHaveAttribute('src', expect.stringContaining('06918d1009cc79ffdee853f1ef789cddf8014226/library_hero_2x.jpg'));
+});

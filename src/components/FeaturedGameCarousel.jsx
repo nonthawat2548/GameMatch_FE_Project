@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import HeroArtwork from './HeroArtwork';
+import { heroImageCandidates } from '../utils/heroImages';
 
 const SLIDE_MS = 4000;
 
@@ -17,6 +19,14 @@ export default function FeaturedGameCarousel({ games }) {
     const timer = setInterval(() => setPage((p) => (p + 1) % total), SLIDE_MS);
     return () => clearInterval(timer);
   }, [total, paused]);
+
+  // Preload only the next slide, so all ten large images are not fetched at once.
+  const nextImage = total > 1 ? heroImageCandidates(games[(index + 1) % total])[0] : '';
+  useEffect(() => {
+    if (!nextImage || paused) return;
+    const image = new Image();
+    image.src = nextImage;
+  }, [nextImage, paused]);
 
   if (!featured) {
     return (
@@ -41,12 +51,7 @@ export default function FeaturedGameCarousel({ games }) {
         aria-label="เปิดรายละเอียดเกมเด่น"
       >
         <div key={featured.id} className="hero-slide">
-          <img
-            className="cinematic-art"
-            src={featured.imageUrl}
-            alt=""
-            onError={(e) => { e.currentTarget.hidden = true; }}
-          />
+          <HeroArtwork key={featured.id} game={featured} />
           <div className="hero-feature-caption">
             <span className="eyebrow">
               {featured.popularitySource === 'Steam Most Played' && featured.popularityOrder > 0

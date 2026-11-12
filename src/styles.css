@@ -1773,3 +1773,43 @@ footer { background: #0d1324; border-color: var(--gm-line); }
   .cinematic-hero .hero-carousel-dots .hero-dot::before { width: 5px; }
   .cinematic-hero .hero-carousel-dots .hero-dot[aria-pressed='true']::before { width: 12px; }
 }
+
+/* Dedicated, high-resolution Steam artwork for the full cinematic banner. */
+.cinematic-hero .hero-slide .cinematic-art {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 72% center;
+  filter: none;
+  opacity: 1;
+  animation: cinematic-camera-hd 4s linear both;
+  transform-origin: 72% center;
+}
+@keyframes cinematic-camera-hd {
+  from { transform: scale(1.01); }
+  to { transform: scale(1.055); }
+}
+.cinematic-hero .hero-slide::after {
+  background:
+    linear-gradient(90deg, #10172a 0%, #10172af5 22%, #10172ad9 34%, #10172a8c 46%, #10172a1a 63%, transparent 78%),
+    linear-gradient(0deg, #0a1020d9 0%, #0a10204d 19%, transparent 42%);
+}
+.cinematic-hero .hero-slide .hero-feature-caption {
+  text-shadow: 0 2px 12px #000, 0 1px 3px #000;
+}
+[data-theme='light'] .cinematic-hero .hero-slide::after {
+  background:
+    linear-gradient(90deg, #fcfbff 0%, #fcfbfff8 22%, #fcfbfff0 34%, #fcfbffb0 46%, #fcfbff1a 65%, transparent 80%),
+    linear-gradient(0deg, #0a1020d9 0%, #0a10204d 19%, transparent 42%);
+}
+@media (max-width: 760px) {
+  .cinematic-hero .hero-slide .cinematic-art { object-position: 68% center; }
+  .cinematic-hero .hero-slide::after,
+  [data-theme='light'] .cinematic-hero .hero-slide::after {
+    background: linear-gradient(0deg, #0a1020e8 0%, #0a102075 27%, transparent 62%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-hero .hero-slide .cinematic-art { animation: none; }
+}
