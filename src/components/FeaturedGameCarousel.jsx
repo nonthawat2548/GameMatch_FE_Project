@@ -89,7 +89,7 @@ export default function FeaturedGameCarousel({ games }) {
           </div>
         </div>
       </Link>
-      {(total > 1 || showVideo) && (
+      {(total > 1 || (motionEnabled && videoAvailable)) && (
         <>
           <div className="hero-carousel-top">
             {motionEnabled && videoAvailable && (
