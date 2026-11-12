@@ -18,7 +18,7 @@ export default function Profile() {
     setNote('');
     const displayName = name.trim();
     if (!displayName || utf8Length(displayName) > 100) {
-      setError('กรุณาระบุชื่อที่แสดงไม่เกิน 100 ไบต์ ภาษาไทยนับหลายไบต์ต่อตัว');
+      setError('ชื่อยาวเกินไป ลองใช้ชื่อที่สั้นลง (ไม่เกิน 100 ไบต์)');
       setBusy(false);
       return;
     }
@@ -105,7 +105,7 @@ export default function Profile() {
               />
             </label>
             <button disabled={busy}>เปลี่ยนและเข้าสู่ระบบใหม่</button>
-            <p className="muted form-hint">การเปลี่ยนรหัสผ่านจะออกจากระบบในทุกอุปกรณ์</p>
+            <p className="muted form-hint">เปลี่ยนรหัสผ่านแล้ว ต้องเข้าสู่ระบบใหม่ทุกเครื่อง</p>
           </fieldset>
         </form>
       </div>

@@ -61,9 +61,9 @@ export default function Discover() {
     <>
       <section className="catalog-intro">
         <div>
-          <span className="eyebrow">EXPLORE THE LIBRARY</span>
+          <span className="eyebrow">หาเกมน่าเล่น</span>
           <h1>เกมทั้งหมด</h1>
-          <p className="muted">ค้นหาเกมที่สนใจ แล้วเก็บไว้ในรายการเกมโปรดของคุณ</p>
+          <p className="muted">เลือกดูเกมที่สนใจ แล้วเก็บเกมที่ชอบไว้เล่นทีหลังได้</p>
         </div>
         <Link className="button" to="/match">
           ช่วยเลือกเกมให้หน่อย

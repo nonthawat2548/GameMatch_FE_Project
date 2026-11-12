@@ -31,7 +31,7 @@ test('member submits stars and comment then sees only own review controls', asyn
   fireEvent.click(screen.getByRole('button', { name: 'ให้คะแนน 4 ดาว' }));
   fireEvent.change(screen.getByLabelText('ความคิดเห็น'), { target: { value: 'สนุกมาก' } });
   fireEvent.click(screen.getByRole('button', { name: 'ส่งรีวิว' }));
-  expect(await screen.findByText('ส่งรีวิวสำเร็จ')).toBeInTheDocument();
+  expect(await screen.findByText('โพสต์รีวิวแล้ว')).toBeInTheDocument();
   expect(api).toHaveBeenCalledWith('/api/games/46/reviews', { method: 'POST', body: { rating: 4, comment: 'สนุกมาก' } });
   expect(screen.getByRole('button', { name: 'แก้ไขรีวิว' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'เขียนรีวิว' })).not.toBeInTheDocument();

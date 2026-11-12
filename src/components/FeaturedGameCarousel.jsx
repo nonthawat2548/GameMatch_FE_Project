@@ -55,11 +55,11 @@ export default function FeaturedGameCarousel({ games }) {
           <div className="hero-feature-caption">
             <span className="eyebrow">
               {featured.popularitySource === 'Steam Most Played' && featured.popularityOrder > 0
-                ? 'STEAM MOST PLAYED · #' + featured.popularityOrder
-                : 'FEATURED GAME'}
+                ? 'เกมฮิตบน Steam · #' + featured.popularityOrder
+                : 'เกมน่าเล่น'}
             </span>
             <strong>{featured.title}</strong>
-            <span>สำรวจเกม <span aria-hidden="true">↗</span></span>
+            <span>ดูเกมนี้ <span aria-hidden="true">↗</span></span>
           </div>
         </div>
       </Link>

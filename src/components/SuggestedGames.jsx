@@ -22,7 +22,7 @@ export default function SuggestedGames({ path, title, description, emptyText }) 
       <h2>{title}</h2>
       <p className="muted">{description}</p>
       {error ? <div className="empty"><p>โหลดคำแนะนำไม่ได้: {error}</p><button type="button" className="secondary" onClick={() => setRetry((n) => n + 1)}>โหลดคำแนะนำอีกครั้ง</button></div>
-        : games === null ? <p className="muted" aria-live="polite">กำลังค้นหาเกมที่เหมาะสม…</p>
+        : games === null ? <p className="muted" aria-live="polite">กำลังหาเกมน่าเล่นให้คุณ…</p>
         : <GameGrid games={games} emptyText={emptyText} />}
     </section>
   );

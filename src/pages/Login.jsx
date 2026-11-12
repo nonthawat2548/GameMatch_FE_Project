@@ -27,7 +27,7 @@ export default function Login({ register = false }) {
         return;
       }
       if (!displayName || utf8Length(displayName) > 100) {
-        setError('กรุณาระบุชื่อที่แสดงไม่เกิน 100 ไบต์ ภาษาไทยนับหลายไบต์ต่อตัว');
+        setError('ชื่อยาวเกินไป ลองใช้ชื่อที่สั้นลง (ไม่เกิน 100 ไบต์)');
         return;
       }
     }
@@ -66,7 +66,7 @@ export default function Login({ register = false }) {
     <form className="panel narrow auth-form" onSubmit={submit} aria-busy={busy}>
       <div className="auth-brand" aria-hidden="true"><span className="brand-mark">G<span>+</span></span> GameMatch</div>
       <h1>{register ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}</h1>
-      <p className="muted">บันทึกเกมโปรดและเก็บความชอบของคุณไว้ใช้ครั้งต่อไป</p>
+      <p className="muted">เก็บเกมที่ชอบและคำตอบไว้ ไม่ต้องเริ่มใหม่ทุกครั้ง</p>
       {!register && location.state?.notice && <p role="status">{location.state.notice}</p>}
       <fieldset disabled={busy}>
         {register && (

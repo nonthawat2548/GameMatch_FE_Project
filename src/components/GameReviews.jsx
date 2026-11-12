@@ -79,7 +79,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
       setWriting(false);
       setEditing(false);
       setComment('');
-      setNotice(editing ? 'บันทึกการแก้ไขแล้ว' : 'ส่งรีวิวสำเร็จ');
+      setNotice(editing ? 'บันทึกการแก้ไขแล้ว' : 'โพสต์รีวิวแล้ว');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -150,7 +150,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
           {error && <p role="alert">{error}</p>}
           {deleteTarget && (
             <div className="review-confirm" role="group" aria-label="ยืนยันการลบรีวิว">
-              <p>ต้องการลบรีวิวนี้หรือไม่? เมื่อลบแล้วจะไม่สามารถกู้คืนได้</p>
+              <p>ลบรีวิวนี้เลยไหม? ลบแล้วเอากลับมาไม่ได้นะ</p>
               <div className="review-actions">
                 <button type="button" className="review-delete" disabled={busy} onClick={remove}>{busy ? 'กำลังลบ…' : 'ยืนยันลบ'}</button>
                 <button type="button" className="review-secondary" disabled={busy} onClick={() => { setDeleteTarget(null); setError(''); }}>ยกเลิก</button>
@@ -176,7 +176,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
               </fieldset>
               <label>ความคิดเห็น
                 <textarea value={comment} onChange={(e) => setComment(e.target.value)} required maxLength={2000}
-                  disabled={busy} placeholder="แชร์ประสบการณ์ที่คุณได้รับจากเกมนี้" rows={4} />
+                  disabled={busy} placeholder="เล่นแล้วเป็นยังไงบ้าง? สนุกไหม มีอะไรอยากบอกคนอื่น?" rows={4} />
               </label>
               <div className="review-actions">
                 <button disabled={busy || !comment.trim()}>{busy ? 'กำลังบันทึก…' : editing ? 'บันทึกการแก้ไข' : 'ส่งรีวิว'}</button>

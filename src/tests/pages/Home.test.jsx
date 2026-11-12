@@ -82,7 +82,7 @@ test('selects the ten highest ranked Steam Most Played games with images, not to
   page();
   const featured = await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
   expect(featured).toHaveAttribute('href', '/games/100');
-  expect(screen.getByText('STEAM MOST PLAYED · #1')).toBeInTheDocument();
+  expect(screen.getByText('เกมฮิตบน Steam · #1')).toBeInTheDocument();
   expect(screen.getByLabelText('สไลด์ 1 จาก 10')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /สไลด์ .*Top Seller/ })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /สไลด์ .*Ranked 11/ })).not.toBeInTheDocument();
