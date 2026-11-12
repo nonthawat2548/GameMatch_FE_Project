@@ -68,3 +68,26 @@ test('searches the existing catalog immediately and links to a matching game', a
   fireEvent.keyDown(screen.getByRole('searchbox'), { key: 'Escape' });
   expect(screen.queryByText(/ไม่พบเกมที่ตรงกับคำค้น/)).not.toBeInTheDocument();
 });
+
+test('selects the ten highest ranked Steam Most Played games with images, not top sellers', async () => {
+  const ranked = Array.from({ length: 12 }, (_, i) => ({
+    id: 100 + i, steamId: 1000 + i, title: 'Ranked ' + (i + 1),
+    genres: ['action'], platforms: ['PC'], imageUrl: 'https://example.com/cover.jpg',
+    popularityOrder: i + 1, popularitySource: 'Steam Most Played', isPublished: true,
+  }));
+  api.mockResolvedValue([
+    { ...ranked[0], id: 200, title: 'Top Seller', popularitySource: 'Steam Top Sellers (TH)' },
+    ...ranked.slice().reverse(),
+  ]);
+  page();
+  const featured = await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
+  expect(featured).toHaveAttribute('href', '/games/100');
+  expect(screen.getByText('STEAM MOST PLAYED · #1')).toBeInTheDocument();
+  expect(screen.getByLabelText('สไลด์ 1 จาก 10')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /สไลด์ .*Top Seller/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /สไลด์ .*Ranked 11/ })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'เกมก่อนหน้า' }));
+  expect(featured).toHaveAttribute('href', '/games/109');
+  fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
+  expect(featured).toHaveAttribute('href', '/games/100');
+});

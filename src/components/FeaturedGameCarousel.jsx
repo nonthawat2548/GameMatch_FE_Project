@@ -48,7 +48,11 @@ export default function FeaturedGameCarousel({ games }) {
             onError={(e) => { e.currentTarget.hidden = true; }}
           />
           <div className="hero-feature-caption">
-            <span className="eyebrow">FEATURED GAME</span>
+            <span className="eyebrow">
+              {featured.popularitySource === 'Steam Most Played' && featured.popularityOrder > 0
+                ? 'STEAM MOST PLAYED · #' + featured.popularityOrder
+                : 'FEATURED GAME'}
+            </span>
             <strong>{featured.title}</strong>
             <span>สำรวจเกม <span aria-hidden="true">↗</span></span>
           </div>

@@ -1762,3 +1762,14 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 
 .member-confirm-overlay {position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px;background:#080d1cb0;overflow:auto}
 .member-confirm-overlay .member-confirm {width:min(100%,650px);max-height:calc(100vh - 36px);overflow:auto;margin:0;background:var(--gm-surface)}
+
+/* Ten featured games: keep navigation compact enough for small screens. */
+.cinematic-hero .hero-carousel-dots { gap: 2px; }
+.cinematic-hero .hero-carousel-dots button.hero-dot { width: 19px; }
+.cinematic-hero .hero-carousel-dots .hero-dot[aria-pressed='true']::before { width: 16px; }
+@media (max-width: 520px) {
+  .cinematic-hero .hero-carousel-dots { gap: 0; right: 86px; }
+  .cinematic-hero .hero-carousel-dots button.hero-dot { width: 14px; }
+  .cinematic-hero .hero-carousel-dots .hero-dot::before { width: 5px; }
+  .cinematic-hero .hero-carousel-dots .hero-dot[aria-pressed='true']::before { width: 12px; }
+}

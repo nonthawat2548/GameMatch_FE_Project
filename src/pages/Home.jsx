@@ -34,7 +34,14 @@ export default function Home({ user } = {}) {
 
   const steamSync = games.find((game) => game.steamId && game.syncedAt)?.syncedAt;
   const syncedOn = gameDate(steamSync?.slice(0, 10));
-  const featured = games.filter((game) => game.imageUrl).slice(0, 5);
+  // แสดงอันดับผู้เล่นจาก Steam Most Played เท่านั้น ไม่ปะปนกับ Top Sellers
+  const withImages = games.filter((game) => game.imageUrl?.trim() && game.isPublished !== false);
+  const mostPlayed = withImages
+    .filter((game) => game.steamId && game.popularitySource === 'Steam Most Played' &&
+      Number.isInteger(game.popularityOrder) && game.popularityOrder > 0)
+    .sort((a, b) => a.popularityOrder - b.popularityOrder || a.id - b.id);
+  // หากยังไม่มีข้อมูลอันดับ ให้แสดงเกมเด่นจากคลังโดยไม่อ้างว่าเป็นอันดับผู้เล่น
+  const featured = (mostPlayed.length ? mostPlayed : withImages).slice(0, 10);
   const genreCount = new Set(games.flatMap((game) => game.genres)).size;
   return (
     <>
