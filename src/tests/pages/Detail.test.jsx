@@ -33,7 +33,7 @@ function page() {
 }
 
 test('shows guest detail, source attribution and a fallback for a broken image', async () => {
-  api.mockResolvedValue(game);
+  api.mockImplementation(async (path) => path === '/api/games/1' ? game : []);
   page();
   expect(screen.getByRole('status')).toHaveTextContent('กำลังโหลด');
   expect(await screen.findByRole('heading', { name: game.title })).toBeInTheDocument();
@@ -56,7 +56,14 @@ test('shows guest detail, source attribution and a fallback for a broken image',
 });
 
 test('retries a failed detail request', async () => {
-  api.mockRejectedValueOnce(new Error('Detail offline')).mockResolvedValueOnce(game);
+  let detailRequests = 0;
+  api.mockImplementation(async (path) => {
+    if (path === '/api/games/1') {
+      if (detailRequests++ === 0) throw new Error('Detail offline');
+      return game;
+    }
+    return [];
+  });
   page();
   expect(await screen.findByRole('alert')).toHaveTextContent('Detail offline');
   fireEvent.click(screen.getByRole('button', { name: 'ลองใหม่' }));
@@ -68,7 +75,7 @@ test('disables duplicate favorite writes and reports success only after completi
   useAuth.mockReturnValue({ user: { id: 1 } });
   let finish;
   api.mockImplementation((path) => {
-    if (path.endsWith('/reviews')) return Promise.resolve([]);
+    if (path.endsWith('/reviews') || path.endsWith('/similar')) return Promise.resolve([]);
     if (path.includes('/favorites/')) return new Promise((resolve) => { finish = resolve; });
     return Promise.resolve(game);
   });
@@ -85,13 +92,11 @@ test('disables duplicate favorite writes and reports success only after completi
 
 test('an old detail response cannot replace the game selected after navigation', async () => {
   let finish;
-  api
-    .mockReturnValueOnce(
-      new Promise((resolve) => {
-        finish = resolve;
-      }),
-    )
-    .mockResolvedValueOnce(second);
+  api.mockImplementation((path) => {
+    if (path === '/api/games/1') return new Promise((resolve) => { finish = resolve; });
+    if (path === '/api/games/2') return Promise.resolve(second);
+    return Promise.resolve([]);
+  });
   page();
   fireEvent.click(screen.getByRole('link', { name: 'Second game' }));
   await screen.findByRole('heading', { name: second.title });
@@ -106,7 +111,7 @@ test('a delayed favorite write for the previous game cannot show success on the 
   useAuth.mockReturnValue({ user: { id: 1 } });
   let finish;
   api.mockImplementation((path) => {
-    if (path.endsWith('/reviews')) return Promise.resolve([]);
+    if (path.endsWith('/reviews') || path.endsWith('/similar')) return Promise.resolve([]);
     if (path.includes('/favorites/')) return new Promise((resolve) => { finish = resolve; });
     return Promise.resolve(path === '/api/games/2' ? second : game);
   });

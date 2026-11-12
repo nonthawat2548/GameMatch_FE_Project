@@ -46,7 +46,9 @@ test('owner can edit and confirm deletion; other review stays', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'ให้คะแนน 2 ดาว' }));
   fireEvent.change(screen.getByLabelText('ความคิดเห็น'), { target: { value: 'ปรับคะแนนหลังเล่นไปหลายชั่วโมง' } });
   fireEvent.click(screen.getByRole('button', { name: 'บันทึกการแก้ไข' }));
-  expect(await screen.findByText('ปรับคะแนนหลังเล่นไปหลายชั่วโมง')).toBeInTheDocument();
+  expect(await screen.findByText('บันทึกการแก้ไขแล้ว')).toBeInTheDocument();
+  expect(screen.getByText('ปรับคะแนนหลังเล่นไปหลายชั่วโมง')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'ลบรีวิว' })).toBeEnabled();
   expect(api).toHaveBeenCalledWith('/api/games/46/reviews/7', { method: 'PUT', body: { rating: 2, comment: 'ปรับคะแนนหลังเล่นไปหลายชั่วโมง' } });
   fireEvent.click(screen.getByRole('button', { name: 'ลบรีวิว' }));
   expect(api).toHaveBeenCalledTimes(1);
