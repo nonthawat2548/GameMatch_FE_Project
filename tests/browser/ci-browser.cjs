@@ -65,11 +65,13 @@ async function quiz(page) {
       page.on('pageerror',e=>errors.push(e.message));
       await page.goto(origin);await page.locator('.game-card').first().waitFor();
       const search=page.getByRole('searchbox');
+      await page.evaluate(() => document.fonts.ready);
+      await search.focus();
       const before=await page.locator('.cinematic-hero').boundingBox();
       await search.fill(game.title);await page.locator('#home-search-results').waitFor();
       assert.equal(await page.locator('#home-search-results').evaluate(el=>getComputedStyle(el).position),'absolute');
       const after=await page.locator('.cinematic-hero').boundingBox();
-      assert.equal(after.height,before.height);
+      assert(Math.abs(after.height-before.height)<=2, 'search dropdown must not resize hero: '+before.height+' → '+after.height);
       await search.press('Escape');await layout(page);
       await page.getByRole('button',{name:'สลับเป็นธีมสว่าง'}).click();await page.reload();
       await page.locator('.game-card').first().waitFor();

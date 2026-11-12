@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: nonthawat2548/GameMatch_BE_Project
-          ref: 37d93b7c00cf36d0ac231c221eb331275dea878c
+          ref: 95986dafe4875514301b364557a4b5c7000bff4a
           path: backend
       - uses: actions/setup-go@v5
         with:
