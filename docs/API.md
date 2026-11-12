@@ -69,3 +69,6 @@ Session ฝั่ง frontend: 401 ของ protected API ล้าง token �
 Navigation หลังล็อกอิน: หน้าที่ขอเข้าสู่ระบบส่ง pathname ผ่าน Router state.from; สลับไปสมัครสมาชิกแล้วกลับ Login ยังคงหน้าปลายทางเดิม `auth/returnPath.js` ยอมรับเฉพาะ route ภายในที่มีจริง หากเป็น URL ภายนอกหรือ state ผิดรูปแบบจะกลับหน้าแรก ไม่เปลี่ยน API contract หรือเส้นทาง authorization ของ Go
 
 Frontend routing: `/` เป็นหน้าแรก, `/discover` เป็นรายการเกม, `/about` อธิบายการใช้และแหล่งข้อมูล หน้า Home/Discover เรียก `GET /api/games` เพื่อโหลดรายการ published; ค้นหาชื่อและเลือกแนวในหน้า Discover เป็นการกรองจาก state ในเครื่อง Backend ยังรองรับ `?q=keyword` ตาม contract สำหรับผู้เรียกอื่นเหมือนเดิม ค่า return path ที่ไม่ผ่านการตรวจจะกลับ `/` (หน้าแรก)
+
+### Admin Members
+GET /api/admin/members และ PUT /api/admin/members/{id}/role ใช้หน้า /admin/members; Admin เท่านั้น; body {"role":"admin"} หรือ {"role":"member"}; ห้ามแก้บทบาทตัวเอง; เมื่อเปลี่ยนบทบาท Session เดิมของบัญชีที่ถูกแก้จะหมดอายุ

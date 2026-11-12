@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import AdminNav from '../components/AdminNav';
 import { api } from '../api/backend';
 import { utf8Length } from '../utils/validation';
 const blank = {
@@ -147,6 +148,7 @@ export default function Admin() {
           )}
         </div>
       </div>
+      <AdminNav />
       {games && (
         <div className="admin-metrics">
           <div><span>เกมทั้งหมด</span><strong>{games.length}</strong></div>
