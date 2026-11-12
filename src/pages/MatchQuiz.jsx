@@ -14,6 +14,9 @@ const fields = [
       ['strategy', 'Strategy'],
       ['simulation', 'Simulation'],
       ['adventure', 'Adventure'],
+      ['indie', 'Indie'], ['casual', 'Casual'], ['sports', 'Sports'], ['racing', 'Racing'],
+      ['massively-multiplayer', 'MMO'], ['early-access', 'Early Access'], ['free-to-play', 'Free to Play'],
+      ['fps', 'FPS'], ['survival', 'Survival'], ['horror', 'Horror'], ['puzzle', 'Puzzle'], ['moba', 'MOBA'],
     ],
   ],
   [
@@ -39,6 +42,7 @@ const fields = [
 export default function MatchQuiz() {
   const { user, loading } = useAuth(),
     [p, setP] = useState({ genre: 'rpg', mode: 'solo', style: 'story' }),
+    [step, setStep] = useState(0),
     [games, setGames] = useState(null),
     [busy, setBusy] = useState(false),
     [saving, setSaving] = useState(false),
@@ -51,6 +55,7 @@ export default function MatchQuiz() {
     let active = true;
     setP({ genre: 'rpg', mode: 'solo', style: 'story' });
     setGames(null);
+    setStep(0);
     setNote('');
     setError('');
     setRestoring(Boolean(memberID));
@@ -71,6 +76,10 @@ export default function MatchQuiz() {
   }, [memberID]);
   async function run(e) {
     e.preventDefault();
+    if (step < fields.length - 1) {
+      setStep(step + 1);
+      return;
+    }
     setBusy(true);
     setError('');
     setGames(null);
@@ -109,35 +118,42 @@ export default function MatchQuiz() {
       {loading && <p role="status">กำลังตรวจสอบบัญชี…</p>}
       {!loading && restoring && <p role="status">กำลังโหลดความชอบที่บันทึกไว้…</p>}
       <form onSubmit={run} className="panel quiz-panel" aria-busy={formBusy}>
-        <h2>กำหนดความชอบของคุณ</h2>
-        <div className="quiz-fields">
-          {fields.map(([key, label, options]) => (
-            <label key={key}>
-              {label}
-              <select
-                disabled={formBusy}
-                value={p[key]}
-                onChange={(e) => {
-                  setP({ ...p, [key]: e.target.value });
-                  setNote('');
-                  setGames(null);
-                }}
-              >
-                {options.map(([v, text]) => (
-                  <option key={v} value={v}>
-                    {key === 'genre' ? genreLabel(v) : text}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <div className="finder-progress">
+          <span className="eyebrow">GAME FINDER</span>
+          <span className="muted">คำถาม {step + 1} / {fields.length}</span>
+        </div>
+        <div className="finder-track" aria-hidden="true"><div style={{ width: ((step + 1) / fields.length * 100) + '%' }} /></div>
+        <div className="finder-steps">
+          {fields.map(([key, label, options], i) => (
+            <button key={key} type="button" disabled={formBusy || i > step} className="secondary" aria-current={i === step ? 'step' : undefined} onClick={() => setStep(i)}>
+              {i + 1}. {label}<small>{key === 'genre' ? genreLabel(p[key]) : options.find(([v]) => v === p[key])?.[1]}</small>
+            </button>
           ))}
         </div>
-        <button disabled={formBusy}>{busy ? 'กำลังจับคู่…' : 'แนะนำเกมให้ฉัน'}</button>
-        {user && (
-          <button type="button" className="secondary" onClick={save} disabled={formBusy}>
-            {saving ? 'กำลังบันทึก…' : 'บันทึกความชอบ'}
-          </button>
-        )}
+        {fields.filter((_, i) => i === step).map(([key, label, options]) => (
+          <fieldset className="finder-question" key={key} disabled={formBusy}>
+            <legend>{['คุณชอบเกมแนวไหน?', 'ปกติคุณเล่นกับใคร?', 'คุณอยากได้ประสบการณ์แบบไหน?'][step]}</legend>
+            <p className="muted">เลือก {label} ที่ตรงกับคุณมากที่สุด</p>
+            <div className="finder-options">
+              {options.map(([v, text]) => (
+                <label key={v} className={p[key] === v ? 'finder-option selected' : 'finder-option'}>
+                  <input type="radio" name={key} value={v} checked={p[key] === v}
+                    onChange={() => { setP({ ...p, [key]: v }); setNote(''); setGames(null); }} />
+                  <span>{key === 'genre' ? genreLabel(v) : text}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+        <div className="finder-actions">
+          <button type="button" className="secondary" disabled={formBusy || step === 0} onClick={() => setStep(step - 1)}>ย้อนกลับ</button>
+          <button disabled={formBusy}>{step < fields.length - 1 ? 'ถัดไป' : busy ? 'กำลังจับคู่…' : 'แนะนำเกมให้ฉัน'}</button>
+          {user && step === fields.length - 1 && (
+            <button type="button" className="secondary" onClick={save} disabled={formBusy}>
+              {saving ? 'กำลังบันทึก…' : 'บันทึกความชอบ'}
+            </button>
+          )}
+        </div>
       </form>
       {!loading && !user && (
         <p className="muted">
@@ -162,6 +178,7 @@ export default function MatchQuiz() {
           <p className="muted">
             คะแนนแสดงความตรงกับตัวเลือกจากข้อมูลเกม ไม่ใช่การรับประกันว่าจะชอบเกม
           </p>
+          {games.length > 0 && <div className="finder-best"><strong>อันดับ 1 · {games[0].matchScore}/100</strong> <span>เกมที่ตรงกับคำตอบของคุณที่สุดจากผลลัพธ์นี้</span></div>}
           <GameGrid games={games} />
         </section>
       )}

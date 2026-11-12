@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { genreLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
 import GameReviews from '../components/GameReviews';
+import SuggestedGames from '../components/SuggestedGames';
 export default function Detail() {
   const { id } = useParams();
   // เปลี่ยนเกมแล้วสร้าง state ใหม่ ป้องกันผลคำขอของเกมก่อนหน้าค้างในหน้าใหม่
@@ -138,6 +139,7 @@ function DetailContent({ id }) {
               เข้าสู่ระบบเพื่อบันทึกเกม
             </Link>
           )}
+          <Link className="button secondary" to={'/compare?game=' + id}>เปรียบเทียบเกม</Link>
           {source && (
             <p className="detail-source">
               ข้อมูลและภาพจาก{' '}
@@ -150,6 +152,7 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
+      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="คัดจากแนวเกมและแท็กที่ตรงกับเกมนี้" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
       <GameReviews
         key={user?.id ?? 'guest'}
         gameId={id}

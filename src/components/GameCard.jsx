@@ -36,6 +36,17 @@ export default function GameCard({ game, action }) {
         {game.matchScore > 0 && (
           <strong className="score">ตรงกับความชอบ {game.matchScore}/100</strong>
         )}
+        {game.matchBreakdown?.length > 0 && (
+          <div className="match-breakdown" aria-label="คะแนนจับคู่แยกรายด้าน">
+            {game.matchBreakdown.map((part) => (
+              <div key={part.label}>
+                <span>{part.label}</span><b>{part.points}/{part.max}</b>
+                <div className="match-track"><div style={{ width: (part.points / part.max * 100) + '%' }} /></div>
+              </div>
+            ))}
+            <small className="muted">0 คะแนน = ไม่พบข้อมูลตรงกับคำตอบ</small>
+          </div>
+        )}
         {game.reasons?.map((x) => (
           <p className="reason" key={x}>
             {x}
@@ -52,6 +63,7 @@ export default function GameCard({ game, action }) {
             ข้อมูลและภาพจาก {source.name} ↗
           </a>
         )}
+        <Link className="card-compare" to={'/compare?game=' + game.id} aria-label={'เปรียบเทียบ ' + game.title}>เปรียบเทียบเกม ↗</Link>
         {action}
       </div>
     </article>

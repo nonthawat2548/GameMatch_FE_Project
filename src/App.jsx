@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Home from './pages/Home';
 import About from './pages/About';
+import Compare from './pages/Compare';
 const THEME_KEY = 'gamematch_theme';
 
 function Shell() {
@@ -50,6 +51,7 @@ function Shell() {
               </NavLink>
               <NavLink to="/discover">เกมทั้งหมด</NavLink>
               <NavLink to="/match">แนะนำเกม</NavLink>
+              <NavLink to="/compare">เปรียบเทียบ</NavLink>
               <NavLink to="/about">เกี่ยวกับ</NavLink>
               {user && <NavLink to="/me/favorites">เกมโปรด</NavLink>}
               {user?.role === 'admin' && <NavLink to="/admin">จัดการเกม</NavLink>}
@@ -93,7 +95,8 @@ function Shell() {
           </div>
         )}
         <Routes key={user?.id || 'guest'}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home user={user} />} />
+          <Route path="/compare" element={<Compare />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/match" element={<MatchQuiz />} />
           <Route path="/about" element={<About />} />

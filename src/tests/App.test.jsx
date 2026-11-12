@@ -32,6 +32,7 @@ beforeEach(() => {
     if (path === '/api/auth/login') return response(200, { token, user: member });
     if (path === '/api/games') return response(200, [game]);
     if (path === '/api/games/7') return response(200, game);
+    if (path === '/api/games/7/similar' || path === '/api/games/7/reviews' || path === '/api/me/recommendations') return response(200, []);
     if (path === '/api/recommendations')
       return response(200, [{ ...game, matchScore: 100, reasons: ['ตรงตามความชอบใน fixture'] }]);
     if (options.headers?.Authorization !== 'Bearer ' + token) {
@@ -58,6 +59,8 @@ test('guest matches games, logs in, saves a favorite, updates profile and logs o
   render(<App />);
   expect(await screen.findByRole('link', { name: game.title })).toBeInTheDocument();
   await user.click(screen.getByRole('link', { name: 'แนะนำเกม' }));
+  await user.click(screen.getByRole('button', { name: 'ถัดไป' }));
+  await user.click(screen.getByRole('button', { name: 'ถัดไป' }));
   await user.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
   expect(await screen.findByText('ตรงกับความชอบ 100/100')).toBeInTheDocument();
   expect(screen.getByText('ตรงตามความชอบใน fixture')).toBeInTheDocument();

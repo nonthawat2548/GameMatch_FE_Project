@@ -4,9 +4,10 @@ import { api } from '../api/backend';
 import GameGrid from '../components/GameGrid';
 import FeaturedGameCarousel from '../components/FeaturedGameCarousel';
 import HomeGameSearch from '../components/HomeGameSearch';
+import SuggestedGames from '../components/SuggestedGames';
 import { gameDate } from '../utils/gameSource';
 
-export default function Home() {
+export default function Home({ user } = {}) {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -72,6 +73,7 @@ export default function Home() {
           <span aria-hidden="true">→</span>
         </Link>
       </div>
+      {user && <SuggestedGames key={user.id} path="/api/me/recommendations" title="แนะนำจากเกมโปรดของคุณ" description="ค้นหาเกมใหม่จากแนวและแท็กที่คล้ายเกมที่คุณบันทึกไว้" emptyText="บันทึกเกมโปรดก่อนเพื่อรับคำแนะนำ หรือยังไม่มีเกมที่คล้ายกันในคลัง" />}
       <section aria-labelledby="home-games-heading" aria-busy={loading}>
         {syncedOn && <p className="muted">ข้อมูล Steam อัปเดต {syncedOn}</p>}
         <div className="section-head">

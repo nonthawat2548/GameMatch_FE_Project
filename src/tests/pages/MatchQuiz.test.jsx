@@ -5,6 +5,8 @@ import { api } from '../../api/backend';
 import { useAuth } from '../../auth/AuthContext';
 jest.mock('../../api/backend', () => ({ api: jest.fn() }));
 jest.mock('../../auth/AuthContext', () => ({ useAuth: jest.fn() }));
+function next() { fireEvent.click(screen.getByRole('button', { name: 'ถัดไป' })); }
+function finish() { next(); next(); fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' })); }
 beforeEach(() => {
   jest.resetAllMocks();
   useAuth.mockReturnValue({ user: null });
@@ -25,8 +27,8 @@ test('sends selected preferences and renders match reasons', async () => {
       <MatchQuiz />
     </MemoryRouter>,
   );
-  fireEvent.change(screen.getByLabelText('แนวเกม'), { target: { value: 'action' } });
-  fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
+  fireEvent.click(screen.getByRole('radio', { name: 'แอ็กชัน' }));
+  finish();
   await waitFor(() =>
     expect(api).toHaveBeenCalledWith('/api/recommendations', {
       method: 'POST',
@@ -36,7 +38,8 @@ test('sends selected preferences and renders match reasons', async () => {
   expect(await screen.findByText('Test RPG')).toBeInTheDocument();
   expect(screen.getByText('ตรงกับความชอบ 100/100')).toBeInTheDocument();
   expect(screen.getByText('เนื้อเรื่องตรง')).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('แนวเกม'), { target: { value: 'strategy' } });
+  fireEvent.click(screen.getByRole('button', { name: /1\. แนวเกม/ }));
+  fireEvent.click(screen.getByRole('radio', { name: 'วางแผน' }));
   expect(screen.queryByText('Test RPG')).not.toBeInTheDocument();
 });
 test('shows empty results', async () => {
@@ -46,7 +49,7 @@ test('shows empty results', async () => {
       <MatchQuiz />
     </MemoryRouter>,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
+  finish();
   expect(await screen.findByText(/ยังไม่มีเกมที่ตรงเงื่อนไข/)).toBeInTheDocument();
 });
 test('shows API errors', async () => {
@@ -56,7 +59,7 @@ test('shows API errors', async () => {
       <MatchQuiz />
     </MemoryRouter>,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
+  finish();
   expect(await screen.findByRole('alert')).toHaveTextContent('Server offline');
 });
 
@@ -68,10 +71,12 @@ test('restores member preferences and prevents editing until restored', async ()
       <MatchQuiz />
     </MemoryRouter>,
   );
-  expect(screen.getByLabelText('แนวเกม')).toBeDisabled();
-  await waitFor(() => expect(screen.getByLabelText('แนวเกม')).toHaveValue('strategy'));
-  expect(screen.getByLabelText('รูปแบบการเล่น')).toHaveValue('coop');
-  expect(screen.getByLabelText('สไตล์การเล่น')).toHaveValue('challenge');
+  expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeDisabled();
+  await waitFor(() => expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeChecked());
+  next();
+  expect(screen.getByRole('radio', { name: 'ร่วมมือกับเพื่อน' })).toBeChecked();
+  next();
+  expect(screen.getByRole('radio', { name: 'ความท้าทาย' })).toBeChecked();
   fireEvent.click(screen.getByRole('button', { name: 'บันทึกความชอบ' }));
   expect(await screen.findByText('บันทึกความชอบแล้ว')).toBeInTheDocument();
   expect(api).toHaveBeenLastCalledWith('/api/me/preferences', {
@@ -88,8 +93,8 @@ test('waits for session restoration before allowing quiz input or guest requests
     </MemoryRouter>,
   );
   expect(screen.getByRole('status')).toHaveTextContent('กำลังตรวจสอบบัญชี');
-  expect(screen.getByLabelText('แนวเกม')).toBeDisabled();
-  fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
+  expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeDisabled();
+  next();
   expect(api).not.toHaveBeenCalled();
   expect(screen.queryByRole('link', { name: 'เข้าสู่ระบบ' })).not.toBeInTheDocument();
   useAuth.mockReturnValue({ user: { id: 1 }, loading: false });
@@ -104,10 +109,10 @@ test('waits for session restoration before allowing quiz input or guest requests
       <MatchQuiz />
     </MemoryRouter>,
   );
-  expect(screen.getByLabelText('แนวเกม')).toBeDisabled();
+  expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeDisabled();
   restore({ genre: 'strategy', mode: 'coop', style: 'challenge' });
-  await waitFor(() => expect(screen.getByLabelText('แนวเกม')).toBeEnabled());
-  expect(screen.getByLabelText('แนวเกม')).toHaveValue('strategy');
+  await waitFor(() => expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeEnabled());
+  expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeChecked();
 });
 
 test('removes previous successful results when a new request fails', async () => {
@@ -121,7 +126,7 @@ test('removes previous successful results when a new request fails', async () =>
       <MatchQuiz />
     </MemoryRouter>,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
+  finish();
   expect(await screen.findByText('Old result')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Offline');
