@@ -62,9 +62,8 @@ export default function AdminMembers() {
   return (
     <AdminLayout header={
       <div className="page-banner">
-        <span className="eyebrow">ADMIN WORKSPACE</span>
         <h1>จัดการสมาชิก</h1>
-        <p className="muted">จัดการบทบาทและสิทธิ์การเข้าถึงระบบของสมาชิก GameMatch</p>
+        <p className="muted">จัดการสิทธิ์ Member และ Admin</p>
       </div>
       }>
       {members && (

@@ -87,7 +87,7 @@ test('guest matches games, logs in, saves a favorite, updates profile and logs o
   fireEvent.change(screen.getByLabelText('ชื่อที่แสดง'), { target: { value: 'Member Updated' } });
   await user.click(screen.getByRole('button', { name: 'บันทึกโปรไฟล์' }));
   expect(
-    await within(screen.getByRole('navigation')).findByRole('link', { name: 'Member Updated' }),
+    await within(screen.getByRole('navigation', { name: 'เมนูหลัก' })).findByRole('link', { name: 'Member Updated' }),
   ).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'ออกจากระบบ' }));
   expect(await screen.findByRole('heading', { name: 'เข้าสู่ระบบ' })).toBeInTheDocument();
@@ -196,10 +196,10 @@ test('separates home, catalog and about routes using the main navigation', async
   render(<App />);
   expect(screen.getByRole('heading', { name: 'หาเกมที่อยากเล่น' })).toBeInTheDocument();
   await screen.findByRole('link', { name: game.title });
-  fireEvent.click(within(screen.getByRole('navigation')).getByRole('link', { name: 'เกมทั้งหมด' }));
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'เมนูหลัก' })).getByRole('link', { name: 'เกมทั้งหมด' }));
   expect(await screen.findByRole('heading', { name: 'เกมทั้งหมด' })).toBeInTheDocument();
   await screen.findByRole('searchbox');
-  fireEvent.click(within(screen.getByRole('navigation')).getByRole('link', { name: 'เกี่ยวกับ' }));
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'เมนูหลัก' })).getByRole('link', { name: 'เกี่ยวกับ' }));
   expect(screen.getByRole('heading', { name: 'เกี่ยวกับ GameMatch' })).toBeInTheDocument();
   expect(window.location.pathname).toBe('/about');
 });

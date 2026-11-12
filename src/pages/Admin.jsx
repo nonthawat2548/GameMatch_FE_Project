@@ -137,7 +137,6 @@ export default function Admin() {
     <AdminLayout header={
       <div className="section-head">
         <div>
-          <span className="eyebrow">ADMIN WORKSPACE</span>
           <h1>จัดการคลังเกม</h1>
         </div>
         <div className="admin-sync-actions">

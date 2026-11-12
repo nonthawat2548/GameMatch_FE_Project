@@ -50,16 +50,15 @@ export default function Compare() {
   return (
     <>
       <div className="page-banner">
-        <span className="eyebrow">เลือกเกมไหนดี?</span>
         <h1>เปรียบเทียบเกม</h1>
-        <p className="muted">ลังเลว่าจะเล่นเกมไหน? เลือกมา 2–3 เกมแล้วเทียบกันเลย</p>
+        <p className="muted">เลือก 2–3 เกมเพื่อเปรียบเทียบข้อมูล</p>
       </div>
       {error ? <div><p role="alert">{error}</p><button onClick={() => setRetry((n) => n + 1)}>ลองใหม่</button></div> : !games ? <p role="status">กำลังโหลดคลังเกม…</p> : (
         <>
           <div className="panel compare-selects">
             {selected.map((id, i) => (
               <label key={i}>เกมที่ {i + 1}
-                <select value={sorted.some((g) => String(g.id) === id) ? id : ''} onChange={(e) => update(i, e.target.value)}>
+                <select aria-label={`เกมที่ ${i + 1}`} value={sorted.some((g) => String(g.id) === id) ? id : ''} onChange={(e) => update(i, e.target.value)}>
                   <option value="">เลือกเกม</option>
                   {sorted.map((g) => <option key={g.id} value={g.id} disabled={selected.some((v, n) => n !== i && v === String(g.id))}>{g.title}</option>)}
                 </select>

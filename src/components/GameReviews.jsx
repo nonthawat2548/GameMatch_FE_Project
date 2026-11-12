@@ -41,6 +41,8 @@ function ReviewCard({ item, own, canDelete, busy, onEdit, onDelete }) {
 
 export default function GameReviews({ gameId, user, reviews, setReviews, loading, loadError, onRetry }) {
   const [rating, setRating] = useState(5);
+  const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('newest');
   const [comment, setComment] = useState('');
   const [editing, setEditing] = useState(false);
   const [writing, setWriting] = useState(false);
@@ -50,6 +52,11 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   const [deleteTarget, setDeleteTarget] = useState(null);
   const own = user ? reviews.find((r) => r.memberId === user.id) : undefined;
   const others = reviews.filter((r) => r.id !== own?.id);
+  const counts = [5, 4, 3, 2, 1].map(n => reviews.filter(r => r.rating === n).length);
+  const shown = others.filter(r => filter === 'all' || r.rating === Number(filter)).sort((a,b) => {
+    const recent = (b.createdAt || '').localeCompare(a.createdAt || '') || b.id - a.id;
+    return sort === 'highest' ? b.rating - a.rating || recent : sort === 'lowest' ? a.rating - b.rating || recent : recent;
+  });
   const average = reviews.length ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '—';
   const base = '/api/games/' + gameId + '/reviews';
   const commentLength = characterCount(comment.trim());
@@ -119,8 +126,11 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   }
 
   return (
-    <section className="panel reviews" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading">รีวิวจากผู้เล่น</h2>
+    <section className="reviews community-reviews" aria-labelledby="reviews-heading">
+      <div className="community-review-heading">
+        <div><h2 id="reviews-heading">รีวิวจากผู้เล่น GameMatch</h2><p className="muted">คะแนนจากสมาชิกเว็บไซต์ แยกจากคะแนน Steam</p></div>
+        {!loading && !loadError && !own && !writing && !deleteTarget && user && <button type="button" onClick={() => begin(null)}>เขียนรีวิว</button>}
+      </div>
       {loading ? (
         <p role="status">กำลังโหลดรีวิว…</p>
       ) : loadError ? (
@@ -132,13 +142,14 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
         <>
           <div className="review-summary">
             <div className="review-score">
-              <strong>{average}</strong>
+              <div className="review-average"><strong>{average}</strong>{reviews.length > 0 && <span>/5</span>}</div>
               <Stars rating={reviews.length ? Math.round(Number(average)) : 0} />
               <span className="muted">{reviews.length} รีวิว</span>
+              {!reviews.length && <span className="muted">ยังไม่มีคะแนน</span>}
             </div>
             <div className="review-breakdown">
-              {[5, 4, 3, 2, 1].map((n) => {
-                const count = reviews.filter((r) => r.rating === n).length;
+              {[5, 4, 3, 2, 1].map((n, i) => {
+                const count = counts[i];
                 return (
                   <div className="review-bar-row" key={n}>
                     <span>{n} ดาว</span>
@@ -161,9 +172,6 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
             </div>
           )}
           {own && <div className="review-mine"><h3>รีวิวของคุณ</h3>{card(own)}</div>}
-          {user && !own && !writing && !deleteTarget && (
-            <button type="button" onClick={() => begin(null)}>เขียนรีวิว</button>
-          )}
           {user && writing && (
             <form className="review-form" onSubmit={submit}>
               <h3>{editing ? 'แก้ไขรีวิวของคุณ' : 'เขียนรีวิว'}</h3>
@@ -179,7 +187,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
               </fieldset>
               <label>ความคิดเห็น
                 <textarea value={comment} onChange={(e) => setComment(e.target.value)} required maxLength={2000}
-                  disabled={busy} placeholder="เล่นแล้วเป็นยังไงบ้าง? สนุกไหม มีอะไรอยากบอกคนอื่น?" rows={4} />
+                  disabled={busy} placeholder="ความคิดเห็นของคุณหลังเล่นเกมนี้" rows={4} />
               </label>
               <p className="muted form-hint">เขียนอย่างน้อย 10 ตัวอักษร · {commentLength} ตัวอักษร{utf8Length(comment.trim()) > 2000 ? ' · ข้อความยาวเกินไป' : ''}</p>
               <div className="review-actions">
@@ -188,10 +196,21 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
               </div>
             </form>
           )}
-          {!user && <p><Link to="/login" state={{ from: '/games/' + gameId }}>เข้าสู่ระบบ</Link> เพื่อเขียนรีวิว</p>}
-          <h3 className="review-list-title">รีวิวจากผู้เล่น{own ? 'คนอื่น' : 'ทั้งหมด'} ({others.length})</h3>
-          {others.length ? <div className="review-list">{others.map(card)}</div> : (
-            <p className="muted">{own ? 'ยังไม่มีรีวิวจากผู้เล่นคนอื่น' : 'ยังไม่มีรีวิว เป็นคนแรกที่รีวิวเกมนี้'}</p>
+          {!user && <div className="review-signin"><span>อยากแชร์ความคิดเห็นเกี่ยวกับเกมนี้?</span><Link className="button secondary" to="/login" state={{ from: '/games/' + gameId }}>เข้าสู่ระบบ</Link></div>}
+          <div className="review-list-toolbar">
+            <h3 className="review-list-title">รีวิว{own ? 'จากสมาชิกคนอื่น' : 'ทั้งหมด'} ({shown.length})</h3>
+            {others.length > 0 && <div className="review-filters">
+              <label>คะแนน<select value={filter} onChange={e => setFilter(e.target.value)} aria-label="กรองคะแนนรีวิว">
+                <option value="all">ทุกคะแนน</option>
+                {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} ดาว</option>)}
+              </select></label>
+              <label>เรียงตาม<select value={sort} onChange={e => setSort(e.target.value)} aria-label="เรียงรีวิว">
+                <option value="newest">ล่าสุด</option><option value="highest">คะแนนสูงสุด</option><option value="lowest">คะแนนต่ำสุด</option>
+              </select></label>
+            </div>}
+          </div>
+          {shown.length ? <div className="review-list">{shown.map(card)}</div> : (
+            <p className="muted review-empty">{others.length ? 'ไม่มีรีวิวที่ตรงกับตัวกรอง' : own ? 'ยังไม่มีรีวิวจากผู้เล่นคนอื่น' : 'ยังไม่มีรีวิว เป็นคนแรกที่รีวิวเกมนี้'}</p>
           )}
         </>
       )}

@@ -27,3 +27,6 @@ At widths up to 760px, Navbar uses a React state-controlled collapsible navigati
 
 ### Public-facing visual direction
 The homepage is media-first: the game preview occupies its own 16:9 area, search and matching actions sit beside it on desktop and below on phones. Repeated promotional blocks were removed; the catalog uses solid neutral surfaces and the existing brand accent. The UI still uses the same components, routes, roles, APIs, videos and scoring logic. No new dependencies.
+
+### Community and secondary pages
+Member reviews use a flat community layout with a separate average/distribution and real client-side star filtering/sorting. The signed-in user's review remains visible and editable independently of filters. Steam ratings remain separate. Account, comparison, favorites, match wizard and admin pages share restrained surfaces, compact controls and consistent navigation. No API changes or dependencies.

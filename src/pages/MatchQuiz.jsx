@@ -118,7 +118,7 @@ export default function MatchQuiz() {
       {!loading && restoring && <p role="status">กำลังโหลดความชอบที่บันทึกไว้…</p>}
       <form onSubmit={run} className="panel quiz-panel" aria-busy={formBusy}>
         <div className="finder-progress">
-          <strong>ความชอบของคุณ</strong>
+          <strong>{fields[step][1]}</strong>
           <span className="muted">คำถาม {step + 1} / {fields.length}</span>
         </div>
         <div className="finder-track" aria-hidden="true"><div style={{ width: ((step + 1) / fields.length * 100) + '%' }} /></div>
@@ -174,7 +174,7 @@ export default function MatchQuiz() {
         <section className="match-results" aria-labelledby="match-results-heading">
           <h2 id="match-results-heading">เกมที่น่าจะถูกใจคุณ</h2>
           <p className="muted">
-            คะแนนยิ่งสูง ยิ่งตรงกับคำตอบของคุณ ลองเปิดดูรายละเอียดก่อนตัดสินใจนะ
+            เรียงตามคะแนนความตรงกับคำตอบของคุณ
           </p>
           {games.length > 0 && <div className="finder-best"><strong>อันดับ 1 · {games[0].matchScore}/100</strong> <span>เกมนี้ตรงกับคำตอบของคุณมากที่สุด</span></div>}
           <GameGrid games={games} emptyText="ยังไม่มีเกมที่ตรงเงื่อนไข ลองเปลี่ยนคำตอบดูนะ" />

@@ -24,7 +24,6 @@ export default function AdminDashboard() {
   return (
     <AdminLayout header={
       <div className="page-banner">
-        <span className="eyebrow">หลังบ้าน GameMatch</span>
         <h1>ภาพรวมระบบ</h1>
         <p className="muted">ดูจำนวนเกม สมาชิก และรีวิวทั้งหมดจากฐานข้อมูล</p>
       </div>

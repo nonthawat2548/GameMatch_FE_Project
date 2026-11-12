@@ -104,8 +104,8 @@ async function quiz(page) {
       await page.getByRole('link',{name:game.title,exact:true}).waitFor();await layout(page);
       await quiz(page);await layout(page);
       await page.goto(origin+'/compare?game='+game.id);
-      await page.getByLabel('เกมที่ 2').selectOption(String(other.id));await page.getByRole('table').waitFor();await layout(page);
-      await page.goto(origin+'/games/'+game.id);await page.getByRole('heading',{name:game.title,exact:true}).waitFor();await layout(page);
+      await page.getByRole('combobox',{name:'เกมที่ 2',exact:true}).selectOption(String(other.id));await page.getByRole('table').waitFor();await layout(page);
+      await page.goto(origin+'/games/'+game.id);await page.getByRole('heading',{name:game.title,exact:true}).waitFor();await page.getByRole('heading',{name:'รีวิวจากผู้เล่น GameMatch'}).waitFor();await layout(page);
       pass('Guest search / themes / catalog / quiz / comparison / detail at '+width+'px');
       await context.close();
     }

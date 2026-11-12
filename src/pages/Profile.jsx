@@ -71,7 +71,6 @@ export default function Profile() {
       <div className="page-banner profile-banner">
         <div className="profile-avatar" aria-hidden="true">{(user.displayName || 'G').slice(0, 1).toUpperCase()}</div>
         <div>
-          <span className="eyebrow">MY ACCOUNT</span>
           <h1>โปรไฟล์</h1>
           <p className="muted">{user.email?.endsWith('@local.invalid') ? user.username : user.email} · {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก'}</p>
         </div>

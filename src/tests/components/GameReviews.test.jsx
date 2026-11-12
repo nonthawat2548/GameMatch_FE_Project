@@ -91,3 +91,27 @@ test('requires at least ten characters before posting', () => {
   expect(screen.getByRole('button', { name: 'ส่งรีวิว' })).toBeDisabled();
   expect(api).not.toHaveBeenCalled();
 });
+
+test('filters and sorts actual member reviews without changing the overall score', () => {
+  const newest = {...other, id:9, memberId:3, displayName:'Cara', rating:1, comment:'เกมนี้ยังไม่เหมาะกับฉัน', createdAt:'2026-11-13T00:00:00Z'};
+  render(<Harness user={null} initial={[mine, other, newest]}/>);
+  expect(screen.getByText('3.0')).toBeInTheDocument();
+  const articles = () => screen.getAllByRole('article').map(el=>el.textContent);
+  expect(articles()[0]).toContain('Cara');
+  fireEvent.change(screen.getByRole('combobox',{name:'เรียงรีวิว'}),{target:{value:'highest'}});
+  expect(articles()[0]).toContain('Alice');
+  fireEvent.change(screen.getByRole('combobox',{name:'กรองคะแนนรีวิว'}),{target:{value:'3'}});
+  expect(articles()).toHaveLength(1);
+  expect(articles()[0]).toContain('Bob');
+  expect(screen.getByText('3.0')).toBeInTheDocument();
+  fireEvent.change(screen.getByRole('combobox',{name:'กรองคะแนนรีวิว'}),{target:{value:'2'}});
+  expect(screen.getByText('ไม่มีรีวิวที่ตรงกับตัวกรอง')).toBeInTheDocument();
+  expect(api).not.toHaveBeenCalled();
+});
+test('filtering other reviews never hides the signed-in member review or its controls', () => {
+  render(<Harness initial={[mine,other]}/>);
+  fireEvent.change(screen.getByRole('combobox',{name:'กรองคะแนนรีวิว'}),{target:{value:'1'}});
+  expect(screen.getByText(mine.comment)).toBeInTheDocument();
+  expect(screen.getByRole('button',{name:'แก้ไขรีวิว'})).toBeInTheDocument();
+  expect(screen.queryByText(other.comment)).not.toBeInTheDocument();
+});

@@ -32,9 +32,8 @@ export default function Favorites() {
   return (
     <>
       <div className="page-banner">
-        <span className="eyebrow">เกมที่เก็บไว้</span>
         <h1>เกมโปรดของฉัน</h1>
-        <p className="muted">เกมที่คุณชอบหรืออยากลองเล่น เก็บไว้ตรงนี้ได้เลย</p>
+        <p className="muted">รายการเกมที่บันทึกไว้</p>
         {games && <span className="collection-count">{games.length} เกมในรายการ</span>}
       </div>
       {error && <p role="alert">{error}</p>}
@@ -46,6 +45,7 @@ export default function Favorites() {
       {games ? (
         <GameGrid
           games={games}
+          view="list"
           emptyText="ยังไม่มีเกมโปรด ลองหาเกมที่ชอบแล้วกดเพิ่มไว้ก่อนนะ"
           action={(g) => (
             <button

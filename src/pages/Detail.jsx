@@ -158,7 +158,6 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
-      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="แนวเกมและแท็กที่ใกล้เคียงกัน" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
       <GameReviews
         key={user?.id ?? 'guest'}
         gameId={id}
@@ -169,6 +168,7 @@ function DetailContent({ id }) {
         loadError={reviewError}
         onRetry={() => setRetry((n) => n + 1)}
       />
+      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="แนวเกมและแท็กที่ใกล้เคียงกัน" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
     </>
   );
 }
