@@ -18,3 +18,6 @@ The featured carousel uses Steam's public six-second microtrailers for the ten m
 
 ### Game detail trailers (course stack only)
 React fetches /api/games/{id}/trailers on a Steam game's detail page. Go queries the published game Steam ID and Steam Store metadata. Native HTML video supports controls, fullscreen, muted autoplay and source fallback. Current Steam adaptive-only assets use their short official preview rather than adding a streaming library; a link opens the full trailer on Steam. No extra npm packages, no video rehosting or DB migration. RAWG/manual games without a Steam ID retain the image.
+
+### Steam player review score
+Game detail fetches /api/games/{id}/steam-rating independently of the member review section and match score. Displays positive percentage (calculated from Steam counts), Steam review description, total and positive/negative counts. Uses Steam's published default purchase filter, all languages, all review types, and default off-topic exclusion. Empty reviews and upstream failures have distinct states. No new package or schema change.

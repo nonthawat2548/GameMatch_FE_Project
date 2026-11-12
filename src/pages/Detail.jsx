@@ -6,6 +6,7 @@ import { genreLabel, tagLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
 import GameReviews from '../components/GameReviews';
 import GameTrailer from '../components/GameTrailer';
+import SteamRating from '../components/SteamRating';
 import SuggestedGames from '../components/SuggestedGames';
 export default function Detail() {
   const { id } = useParams();
@@ -105,6 +106,7 @@ function DetailContent({ id }) {
         <div className="detail-content">
           <span className="eyebrow">รู้จักเกมนี้</span>
           <h1>{game.title}</h1>
+          <SteamRating key={game.id} game={game} />
           <p className="detail-description">
             {game.descriptionTh || game.description || 'ยังไม่มีคำอธิบายเพิ่มเติม'}
           </p>

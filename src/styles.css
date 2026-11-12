@@ -1879,3 +1879,16 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 .game-trailer-options { @apply flex flex-wrap gap-2; }
 .game-trailer-options button { font-size: 12px; padding: 7px 10px; max-width: 100%; overflow-wrap: anywhere; }
 .game-trailer-options button[aria-pressed='true'] { border-color: var(--gm-accent); }
+
+/* Steam player feedback is visually separate from member ratings. */
+.steam-rating { @apply grid gap-3 p-4; margin-top: 16px; border: 1px solid var(--gm-line); border-radius: 12px; background: var(--gm-surface); }
+.steam-rating-header { @apply flex flex-wrap items-center justify-between gap-2; }
+.steam-rating-header a { font-size: 12px; }
+.steam-rating p { @apply m-0; }
+.steam-rating-main { @apply flex items-center gap-4; }
+.steam-rating-percent { font-size: clamp(26px, 4vw, 40px); font-weight: 800; line-height: 1.1; color: #65d9c5; font-variant-numeric: tabular-nums; }
+.steam-rating-track { @apply w-full overflow-hidden; background: #a54e62; border-radius: 999px; height: 8px; }
+.steam-rating-track span { @apply block h-full; background: #36bca7; }
+.steam-rating-counts { @apply flex flex-wrap justify-between gap-2; font-size: 12px; }
+.steam-rating-caption { font-size: 11px; opacity: .75; }
+[data-theme='light'] .steam-rating-percent { color: #087e70; }
