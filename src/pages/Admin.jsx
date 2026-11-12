@@ -4,6 +4,7 @@ import { utf8Length } from '../utils/validation';
 const blank = {
   title: '',
   description: '',
+  descriptionTh: '',
   imageUrl: '',
   genres: [],
   tags: [],
@@ -105,6 +106,8 @@ export default function Admin() {
       platforms: list(g.platforms),
       isPublished: g.isPublished,
     };
+    const descriptionTh = g.descriptionTh.trim();
+    if (descriptionTh) body.descriptionTh = descriptionTh;
     await task(async () => {
       await api('/api/admin/games' + (g.id ? '/' + g.id : ''), {
         method: g.id ? 'PUT' : 'POST',
@@ -116,7 +119,7 @@ export default function Admin() {
   }
   function edit(game) {
     const { matchScore, reasons, ...data } = game;
-    setG(data);
+    setG({ ...data, descriptionTh: data.descriptionTh || '' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   return (
@@ -221,11 +224,18 @@ export default function Admin() {
               </label>
             ))}
           </div>
+          <p className="muted">คำอธิบายเกมจะถูกแสดงเป็นภาษาไทย</p>
           <label>
             คำอธิบาย
             <textarea
-              value={g.description}
-              onChange={(e) => setG({ ...g, description: e.target.value })}
+              value={g.descriptionTh || g.description}
+              onChange={(e) =>
+                setG({
+                  ...g,
+                  description: e.target.value,
+                  ...(g.descriptionTh || !g.id ? { descriptionTh: e.target.value } : {}),
+                })
+              }
             />
           </label>
           <label className="inline">

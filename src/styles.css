@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -603,6 +603,16 @@ button.genre-filter[aria-pressed='true'] {
 .auth-form > .muted {
   margin: -12px 0 24px;
   font-size: 13px;
+}
+.auth-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+.auth-actions button {
+  margin-right: 0;
 }
 .match-results {
   margin-top: 32px;

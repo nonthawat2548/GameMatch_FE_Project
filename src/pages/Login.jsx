@@ -17,7 +17,7 @@ export default function Login({ register = false }) {
     setError('');
     const previousToken = localStorage.getItem(TOKEN_KEY);
     const f = new FormData(e.target),
-      email = f.get('email').trim().toLowerCase(),
+      username = f.get('username').trim(),
       password = f.get('password');
     const displayName = (f.get('name') || '').trim();
     if (register) {
@@ -36,12 +36,12 @@ export default function Login({ register = false }) {
       if (register) {
         await api('/api/auth/register', {
           method: 'POST',
-          body: { email, password, displayName },
+          body: { username, password, displayName },
         });
         if (localStorage.getItem(TOKEN_KEY) !== previousToken) return;
         // สมัครสำเร็จแล้ว หาก auto-login ล้มเหลว ให้ลอง login แทนสมัครบัญชีซ้ำ
         try {
-          await login(email, password);
+          await login(username, password);
         } catch {
           nav('/login', {
             replace: true,
@@ -53,7 +53,7 @@ export default function Login({ register = false }) {
           return;
         }
       } else {
-        await login(email, password);
+        await login(username, password);
       }
       nav(destination, { replace: true });
     } catch (e) {
@@ -75,8 +75,8 @@ export default function Login({ register = false }) {
           </label>
         )}
         <label>
-          อีเมล
-          <input name="email" type="email" autoComplete="email" required />
+          ชื่อผู้ใช้
+          <input name="username" autoComplete="username" required />
         </label>
         <label>
           รหัสผ่าน
@@ -89,15 +89,15 @@ export default function Login({ register = false }) {
           />
         </label>
         {error && <p role="alert">{error}</p>}
-        <button disabled={busy}>
-          {busy ? 'กำลังดำเนินการ…' : register ? 'สมัครและเข้าสู่ระบบ' : 'เข้าสู่ระบบ'}
-        </button>
+        <div className="auth-actions">
+          <Link to={register ? '/login' : '/register'} state={{ from: destination }}>
+            {register ? 'มีบัญชีแล้ว' : 'สร้างบัญชีใหม่'}
+          </Link>
+          <button disabled={busy}>
+            {busy ? 'กำลังดำเนินการ…' : register ? 'สมัครและเข้าสู่ระบบ' : 'เข้าสู่ระบบ'}
+          </button>
+        </div>
       </fieldset>
-      <p>
-        <Link to={register ? '/login' : '/register'} state={{ from: destination }}>
-          {register ? 'มีบัญชีแล้ว' : 'สร้างบัญชีใหม่'}
-        </Link>
-      </p>
     </form>
   );
 }
