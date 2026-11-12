@@ -19,7 +19,7 @@ export default function FeaturedGameCarousel({ games }) {
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [playingID, setPlayingID] = useState(null);
+  const [startedID, setStartedID] = useState(null);
   const [motionEnabled, setMotionEnabled] = useState(allowVideo);
   const [useVideo, setUseVideo] = useState(true);
   const total = games.length;
@@ -28,10 +28,12 @@ export default function FeaturedGameCarousel({ games }) {
   const videoAvailable = heroVideoCandidates(featured).length > 0;
   const showVideo = motionEnabled && useVideo && videoAvailable;
   const featuredID = featured?.id;
-  const playing = showVideo && playingID === featuredID;
+  const playing = showVideo && startedID === featuredID;
   const slideDuration = showVideo ? (playing ? VIDEO_SLIDE_MS : VIDEO_LOAD_TIMEOUT_MS) : SLIDE_MS;
-  const playbackChange = useCallback((active) => {
-    setPlayingID(active ? featuredID : null);
+  // Latch the first successful playback. Buffering and loop events must never
+  // extend this slide's deadline. Only navigation or an explicit mode change resets it.
+  const playbackStarted = useCallback(() => {
+    setStartedID(featuredID);
   }, [featuredID]);
 
   useEffect(() => {
@@ -48,11 +50,11 @@ export default function FeaturedGameCarousel({ games }) {
 
   useEffect(() => {
     if (total < 2 || paused) return;
-    // Restart the full viewing time only once playback begins.
-    // A failed/stalled clip cannot leave the carousel stuck indefinitely.
+    // An unstarted video has 8s to load. After its first playing event, give it
+    // exactly 12s, including any subsequent buffering or loops.
     const timer = setInterval(() => {
       if (!document.hidden) {
-        setPlayingID(null);
+        setStartedID(null);
         setPage((p) => (p + 1) % total);
       }
     }, slideDuration);
@@ -79,7 +81,7 @@ export default function FeaturedGameCarousel({ games }) {
   }
 
   function select(next) {
-    if ((next + total) % total !== index) setPlayingID(null);
+    if ((next + total) % total !== index) setStartedID(null);
     setPage((next + total) % total);
     setRotation((n) => n + 1);
   }
@@ -93,7 +95,7 @@ export default function FeaturedGameCarousel({ games }) {
       >
         <div key={featured.id} className="hero-slide">
           <HeroArtwork key={featured.id} game={featured} />
-          {showVideo && <HeroVideo key={'video-' + featured.id} game={featured} paused={paused} onPlaybackChange={playbackChange} />}
+          {showVideo && <HeroVideo key={'video-' + featured.id} game={featured} paused={paused} onPlaybackStarted={playbackStarted} />}
           <div className="hero-feature-caption">
             <span className="eyebrow">
               {featured.popularitySource === 'Steam Most Played' && featured.popularityOrder > 0
@@ -112,7 +114,7 @@ export default function FeaturedGameCarousel({ games }) {
               <button type="button" className="hero-carousel-control hero-media-toggle"
                 aria-label={useVideo ? 'ใช้ภาพนิ่ง' : 'ใช้คลิปตัวอย่าง'}
                 title={useVideo ? 'ใช้ภาพนิ่ง' : 'ใช้คลิปตัวอย่าง'}
-                aria-pressed={useVideo} onClick={() => { setPlayingID(null); setUseVideo((v) => !v); }}>
+                aria-pressed={useVideo} onClick={() => { setStartedID(null); setUseVideo((v) => !v); }}>
                 <span aria-hidden="true">{useVideo ? '▣' : '▶'}</span>
               </button>
             )}

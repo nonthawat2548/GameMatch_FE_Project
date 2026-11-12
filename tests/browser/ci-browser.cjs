@@ -126,6 +126,25 @@ async function quiz(page) {
       }
       assert(played>0,'at least one official preview must play');
       console.log('PREVIEWS '+played+'/'+count+' playing, '+fallback+' still fallbacks');
+      // Regression: actual playback plus repeated loop/buffering events must advance.
+      await dots.first().click();
+      const firstLink = await page.locator('.hero-feature').getAttribute('href');
+      await page.waitForFunction(() => {
+        const v=document.querySelector('.cinematic-video');
+        return v && v.currentTime>0 && v.classList.contains('is-playing');
+      },undefined,{timeout:7500});
+      await page.evaluate(() => {
+        const v=document.querySelector('.cinematic-video');
+        let n=0;
+        const timer=setInterval(()=>{
+          if(!v.isConnected || ++n>20){clearInterval(timer);return;}
+          v.dispatchEvent(new Event('waiting'));
+          v.dispatchEvent(new Event('stalled'));
+          v.dispatchEvent(new Event('playing'));
+        },500);
+      });
+      await page.waitForFunction(href => document.querySelector('.hero-feature')?.getAttribute('href') !== href,firstLink,{timeout:13500});
+      pass('video auto-advance despite repeated loop/buffering events');
       await dots.first().click();
       await page.getByRole('button',{name:'ใช้ภาพนิ่ง'}).click();
       assert.equal(await page.locator('video').count(),0);

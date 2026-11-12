@@ -177,11 +177,51 @@ test('a late-loading clip gets its full viewing time after playing starts', () =
   act(() => jest.advanceTimersByTime(1));
   expect(link).toHaveAttribute('href', '/games/47');
 });
-test('a stalled clip keeps the image fallback and advances after the loading timeout', () => {
+test('a stalled clip after playback starts does not extend the viewing deadline', () => {
   const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
   fireEvent.playing(container.querySelector('video'));
   act(() => jest.advanceTimersByTime(3000));
   fireEvent.waiting(container.querySelector('video'));
-  act(() => jest.advanceTimersByTime(8000));
+  act(() => jest.advanceTimersByTime(8999));
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/46');
+  act(() => jest.advanceTimersByTime(1));
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
+});
+
+test('repeated loop and buffering events cannot postpone auto-advance indefinitely', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  const video = container.querySelector('video');
+  const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
+  fireEvent.playing(video);
+  for (let i = 0; i < 5; i++) {
+    act(() => jest.advanceTimersByTime(2000));
+    fireEvent.waiting(video);
+    fireEvent.stalled(video);
+    fireEvent.playing(video);
+    expect(link).toHaveAttribute('href', '/games/46');
+  }
+  act(() => jest.advanceTimersByTime(1999));
+  expect(link).toHaveAttribute('href', '/games/46');
+  act(() => jest.advanceTimersByTime(1));
+  expect(link).toHaveAttribute('href', '/games/47');
+});
+test('an unstarted or unavailable video advances within eight seconds despite repeated stalls', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  const video = container.querySelector('video');
+  for (let i = 0; i < 3; i++) {
+    act(() => jest.advanceTimersByTime(2000));
+    fireEvent.waiting(video);
+    fireEvent.stalled(video);
+  }
+  act(() => jest.advanceTimersByTime(2000));
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
+});
+test('fallback source after first playback does not grant another viewing deadline', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  fireEvent.playing(container.querySelector('video'));
+  act(() => jest.advanceTimersByTime(7000));
+  fireEvent.error(container.querySelector('video'));
+  fireEvent.playing(container.querySelector('video'));
+  act(() => jest.advanceTimersByTime(5000));
   expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
 });
