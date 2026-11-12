@@ -30,26 +30,34 @@ test('moves forward, backward and wraps through real games', () => {
 test('advances automatically and supports pause and resume', () => {
   page();
   const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
-  act(() => jest.advanceTimersByTime(6000));
+  act(() => jest.advanceTimersByTime(4000));
   expect(link).toHaveAttribute('href', '/games/47');
   fireEvent.click(screen.getByRole('button', { name: 'หยุดสไลด์อัตโนมัติ' }));
-  act(() => jest.advanceTimersByTime(12000));
+  act(() => jest.advanceTimersByTime(8000));
   expect(link).toHaveAttribute('href', '/games/47');
   fireEvent.click(screen.getByRole('button', { name: 'เล่นสไลด์อัตโนมัติ' }));
-  act(() => jest.advanceTimersByTime(6000));
+  act(() => jest.advanceTimersByTime(4000));
   expect(link).toHaveAttribute('href', '/games/48');
 });
 
-test('pauses while pointer is over the carousel', () => {
+test('keeps rotating while the mouse is over the carousel or a navigation button is focused', () => {
   page();
   const carousel = screen.getByRole('region', { name: 'เกมเด่น' });
   const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
   fireEvent.mouseEnter(carousel);
-  act(() => jest.advanceTimersByTime(6000));
-  expect(link).toHaveAttribute('href', '/games/46');
-  fireEvent.mouseLeave(carousel);
-  act(() => jest.advanceTimersByTime(6000));
+  fireEvent.focus(screen.getByRole('button', { name: 'เกมถัดไป' }));
+  act(() => jest.advanceTimersByTime(4000));
   expect(link).toHaveAttribute('href', '/games/47');
+  act(() => jest.advanceTimersByTime(4000));
+  expect(link).toHaveAttribute('href', '/games/48');
+  act(() => jest.advanceTimersByTime(4000));
+  expect(link).toHaveAttribute('href', '/games/46');
+});
+
+test('automatically advances across multiple intervals without a click', () => {
+  page();
+  act(() => jest.advanceTimersByTime(8000));
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/48');
 });
 
 test('does not show carousel controls when there is only one game', () => {

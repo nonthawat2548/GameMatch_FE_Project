@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const SLIDE_MS = 6000;
+const SLIDE_MS = 4000;
 
 // วนตำแหน่งด้วย modulo เหมือน FeaturedCarousel ใน MovieHub
 export default function FeaturedGameCarousel({ games }) {
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const total = games.length;
   const index = total ? page % total : 0;
   const featured = games[index];
 
   useEffect(() => {
-    if (total < 2 || paused || hovered || focused) return;
-    const timer = setTimeout(() => setPage((p) => (p + 1) % total), SLIDE_MS);
-    return () => clearTimeout(timer);
-  }, [total, index, paused, hovered, focused]);
+    if (total < 2 || paused) return;
+    // เริ่มเลื่อนเองทุก 4 วินาทีหลังโหลดข้อมูล และหยุดเมื่อกดปุ่ม Pause เท่านั้น
+    const timer = setInterval(() => setPage((p) => (p + 1) % total), SLIDE_MS);
+    return () => clearInterval(timer);
+  }, [total, paused]);
 
   if (!featured) {
     return (
@@ -35,16 +34,7 @@ export default function FeaturedGameCarousel({ games }) {
   }
 
   return (
-    <section
-      className="featured-carousel"
-      aria-label="เกมเด่น"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
-      }}
-    >
+    <section className="featured-carousel" aria-label="เกมเด่น">
       <Link
         className="hero-feature"
         to={'/games/' + featured.id}
