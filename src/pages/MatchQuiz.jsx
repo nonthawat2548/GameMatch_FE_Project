@@ -98,13 +98,18 @@ export default function MatchQuiz() {
   }
   return (
     <>
-      <h1>แนะนำเกม</h1>
-      <p className="muted">
-        เลือกแนวเกม วิธีเล่น และสิ่งที่คุณชอบ แล้วดูเกมที่ตรงกับตัวเลือกของคุณ
-      </p>
+      <div className="page-banner">
+        <span className="eyebrow">PERSONAL MATCH</span>
+        <h1>แนะนำเกม</h1>
+        <p className="muted">เลือกแนวเกม วิธีเล่น และสิ่งที่คุณชอบ แล้วดูเกมที่ตรงกับตัวเลือกของคุณ</p>
+        <div className="quiz-weights" aria-label="สัดส่วนคะแนนจับคู่">
+          <span><b>45%</b> แนวเกม</span><span><b>25%</b> รูปแบบการเล่น</span><span><b>30%</b> สไตล์</span>
+        </div>
+      </div>
       {loading && <p role="status">กำลังตรวจสอบบัญชี…</p>}
       {!loading && restoring && <p role="status">กำลังโหลดความชอบที่บันทึกไว้…</p>}
-      <form onSubmit={run} className="panel" aria-busy={formBusy}>
+      <form onSubmit={run} className="panel quiz-panel" aria-busy={formBusy}>
+        <h2>กำหนดความชอบของคุณ</h2>
         <div className="quiz-fields">
           {fields.map(([key, label, options]) => (
             <label key={key}>

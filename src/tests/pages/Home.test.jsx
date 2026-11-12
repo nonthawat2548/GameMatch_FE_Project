@@ -46,3 +46,10 @@ test('retries catalog loading while keeping the home navigation available', asyn
   expect(await screen.findByRole('link', { name: games[0].title })).toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
+
+test('uses a real catalog image for the featured game and links to its detail', async () => {
+  api.mockResolvedValue([{ ...games[0], imageUrl: 'https://example.com/cover.jpg' }, ...games.slice(1)]);
+  page();
+  expect(await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/1');
+  expect(screen.getByText('6', { selector: '.hero-stats strong' })).toBeInTheDocument();
+});

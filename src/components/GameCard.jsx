@@ -32,6 +32,7 @@ export default function GameCard({ game, action }) {
           <Link to={'/games/' + game.id}>{game.title}</Link>
         </h2>
         <p className="card-genres">{game.genres.map(genreLabel).join(' / ') || 'ไม่ระบุแนว'}</p>
+        {game.descriptionTh && <p className="card-description">{game.descriptionTh}</p>}
         {game.matchScore > 0 && (
           <strong className="score">ตรงกับความชอบ {game.matchScore}/100</strong>
         )}

@@ -99,6 +99,7 @@ function DetailContent({ id }) {
           )}
         </div>
         <div className="detail-content">
+          <span className="eyebrow">GAME OVERVIEW</span>
           <h1>{game.title}</h1>
           <p className="detail-description">
             {game.descriptionTh || game.description || 'ยังไม่มีคำอธิบายเพิ่มเติม'}

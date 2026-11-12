@@ -68,10 +68,14 @@ export default function Profile() {
   }
   return (
     <>
-      <h1>โปรไฟล์</h1>
-      <p className="muted">
-        {user.email} · {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก'}
-      </p>
+      <div className="page-banner profile-banner">
+        <div className="profile-avatar" aria-hidden="true">{(user.displayName || 'G').slice(0, 1).toUpperCase()}</div>
+        <div>
+          <span className="eyebrow">MY ACCOUNT</span>
+          <h1>โปรไฟล์</h1>
+          <p className="muted">{user.email} · {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก'}</p>
+        </div>
+      </div>
       <div className="profile-forms">
         <form className="panel" onSubmit={save} aria-busy={busy}>
           <fieldset disabled={busy}>

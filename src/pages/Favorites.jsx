@@ -31,7 +31,12 @@ export default function Favorites() {
   }
   return (
     <>
-      <h1>เกมโปรดของฉัน</h1>
+      <div className="page-banner">
+        <span className="eyebrow">YOUR COLLECTION</span>
+        <h1>เกมโปรดของฉัน</h1>
+        <p className="muted">รวมเกมที่คุณบันทึกไว้ กลับมาเปิดรายละเอียดได้ทุกเวลา</p>
+        {games && <span className="collection-count">{games.length} เกมในรายการ</span>}
+      </div>
       {error && <p role="alert">{error}</p>}
       {error && !games && (
         <button className="secondary" onClick={() => setRetry((n) => n + 1)}>

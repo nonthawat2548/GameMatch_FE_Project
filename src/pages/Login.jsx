@@ -64,6 +64,7 @@ export default function Login({ register = false }) {
   }
   return (
     <form className="panel narrow auth-form" onSubmit={submit} aria-busy={busy}>
+      <div className="auth-brand" aria-hidden="true"><span className="brand-mark">G<span>+</span></span> GameMatch</div>
       <h1>{register ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}</h1>
       <p className="muted">บันทึกเกมโปรดและเก็บความชอบของคุณไว้ใช้ครั้งต่อไป</p>
       {!register && location.state?.notice && <p role="status">{location.state.notice}</p>}

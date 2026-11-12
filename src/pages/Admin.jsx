@@ -126,6 +126,7 @@ export default function Admin() {
     <>
       <div className="section-head">
         <div>
+          <span className="eyebrow">ADMIN WORKSPACE</span>
           <h1>จัดการคลังเกม</h1>
         </div>
         <div className="admin-sync-actions">
@@ -146,6 +147,14 @@ export default function Admin() {
           )}
         </div>
       </div>
+      {games && (
+        <div className="admin-metrics">
+          <div><span>เกมทั้งหมด</span><strong>{games.length}</strong></div>
+          <div><span>เผยแพร่แล้ว</span><strong>{games.filter((item) => item.isPublished).length}</strong></div>
+          <div><span>ซ่อนอยู่</span><strong>{games.filter((item) => !item.isPublished).length}</strong></div>
+          <div><span>คำอธิบายไทย</span><strong>{games.filter((item) => item.descriptionTh).length}</strong></div>
+        </div>
+      )}
       <p className="muted">
         นำเข้ารายชื่อเกมจาก Steam Web API ทีละไม่เกิน 12 รายการ เรียงตาม AppID
         แล้วเติมรูปและรายละเอียดจาก Steam Store โดยคงคำอธิบายและสถานะเผยแพร่ที่ผู้ดูแลแก้ไว้

@@ -31,20 +31,60 @@ export default function Home() {
 
   const steamSync = games.find((game) => game.steamId && game.syncedAt)?.syncedAt;
   const syncedOn = gameDate(steamSync?.slice(0, 10));
+  const featured = games.find((game) => game.imageUrl);
+  const genreCount = new Set(games.flatMap((game) => game.genres)).size;
   return (
     <>
       <section className="home-intro">
-        <h1>หาเกมที่อยากเล่น</h1>
-        <p>เลือกดูเกมในคลัง หรือบอกแนวเกมและสไตล์ที่ชอบให้ GameMatch ช่วยเลือก</p>
-        <div className="home-actions">
-          <Link className="button" to="/discover">
-            ดูเกมทั้งหมด
-          </Link>
-          <Link className="button secondary" to="/match">
-            ลองจับคู่เกม
-          </Link>
+        <div className="hero-copy">
+          <span className="eyebrow"><span aria-hidden="true" /> YOUR NEXT GAME STARTS HERE</span>
+          <h1>หาเกมที่อยากเล่น</h1>
+          <p className="hero-tagline">เกมที่ใช่ <span>ในสไตล์ของคุณ</span></p>
+          <p className="hero-description">เลือกดูเกมในคลัง หรือบอกแนวเกมและสไตล์ที่ชอบให้ GameMatch ช่วยเลือก</p>
+          <div className="home-actions">
+            <Link className="button" to="/discover">ดูเกมทั้งหมด <span aria-hidden="true">↗</span></Link>
+            <Link className="button secondary" to="/match">ลองจับคู่เกม <span aria-hidden="true">→</span></Link>
+          </div>
+          {!loading && !error && games.length > 0 && (
+            <div className="hero-stats">
+              <div><strong>{games.length}</strong><span>เกมในคลัง</span></div>
+              <div><strong>{genreCount}</strong><span>แนวเกม</span></div>
+              <div><strong>3</strong><span>ตัวเลือกจับคู่</span></div>
+            </div>
+          )}
+        </div>
+        <div className="hero-visual">
+          {featured ? (
+            <Link className="hero-feature" to={'/games/' + featured.id} aria-label="เปิดรายละเอียดเกมเด่น">
+              <img src={featured.imageUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />
+              <div className="hero-feature-caption">
+                <span className="eyebrow">FEATURED GAME</span>
+                <strong>{featured.title}</strong>
+                <span>สำรวจเกม <span aria-hidden="true">↗</span></span>
+              </div>
+            </Link>
+          ) : (
+            <div className="hero-placeholder" aria-hidden="true">
+              <div className="hero-orbit orbit-one" />
+              <div className="hero-orbit orbit-two" />
+              <span>G<span>+</span></span>
+              <small>DISCOVER · MATCH · PLAY</small>
+            </div>
+          )}
         </div>
       </section>
+      <div className="home-paths">
+        <Link to="/discover" className="home-path">
+          <span className="path-number" aria-hidden="true">01</span>
+          <div><strong>สำรวจคลังเกม</strong><p>ค้นหาและกรองเกมตามแนวที่สนใจ</p></div>
+          <span aria-hidden="true">→</span>
+        </Link>
+        <Link to="/match" className="home-path">
+          <span className="path-number" aria-hidden="true">02</span>
+          <div><strong>จับคู่ความชอบ</strong><p>เลือก 3 ข้อ แล้วรับเกมที่เหมาะกับคุณ</p></div>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
       <section aria-labelledby="home-games-heading" aria-busy={loading}>
         {syncedOn && <p className="muted">ข้อมูล Steam อัปเดต {syncedOn}</p>}
         <div className="section-head">

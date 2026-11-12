@@ -20,7 +20,8 @@ function Shell() {
       <header className="site-header">
         <div className="header-inner">
           <Link className="brand" to="/">
-            GameMatch
+            <span className="brand-mark" aria-hidden="true">G<span>+</span></span>
+            <span>Game<span className="brand-accent">Match</span></span>
           </Link>
           <nav aria-label="เมนูหลัก">
             <div className="primary-links">

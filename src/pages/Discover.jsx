@@ -55,6 +55,7 @@ export default function Discover() {
     <>
       <section className="catalog-intro">
         <div>
+          <span className="eyebrow">EXPLORE THE LIBRARY</span>
           <h1>เกมทั้งหมด</h1>
           <p className="muted">ค้นหาเกมที่สนใจ แล้วเก็บไว้ในรายการเกมโปรดของคุณ</p>
         </div>
