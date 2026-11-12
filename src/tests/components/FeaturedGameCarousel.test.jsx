@@ -146,3 +146,14 @@ test('does not request video when the operating system prefers reduced motion', 
     expect(container.querySelector('.cinematic-art')).toBeInTheDocument();
   } finally { window.matchMedia = previous; }
 });
+
+test('manual selection restarts the full video slide duration', () => {
+  page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  act(() => jest.advanceTimersByTime(7000));
+  fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
+  const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
+  act(() => jest.advanceTimersByTime(7999));
+  expect(link).toHaveAttribute('href', '/games/47');
+  act(() => jest.advanceTimersByTime(1));
+  expect(link).toHaveAttribute('href', '/games/46');
+});

@@ -1226,8 +1226,8 @@ footer { background: #0d1324; border-color: var(--gm-line); }
   .hero-slide { animation: none; }
 }
 
-/* Cinematic motion hero — reuse the featured catalog and existing carousel timer.
-   No extra requests, video player, animation framework or backend changes. */
+/* Cinematic hero — reuse the featured catalog and existing carousel timer.
+   Native video previews are layered above the original artwork. */
 .cinematic-hero {
   @apply relative;
   display: flex;
@@ -1851,3 +1851,5 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 @media (prefers-reduced-motion: reduce) {
   .cinematic-hero .hero-slide .cinematic-video { display: none; transition: none; }
 }
+
+.cinematic-hero .hero-slide::after { z-index: 1; pointer-events: none; }

@@ -86,6 +86,57 @@ async function quiz(page) {
       pass('Guest search / themes / catalog / quiz / comparison / detail at '+width+'px');
       await context.close();
     }
+    if(production){
+      // Do not let the earlier reduced-motion layout checks hide video errors.
+      const ctx=await browser.newContext({viewport:{width:1366,height:900},reducedMotion:'no-preference'});
+      const page=await ctx.newPage();
+      page.on('pageerror',e=>errors.push(e.message));
+      // The CI workflow may start before Vercel finishes the new deployment.
+      for(let i=0;i<10;i++){
+        await page.goto(origin);
+        await page.locator('.game-card').first().waitFor();
+        if(await page.locator('.hero-media-toggle').count()) break;
+        await page.waitForTimeout(5000);
+      }
+      await page.locator('.hero-media-toggle').waitFor();
+      const dots=page.locator('.hero-dot');
+      const count=await dots.count();
+      let played=0, fallback=0;
+      for(let i=0;i<count;i++){
+        await dots.nth(i).click();
+        const video=page.locator('.cinematic-video');
+        if(!await video.count()){fallback++;continue;}
+        const initialSrc=await video.getAttribute('src');
+        try{
+          await page.waitForFunction((src)=>{
+            const v=document.querySelector('.cinematic-video');
+            return v && v.currentSrc.split('.').slice(0,-1).join('.')===src.split('.').slice(0,-1).join('.') &&
+              v.videoWidth>0 && v.currentTime>0 && v.classList.contains('is-playing');
+          },initialSrc,{timeout:6500});
+          const info=await video.evaluate(v=>({width:v.videoWidth,height:v.videoHeight,muted:v.muted,paused:v.paused}));
+          assert(info.muted&&!info.paused);
+          console.log('VIDEO '+initialSrc+' '+info.width+'x'+info.height);
+          played++;
+        }catch(e){
+          // A missing external clip must never remove the existing game artwork.
+          assert(await page.locator('.cinematic-art').count());
+          console.log('FALLBACK '+initialSrc+' '+e.message.split('\n')[0]);
+          fallback++;
+        }
+      }
+      assert(played>0,'at least one official preview must play');
+      console.log('PREVIEWS '+played+'/'+count+' playing, '+fallback+' still fallbacks');
+      await dots.first().click();
+      await page.getByRole('button',{name:'ใช้ภาพนิ่ง'}).click();
+      assert.equal(await page.locator('video').count(),0);
+      await page.getByRole('button',{name:'ใช้คลิปตัวอย่าง'}).click();
+      await page.locator('video').waitFor({state:'attached'});
+      await page.getByRole('button',{name:'หยุดสไลด์อัตโนมัติ'}).click();
+      assert(await page.locator('video').evaluate(v=>v.paused));
+      await layout(page);
+      pass('Steam motion previews / still toggle / pause');
+      await ctx.close();
+    }
     if(!production){
       const ctx=await browser.newContext({viewport:{width:1366,height:900}});const page=await ctx.newPage();
       page.on('pageerror',e=>errors.push(e.message));

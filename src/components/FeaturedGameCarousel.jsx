@@ -17,6 +17,7 @@ function allowVideo() {
 export default function FeaturedGameCarousel({ games }) {
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [rotation, setRotation] = useState(0);
   const [motionEnabled, setMotionEnabled] = useState(allowVideo);
   const [useVideo, setUseVideo] = useState(true);
   const total = games.length;
@@ -43,7 +44,7 @@ export default function FeaturedGameCarousel({ games }) {
     // ให้เวลาคลิปตัวอย่างเล่นครบหนึ่งรอบ ภาพนิ่งใช้จังหวะเดิม
     const timer = setInterval(() => { if (!document.hidden) setPage((p) => (p + 1) % total); }, slideDuration);
     return () => clearInterval(timer);
-  }, [total, paused, slideDuration]);
+  }, [total, paused, slideDuration, rotation]);
 
   // Preload only the next slide, so all ten large images are not fetched at once.
   const nextImage = total > 1 ? heroImageCandidates(games[(index + 1) % total])[0] : '';
@@ -66,6 +67,7 @@ export default function FeaturedGameCarousel({ games }) {
 
   function select(next) {
     setPage((next + total) % total);
+    setRotation((n) => n + 1);
   }
 
   return (
