@@ -45,7 +45,7 @@ test('shows guest detail, source attribution and a fallback for a broken image',
     'href',
     'https://rawg.io/games/123',
   );
-  expect(screen.getByText('แพลตฟอร์ม')).toBeInTheDocument();
+  expect(screen.getByText('เล่นบน')).toBeInTheDocument();
   expect(screen.getByText('PC')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: '← กลับไปรายการเกม' })).toHaveAttribute(
     'href',

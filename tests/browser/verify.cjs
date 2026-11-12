@@ -304,7 +304,7 @@ async function run() {
       await capture(page, label + '-catalog');
       await page.goto(origin + '/match');
       await page.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }).click();
-      await page.getByRole('heading', { name: 'ผลลัพธ์สำหรับคุณ' }).waitFor();
+      await page.getByRole('heading', { name: 'เกมที่น่าจะถูกใจคุณ' }).waitFor();
       assert.equal(await page.locator('.game-card').count(), 5);
       await capture(page, label + '-quiz-results');
       await page.goto(origin + '/games/1');
