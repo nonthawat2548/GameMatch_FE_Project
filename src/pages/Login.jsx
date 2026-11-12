@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
-import { passwordError, utf8Length } from '../utils/validation';
+import { passwordError, characterCount } from '../utils/validation';
 import { returnPath } from '../auth/returnPath';
 import { TOKEN_KEY } from '../auth/session';
 export default function Login({ register = false }) {
@@ -17,7 +17,7 @@ export default function Login({ register = false }) {
     setError('');
     const previousToken = localStorage.getItem(TOKEN_KEY);
     const f = new FormData(e.target),
-      username = f.get('username').trim(),
+      identity = f.get('identity').trim(),
       password = f.get('password');
     const displayName = (f.get('name') || '').trim();
     if (register) {
@@ -26,8 +26,8 @@ export default function Login({ register = false }) {
         setError(validationError);
         return;
       }
-      if (!displayName || utf8Length(displayName) > 100) {
-        setError('ชื่อยาวเกินไป ลองใช้ชื่อที่สั้นลง (ไม่เกิน 100 ไบต์)');
+      if (!displayName || characterCount(displayName) > 50) {
+        setError('กรุณาระบุชื่อที่แสดง ไม่เกิน 50 ตัวอักษร');
         return;
       }
     }
@@ -36,12 +36,12 @@ export default function Login({ register = false }) {
       if (register) {
         await api('/api/auth/register', {
           method: 'POST',
-          body: { username, password, displayName },
+          body: { email: identity.toLowerCase(), password, displayName },
         });
         if (localStorage.getItem(TOKEN_KEY) !== previousToken) return;
         // สมัครสำเร็จแล้ว หาก auto-login ล้มเหลว ให้ลอง login แทนสมัครบัญชีซ้ำ
         try {
-          await login(username, password);
+          await login(identity, password);
         } catch {
           nav('/login', {
             replace: true,
@@ -53,7 +53,7 @@ export default function Login({ register = false }) {
           return;
         }
       } else {
-        await login(username, password);
+        await login(identity, password);
       }
       nav(destination, { replace: true });
     } catch (e) {
@@ -72,19 +72,19 @@ export default function Login({ register = false }) {
         {register && (
           <label>
             ชื่อที่แสดง
-            <input name="name" required maxLength={100} />
+            <input name="name" required />
           </label>
         )}
         <label>
-          ชื่อผู้ใช้
-          <input name="username" autoComplete="username" required />
+          {register ? 'อีเมล' : 'อีเมลหรือชื่อผู้ใช้'}
+          <input name="identity" type={register ? 'email' : 'text'} autoComplete={register ? 'email' : 'username'} maxLength={register ? 255 : 320} required />
         </label>
         <label>
           รหัสผ่าน
           <input
             name="password"
             type="password"
-            minLength={8}
+            minLength={register ? 8 : undefined}
             autoComplete={register ? 'new-password' : 'current-password'}
             required
           />

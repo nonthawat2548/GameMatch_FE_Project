@@ -23,7 +23,8 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     path === '/api/me' ||
     path.startsWith('/api/me/') ||
     path.startsWith('/api/admin/') ||
-    path === '/api/auth/logout';
+    path === '/api/auth/logout' ||
+    (method !== 'GET' && /^\/api\/games\/\d+\/reviews(?:\/\d+)?$/.test(path));
   // คำขอเก่าที่เพิ่งตอบ 401 ต้องไม่ล้าง session ใหม่ที่ล็อกอินไปแล้ว
   if (
     response.status === 401 &&
@@ -34,6 +35,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     localStorage.removeItem(TOKEN_KEY);
     window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
   }
+  if (response.status === 204) return null;
   let data;
   try {
     data = await response.json();
@@ -45,7 +47,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   }
   if (!response.ok) {
     const error = new Error(
-      typeof data?.error === 'string' ? data.error : `HTTP ${response.status}`,
+      typeof data?.error === 'string' ? data.error : data?.error?.message || `HTTP ${response.status}`,
     );
     error.status = response.status;
     throw error;

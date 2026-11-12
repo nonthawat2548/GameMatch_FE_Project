@@ -94,6 +94,7 @@ test('creates a game with normalized arrays even when submitting without blur', 
     body: {
       title: 'Demo: New game',
       description: '',
+      descriptionTh: '',
       imageUrl: '',
       genres: ['rpg', 'action'],
       tags: ['singleplayer', 'story-rich'],
@@ -112,7 +113,7 @@ test('updates a game and its publication flag without sending response-only fiel
   render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
   await screen.findByText(game.title);
   fireEvent.click(screen.getByRole('button', { name: 'แก้ไข' }));
-  expect(screen.getByLabelText('คำอธิบาย')).toHaveValue('Admin description');
+  expect(screen.getByLabelText('คำอธิบายต้นฉบับ')).toHaveValue('Admin description');
   fireEvent.click(screen.getByRole('checkbox', { name: 'เผยแพร่' }));
   submit();
   expect(await screen.findByText('ซ่อน')).toBeInTheDocument();
@@ -121,6 +122,7 @@ test('updates a game and its publication flag without sending response-only fiel
     body: {
       title: game.title,
       description: game.description,
+      descriptionTh: '',
       imageUrl: '',
       genres: ['rpg'],
       tags: ['singleplayer'],
@@ -258,4 +260,20 @@ test('status failures do not block editing and can be retried', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'ตรวจสอบสถานะ Steam อีกครั้ง' }));
   await screen.findByText(/ตั้งค่า Steam API key แล้ว/);
   expect(screen.getByRole('button', { name: 'นำเข้าเกม Steam' })).toBeEnabled();
+});
+
+test('edits Thai and original descriptions independently', async () => {
+  api.mockImplementation(async (path, options) => {
+    if (path === '/api/admin/sync/status') return { steamConfigured: false };
+    if (options?.method === 'PUT') return { id: game.id };
+    return [{ ...game, descriptionTh: 'คำอธิบายไทยเดิม' }];
+  });
+  render(<MemoryRouter initialEntries={['/admin']}><Admin /></MemoryRouter>);
+  fireEvent.click(await screen.findByRole('button', { name: 'แก้ไข' }));
+  fireEvent.change(screen.getByLabelText('คำอธิบายภาษาไทย'), { target: { value: 'คำอธิบายไทยใหม่' } });
+  expect(screen.getByLabelText('คำอธิบายต้นฉบับ')).toHaveValue(game.description);
+  fireEvent.click(screen.getByRole('button', { name: 'บันทึกเกม' }));
+  await waitFor(() => expect(api).toHaveBeenCalledWith('/api/admin/games/' + game.id, expect.objectContaining({
+    method: 'PUT', body: expect.objectContaining({ description: game.description, descriptionTh: 'คำอธิบายไทยใหม่' }),
+  })));
 });

@@ -101,14 +101,13 @@ export default function Admin() {
     const body = {
       title,
       description: g.description,
+      descriptionTh: g.descriptionTh.trim(),
       imageUrl,
       genres: list(g.genres),
       tags: list(g.tags),
       platforms: list(g.platforms),
       isPublished: g.isPublished,
     };
-    const descriptionTh = g.descriptionTh.trim();
-    if (descriptionTh) body.descriptionTh = descriptionTh;
     await task(async () => {
       await api('/api/admin/games' + (g.id ? '/' + g.id : ''), {
         method: g.id ? 'PUT' : 'POST',
@@ -235,19 +234,14 @@ export default function Admin() {
               </label>
             ))}
           </div>
-          <p className="muted">คำอธิบายเกมจะถูกแสดงเป็นภาษาไทย</p>
+          <p className="muted">ถ้ามีคำอธิบายไทย ระบบจะแสดงภาษาไทยก่อน โดยเก็บต้นฉบับแยกไว้</p>
           <label>
-            คำอธิบาย
-            <textarea
-              value={g.descriptionTh || g.description}
-              onChange={(e) =>
-                setG({
-                  ...g,
-                  description: e.target.value,
-                  ...(g.descriptionTh || !g.id ? { descriptionTh: e.target.value } : {}),
-                })
-              }
-            />
+            คำอธิบายภาษาไทย
+            <textarea value={g.descriptionTh} onChange={(e) => setG({ ...g, descriptionTh: e.target.value })} />
+          </label>
+          <label>
+            คำอธิบายต้นฉบับ
+            <textarea value={g.description} onChange={(e) => setG({ ...g, description: e.target.value })} />
           </label>
           <label className="inline">
             <input

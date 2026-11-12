@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/backend';
+import { characterCount, utf8Length } from '../utils/validation';
 
 function Stars({ rating }) {
   return (
@@ -51,6 +52,8 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   const others = reviews.filter((r) => r.id !== own?.id);
   const average = reviews.length ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : '—';
   const base = '/api/games/' + gameId + '/reviews';
+  const commentLength = characterCount(comment.trim());
+  const commentValid = commentLength >= 10 && utf8Length(comment.trim()) <= 2000;
 
   function begin(item) {
     setEditing(Boolean(item));
@@ -64,7 +67,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
 
   async function submit(e) {
     e.preventDefault();
-    if (busy || !comment.trim() || (editing && !own)) return;
+    if (busy || !commentValid || (editing && !own)) return;
     setBusy(true);
     setError('');
     setNotice('');
@@ -178,8 +181,9 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
                 <textarea value={comment} onChange={(e) => setComment(e.target.value)} required maxLength={2000}
                   disabled={busy} placeholder="เล่นแล้วเป็นยังไงบ้าง? สนุกไหม มีอะไรอยากบอกคนอื่น?" rows={4} />
               </label>
+              <p className="muted form-hint">เขียนอย่างน้อย 10 ตัวอักษร · {commentLength} ตัวอักษร{utf8Length(comment.trim()) > 2000 ? ' · ข้อความยาวเกินไป' : ''}</p>
               <div className="review-actions">
-                <button disabled={busy || !comment.trim()}>{busy ? 'กำลังบันทึก…' : editing ? 'บันทึกการแก้ไข' : 'ส่งรีวิว'}</button>
+                <button disabled={busy || !commentValid}>{busy ? 'กำลังบันทึก…' : editing ? 'บันทึกการแก้ไข' : 'ส่งรีวิว'}</button>
                 <button type="button" className="review-secondary" disabled={busy} onClick={() => { setWriting(false); setEditing(false); setError(''); }}>ยกเลิก</button>
               </div>
             </form>

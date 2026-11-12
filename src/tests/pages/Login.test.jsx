@@ -27,7 +27,7 @@ function page(register = false, from) {
   );
 }
 function credentials() {
-  fireEvent.change(screen.getByLabelText('อีเมล'), { target: { value: 'member@example.com' } });
+  fireEvent.change(screen.getByLabelText(/^อีเมล/), { target: { value: 'member@example.com' } });
   fireEvent.change(screen.getByLabelText('รหัสผ่าน'), { target: { value: 'password123' } });
 }
 test('registers without accepting a role and logs in', async () => {
@@ -128,11 +128,11 @@ test('rejects a Thai password exceeding bcrypt byte limit before registration', 
   expect(login).not.toHaveBeenCalled();
 });
 
-test('rejects a Thai display name exceeding the backend byte limit', async () => {
+test('rejects a Thai display name exceeding the 50-character limit', async () => {
   page(true);
   credentials();
-  fireEvent.change(screen.getByLabelText('ชื่อที่แสดง'), { target: { value: 'ก'.repeat(34) } });
+  fireEvent.change(screen.getByLabelText('ชื่อที่แสดง'), { target: { value: 'ก'.repeat(51) } });
   fireEvent.click(screen.getByRole('button', { name: 'สมัครและเข้าสู่ระบบ' }));
-  expect(await screen.findByRole('alert')).toHaveTextContent('100 ไบต์');
+  expect(await screen.findByRole('alert')).toHaveTextContent('50 ตัวอักษร');
   expect(api).not.toHaveBeenCalled();
 });

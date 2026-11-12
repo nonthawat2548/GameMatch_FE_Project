@@ -66,7 +66,7 @@ test('guest matches games, logs in, saves a favorite, updates profile and logs o
   expect(screen.getByText('ตรงตามความชอบใน fixture')).toBeInTheDocument();
   await user.click(screen.getByRole('link', { name: game.title }));
   await user.click(await screen.findByRole('link', { name: 'เข้าสู่ระบบเพื่อบันทึกเกม' }));
-  await user.type(screen.getByLabelText('อีเมล'), member.email);
+  await user.type(screen.getByLabelText('อีเมลหรือชื่อผู้ใช้'), member.email);
   await user.type(screen.getByLabelText('รหัสผ่าน'), 'password123');
   await user.click(screen.getByRole('button', { name: 'เข้าสู่ระบบ' }));
   expect(await screen.findByRole('link', { name: 'Member A' })).toBeInTheDocument();
@@ -185,7 +185,7 @@ test('returns to a protected favorites page after login instead of sending the m
   window.history.replaceState({}, '', '/me/favorites');
   render(<App />);
   await screen.findByRole('heading', { name: 'เข้าสู่ระบบ' });
-  fireEvent.change(screen.getByLabelText('อีเมล'), { target: { value: member.email } });
+  fireEvent.change(screen.getByLabelText('อีเมลหรือชื่อผู้ใช้'), { target: { value: member.email } });
   fireEvent.change(screen.getByLabelText('รหัสผ่าน'), { target: { value: 'password123' } });
   fireEvent.click(screen.getByRole('button', { name: 'เข้าสู่ระบบ' }));
   expect(await screen.findByRole('heading', { name: 'เกมโปรดของฉัน' })).toBeInTheDocument();

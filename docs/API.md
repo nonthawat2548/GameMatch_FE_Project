@@ -72,3 +72,6 @@ Frontend routing: `/` เป็นหน้าแรก, `/discover` เป็�
 
 ### Admin Members
 GET /api/admin/members และ PUT /api/admin/members/{id}/role ใช้หน้า /admin/members; Admin เท่านั้น; body {"role":"admin"} หรือ {"role":"member"}; ห้ามแก้บทบาทตัวเอง; เมื่อเปลี่ยนบทบาท Session เดิมของบัญชีที่ถูกแก้จะหมดอายุ
+
+### Course-aligned account and review rules
+New registration sends email, password and displayName. Login accepts email or legacy username. Existing accounts are retained. Display name 1–50 characters, password 8 characters minimum and 72 UTF-8 bytes maximum. JWT expires after one hour; 401 from protected review mutations invalidates the current session. Reviews require 10 characters minimum and 2000 bytes maximum. Admin game form sends original and Thai descriptions separately.

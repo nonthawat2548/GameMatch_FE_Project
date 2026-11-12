@@ -125,3 +125,16 @@ test('a member receiving 403 keeps the authenticated session', async () => {
   await expect(api('/api/admin/games')).rejects.toMatchObject({ status: 403 });
   expect(localStorage.getItem('gamematch_token')).toBe('member-token');
 });
+
+test.each([['POST','/api/games/7/reviews'],['PUT','/api/games/7/reviews/1'],['DELETE','/api/games/7/reviews/1']])('clears a revoked token from review %s', async (method, path) => {
+  localStorage.setItem('gamematch_token', 'expired');
+  fetch.mockResolvedValue({ok:false,status:401,json:async()=>({error:'Expired'})});
+  await expect(api(path,{method})).rejects.toMatchObject({status:401});
+  expect(localStorage.getItem('gamematch_token')).toBeNull();
+});
+test('supports course-style 204 and nested JSON errors', async () => {
+  fetch.mockResolvedValueOnce({ status: 204 });
+  await expect(api('/api/me/favorites/7', { method: 'DELETE' })).resolves.toBeNull();
+  fetch.mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: { message: 'Invalid' } }) });
+  await expect(api('/api/games')).rejects.toMatchObject({ message: 'Invalid', status: 400 });
+});

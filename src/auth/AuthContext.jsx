@@ -75,9 +75,9 @@ export function AuthProvider({ children }) {
     setRestoreToken(localStorage.getItem(TOKEN_KEY));
     setRestoreAttempt((n) => n + 1);
   }
-  async function login(username, password) {
+  async function login(identity, password) {
     const previousToken = localStorage.getItem(TOKEN_KEY);
-    const d = await api('/api/auth/login', { method: 'POST', body: { username, password } });
+    const d = await api('/api/auth/login', { method: 'POST', body: { email: identity, password } });
     if (localStorage.getItem(TOKEN_KEY) !== previousToken) {
       throw new Error('มีการเปลี่ยนบัญชีระหว่างเข้าสู่ระบบ กรุณาลองใหม่');
     }

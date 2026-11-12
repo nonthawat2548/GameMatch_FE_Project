@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { api } from '../api/backend';
-import { passwordError, utf8Length } from '../utils/validation';
+import { passwordError, characterCount } from '../utils/validation';
 import { TOKEN_KEY } from '../auth/session';
 export default function Profile() {
   const { user, refresh, logout } = useAuth(),
@@ -17,8 +17,8 @@ export default function Profile() {
     setError('');
     setNote('');
     const displayName = name.trim();
-    if (!displayName || utf8Length(displayName) > 100) {
-      setError('ชื่อยาวเกินไป ลองใช้ชื่อที่สั้นลง (ไม่เกิน 100 ไบต์)');
+    if (!displayName || characterCount(displayName) > 50) {
+      setError('กรุณาระบุชื่อที่แสดง ไม่เกิน 50 ตัวอักษร');
       setBusy(false);
       return;
     }
@@ -73,7 +73,7 @@ export default function Profile() {
         <div>
           <span className="eyebrow">MY ACCOUNT</span>
           <h1>โปรไฟล์</h1>
-          <p className="muted">{user.email} · {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก'}</p>
+          <p className="muted">{user.email?.endsWith('@local.invalid') ? user.username : user.email} · {user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก'}</p>
         </div>
       </div>
       <div className="profile-forms">
