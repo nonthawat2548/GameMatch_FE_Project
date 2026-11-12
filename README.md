@@ -10,3 +10,5 @@ Install dependencies using `npm ci` for this React Scripts dependency tree. Run 
 
 ## Course structure
 React dependencies and lockfile use MovieHub's version snapshot (excluding direct Express/CORS mock-server dependencies). AdminLayout, AdminGameForm and AdminGameList separate navigation, form rendering and table rendering from Admin's state and API calls. Tailwind utility classes and @apply handle common layout, with custom CSS retained for theme/animation. Run npm run check for tests and build.
+
+Shared navigation and footer are separated into Navbar.jsx and Footer.jsx; Shell retains routing and session/theme state. Common layout declarations now use Tailwind @apply with the existing selectors. Custom colors, exact sizing, cinematic animation and responsive overrides remain in CSS to preserve the design.

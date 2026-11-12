@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom';
-import ThemeToggle from './components/ThemeToggle';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Discover from './pages/Discover';
@@ -40,51 +41,7 @@ function Shell() {
       <a className="skip-link" href="#main-content">
         ข้ามไปเนื้อหา
       </a>
-      <header className="site-header">
-        <div className="header-inner">
-          <Link className="brand" to="/">
-            <span className="brand-mark" aria-hidden="true">G<span>+</span></span>
-            <span>Game<span className="brand-accent">Match</span></span>
-          </Link>
-          <nav aria-label="เมนูหลัก">
-            <div className="primary-links">
-              <NavLink to="/" end>
-                หน้าแรก
-              </NavLink>
-              <NavLink to="/discover">เกมทั้งหมด</NavLink>
-              <NavLink to="/match">แนะนำเกม</NavLink>
-              <NavLink to="/compare">เปรียบเทียบ</NavLink>
-              <NavLink to="/about">เกี่ยวกับ</NavLink>
-              {user && <NavLink to="/me/favorites">เกมโปรด</NavLink>}
-              {user?.role === 'admin' && <NavLink to="/admin">จัดการเกม</NavLink>}
-            </div>
-            <div className="account-links">
-              <ThemeToggle theme={theme} onToggle={() => setTheme((value) => value === 'dark' ? 'light' : 'dark')} />
-              {user ? (
-                <>
-                  <NavLink to="/me/profile">{user.displayName}</NavLink>
-                  <button
-                    className="text-button"
-                    onClick={() =>
-                      logout().catch(() =>
-                        window.alert(
-                          'ล้างข้อมูลในเครื่องแล้ว แต่ติดต่อ Server เพื่อยกเลิก Token ไม่สำเร็จ',
-                        ),
-                      )
-                    }
-                  >
-                    ออกจากระบบ
-                  </button>
-                </>
-              ) : (
-                <NavLink className="login-link" to="/login">
-                  เข้าสู่ระบบ
-                </NavLink>
-              )}
-            </div>
-          </nav>
-        </div>
-      </header>
+      <Navbar user={user} logout={logout} theme={theme} onToggle={() => setTheme((value) => value === 'dark' ? 'light' : 'dark')} />
       <main id="main-content" tabIndex={-1}>
         {error && (
           <div>
@@ -135,22 +92,7 @@ function Shell() {
           />
         </Routes>
       </main>
-      <footer>
-        <div className="footer-inner">
-          <span>GameMatch</span>
-          <p>
-            แหล่งข้อมูล{' '}
-            <a href="https://store.steampowered.com/explore/new/" target="_blank" rel="noreferrer">
-              Steam
-            </a>
-            {' · '}
-            <a href="https://rawg.io" target="_blank" rel="noreferrer">
-              RAWG
-            </a>
-          </p>
-          <small>รายการที่ขึ้นต้นด้วย Demo: เป็นข้อมูลตัวอย่าง</small>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
