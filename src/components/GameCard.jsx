@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { genreLabel } from '../utils/gameLabels';
+import { genreLabel, friendlyReason, matchPartLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
 
 export default function GameCard({ game, action }) {
@@ -39,20 +39,20 @@ export default function GameCard({ game, action }) {
         {game.matchBreakdown?.length > 0 && (
           <div className="match-breakdown" aria-label="คะแนนจับคู่แยกรายด้าน">
             {game.matchBreakdown.map((part) => (
-              <div key={part.label}>
-                <span>{part.label}</span><b>{part.points}/{part.max}</b>
+              <div key={matchPartLabel(part.label)}>
+                <span>{matchPartLabel(part.label)}</span><b>{part.points}/{part.max}</b>
                 <div className="match-track"><div style={{ width: (part.points / part.max * 100) + '%' }} /></div>
               </div>
             ))}
-            <small className="muted">0 คะแนน = ไม่พบข้อมูลตรงกับคำตอบ</small>
+            <small className="muted">0 คะแนน = ยังไม่เจอข้อมูลที่ตรงกับคำตอบข้อนี้</small>
           </div>
         )}
         {game.reasons?.map((x) => (
           <p className="reason" key={x}>
-            {x}
+            {friendlyReason(x)}
           </p>
         ))}
-        <p className="muted">{game.platforms.join(' · ') || 'ยังไม่มีข้อมูลแพลตฟอร์ม'}</p>
+        <p className="muted">{game.platforms.join(' · ') || 'ยังไม่รู้ว่าเล่นบนเครื่องไหนได้'}</p>
         {released && (
           <p className="muted">
             วางจำหน่าย <time dateTime={game.releaseDate}>{released}</time>

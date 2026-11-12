@@ -74,9 +74,9 @@ test('restores member preferences and prevents editing until restored', async ()
   expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeDisabled();
   await waitFor(() => expect(screen.getByRole('radio', { name: 'วางแผน' })).toBeChecked());
   next();
-  expect(screen.getByRole('radio', { name: 'ร่วมมือกับเพื่อน' })).toBeChecked();
+  expect(screen.getByRole('radio', { name: 'เล่นกับเพื่อน (Co-op)' })).toBeChecked();
   next();
-  expect(screen.getByRole('radio', { name: 'ความท้าทาย' })).toBeChecked();
+  expect(screen.getByRole('radio', { name: 'ชอบเกมยาก ๆ' })).toBeChecked();
   fireEvent.click(screen.getByRole('button', { name: 'บันทึกความชอบ' }));
   expect(await screen.findByText('บันทึกความชอบแล้ว')).toBeInTheDocument();
   expect(api).toHaveBeenLastCalledWith('/api/me/preferences', {

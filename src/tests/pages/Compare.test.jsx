@@ -15,7 +15,7 @@ test('compares actual catalog data and prevents duplicate selection', async () =
   expect(screen.getByRole('table')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'A' })).toHaveAttribute('href', '/games/1');
   expect(screen.getByRole('link', { name: 'B' })).toHaveAttribute('href', '/games/2');
-  expect(screen.getAllByText('พบข้อมูลรองรับ')).toHaveLength(2);
+  expect(screen.getAllByText('เล่นได้')).toHaveLength(2);
   fireEvent.click(screen.getByRole('button', { name: 'ล้างการเลือก' }));
   expect(screen.queryByRole('table')).not.toBeInTheDocument();
 });

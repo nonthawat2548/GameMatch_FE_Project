@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
-import { genreLabel } from '../utils/gameLabels';
+import { genreLabel, tagLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
 import GameReviews from '../components/GameReviews';
 import SuggestedGames from '../components/SuggestedGames';
@@ -100,7 +100,7 @@ function DetailContent({ id }) {
           )}
         </div>
         <div className="detail-content">
-          <span className="eyebrow">GAME OVERVIEW</span>
+          <span className="eyebrow">รู้จักเกมนี้</span>
           <h1>{game.title}</h1>
           <p className="detail-description">
             {game.descriptionTh || game.description || 'ยังไม่มีคำอธิบายเพิ่มเติม'}
@@ -119,15 +119,15 @@ function DetailContent({ id }) {
               <dd>{game.genres.map(genreLabel).join(' / ') || 'ยังไม่มีข้อมูล'}</dd>
             </div>
             <div>
-              <dt>แพลตฟอร์ม</dt>
+              <dt>เล่นบน</dt>
               <dd>{game.platforms.join(' / ') || 'ยังไม่มีข้อมูล'}</dd>
             </div>
           </dl>
-          <div className="game-tags" aria-label="แท็กเกม">
+          <div className="game-tags" aria-label="จุดเด่นของเกม">
             {game.tags.length ? (
-              game.tags.map((tag) => <span key={tag}>{tag}</span>)
+              game.tags.map((tag) => <span key={tag}>{tagLabel(tag)}</span>)
             ) : (
-              <p className="muted">ยังไม่มีข้อมูลแท็ก</p>
+              <p className="muted">ยังไม่มีข้อมูลจุดเด่นของเกม</p>
             )}
           </div>
           {user ? (
@@ -152,7 +152,7 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
-      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="คัดจากแนวเกมและแท็กที่ตรงกับเกมนี้" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
+      <SuggestedGames path={'/api/games/' + id + '/similar'} title="เกมที่คล้ายกัน" description="ถ้าชอบเกมนี้ เกมเหล่านี้ก็น่าลองเหมือนกัน" emptyText="ยังไม่พบเกมที่คล้ายกันในคลัง" />
       <GameReviews
         key={user?.id ?? 'guest'}
         gameId={id}

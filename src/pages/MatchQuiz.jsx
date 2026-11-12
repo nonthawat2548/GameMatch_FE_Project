@@ -21,21 +21,21 @@ const fields = [
   ],
   [
     'mode',
-    'รูปแบบการเล่น',
+    'เล่นกับใคร',
     [
       ['solo', 'เล่นคนเดียว'],
-      ['coop', 'ร่วมมือกับเพื่อน'],
-      ['pvp', 'แข่งขันกับผู้เล่น'],
+      ['coop', 'เล่นกับเพื่อน (Co-op)'],
+      ['pvp', 'เล่นแข่งกับคนอื่น (PvP)'],
     ],
   ],
   [
     'style',
-    'สไตล์การเล่น',
+    'ฟีลเกมที่ชอบ',
     [
-      ['story', 'เนื้อเรื่อง'],
-      ['competitive', 'แข่งขัน'],
-      ['relax', 'ผ่อนคลาย'],
-      ['challenge', 'ความท้าทาย'],
+      ['story', 'เน้นเนื้อเรื่อง'],
+      ['competitive', 'เน้นแข่งขัน'],
+      ['relax', 'เล่นชิล ๆ'],
+      ['challenge', 'ชอบเกมยาก ๆ'],
     ],
   ],
 ];
@@ -108,18 +108,18 @@ export default function MatchQuiz() {
   return (
     <>
       <div className="page-banner">
-        <span className="eyebrow">PERSONAL MATCH</span>
+        <span className="eyebrow">หาเกมที่ใช่</span>
         <h1>แนะนำเกม</h1>
-        <p className="muted">เลือกแนวเกม วิธีเล่น และสิ่งที่คุณชอบ แล้วดูเกมที่ตรงกับตัวเลือกของคุณ</p>
+        <p className="muted">ตอบแค่ 3 ข้อ เดี๋ยวเราช่วยหาเกมที่น่าจะถูกใจคุณ</p>
         <div className="quiz-weights" aria-label="สัดส่วนคะแนนจับคู่">
-          <span><b>45%</b> แนวเกม</span><span><b>25%</b> รูปแบบการเล่น</span><span><b>30%</b> สไตล์</span>
+          <span><b>45%</b> แนวเกม</span><span><b>25%</b> เล่นกับใคร</span><span><b>30%</b> ฟีลเกม</span>
         </div>
       </div>
       {loading && <p role="status">กำลังตรวจสอบบัญชี…</p>}
       {!loading && restoring && <p role="status">กำลังโหลดความชอบที่บันทึกไว้…</p>}
       <form onSubmit={run} className="panel quiz-panel" aria-busy={formBusy}>
         <div className="finder-progress">
-          <span className="eyebrow">GAME FINDER</span>
+          <span className="eyebrow">มาหาเกมกัน</span>
           <span className="muted">คำถาม {step + 1} / {fields.length}</span>
         </div>
         <div className="finder-track" aria-hidden="true"><div style={{ width: ((step + 1) / fields.length * 100) + '%' }} /></div>
@@ -132,8 +132,8 @@ export default function MatchQuiz() {
         </div>
         {fields.filter((_, i) => i === step).map(([key, label, options]) => (
           <fieldset className="finder-question" key={key} disabled={formBusy}>
-            <legend>{['คุณชอบเกมแนวไหน?', 'ปกติคุณเล่นกับใคร?', 'คุณอยากได้ประสบการณ์แบบไหน?'][step]}</legend>
-            <p className="muted">เลือก {label} ที่ตรงกับคุณมากที่สุด</p>
+            <legend>{['คุณชอบเกมแนวไหน?', 'ปกติคุณเล่นกับใคร?', 'เวลาเล่นเกม ชอบฟีลแบบไหน?'][step]}</legend>
+            <p className="muted">เลือกแบบที่ชอบที่สุดได้เลย</p>
             <div className="finder-options">
               {options.map(([v, text]) => (
                 <label key={v} className={p[key] === v ? 'finder-option selected' : 'finder-option'}>
@@ -147,7 +147,7 @@ export default function MatchQuiz() {
         ))}
         <div className="finder-actions">
           <button type="button" className="secondary" disabled={formBusy || step === 0} onClick={() => setStep(step - 1)}>ย้อนกลับ</button>
-          <button disabled={formBusy}>{step < fields.length - 1 ? 'ถัดไป' : busy ? 'กำลังจับคู่…' : 'แนะนำเกมให้ฉัน'}</button>
+          <button disabled={formBusy}>{step < fields.length - 1 ? 'ถัดไป' : busy ? 'กำลังหาเกมให้คุณ…' : 'แนะนำเกมให้ฉัน'}</button>
           {user && step === fields.length - 1 && (
             <button type="button" className="secondary" onClick={save} disabled={formBusy}>
               {saving ? 'กำลังบันทึก…' : 'บันทึกความชอบ'}
@@ -160,26 +160,26 @@ export default function MatchQuiz() {
           <Link className="inline-link" to="/login" state={{ from: '/match' }}>
             เข้าสู่ระบบ
           </Link>{' '}
-          เพื่อบันทึกความชอบไว้ใช้ครั้งต่อไป
+          ไว้เก็บคำตอบของคุณ ไม่ต้องเลือกใหม่ครั้งหน้า
         </p>
       )}
       <details className="match-explainer">
         <summary>คะแนนคิดอย่างไร?</summary>
         <p className="muted">
-          เทียบกับข้อมูลเกม: แนวเกม 45 + รูปแบบการเล่น 25 + สไตล์ 30 คะแนน
-          หากไม่มีข้อมูลที่ยืนยันได้จะไม่ได้คะแนนในส่วนนั้น
+          คะแนนเต็ม 100 มาจากแนวเกม 45 คะแนน เล่นกับใคร 25 คะแนน และฟีลเกม 30 คะแนน
+          ถ้าเราไม่มีข้อมูลว่าเกมตรงกับคำตอบข้อนั้น ก็จะไม่ให้คะแนนเพิ่ม
         </p>
       </details>
       {note && <p role="status">{note}</p>}
       {error && <p role="alert">{error}</p>}
       {games !== null && (
         <section className="match-results" aria-labelledby="match-results-heading">
-          <h2 id="match-results-heading">ผลลัพธ์สำหรับคุณ</h2>
+          <h2 id="match-results-heading">เกมที่น่าจะถูกใจคุณ</h2>
           <p className="muted">
-            คะแนนแสดงความตรงกับตัวเลือกจากข้อมูลเกม ไม่ใช่การรับประกันว่าจะชอบเกม
+            คะแนนยิ่งสูง ยิ่งตรงกับคำตอบของคุณ ลองเปิดดูรายละเอียดก่อนตัดสินใจนะ
           </p>
-          {games.length > 0 && <div className="finder-best"><strong>อันดับ 1 · {games[0].matchScore}/100</strong> <span>เกมที่ตรงกับคำตอบของคุณที่สุดจากผลลัพธ์นี้</span></div>}
-          <GameGrid games={games} />
+          {games.length > 0 && <div className="finder-best"><strong>อันดับ 1 · {games[0].matchScore}/100</strong> <span>เกมนี้ตรงกับคำตอบของคุณมากที่สุด</span></div>}
+          <GameGrid games={games} emptyText="ยังไม่มีเกมที่ตรงเงื่อนไข ลองเปลี่ยนคำตอบดูนะ" />
         </section>
       )}
     </>
