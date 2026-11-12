@@ -11,14 +11,17 @@ async function get(path){
   const catalog=await get('/api/games');
   assert.equal(catalog.status,200);
   const games=catalog.data.filter(g=>g.steamId);
-  const ids=[games.find(g=>g.steamId===4262460),games[10],games[40],games[80],games.at(-1)].filter(Boolean);
+  const ids=[games.find(g=>g.steamId===4262460),games[10],games[40],games[80],games.find(g=>g.steamId===70)].filter(Boolean);
   const candidates=[];
   for(const g of ids){
     const detail=await get('/api/games/'+g.id);
     const trailers=await get('/api/games/'+g.id+'/trailers');
     console.log('DETAIL METADATA',g.title,'detail',detail.status,'trailers',trailers.status,Array.isArray(trailers.data)?trailers.data.length:JSON.stringify(trailers.data));
     assert.equal(detail.status,200);
-    if(trailers.status===200&&Array.isArray(trailers.data)&&trailers.data.length) candidates.push(g);
+    assert.equal(trailers.status,200,'trailer metadata '+g.title);
+    assert(Array.isArray(trailers.data));
+    if(trailers.data.length) candidates.push(g);
+    else console.log('DETAIL NO TRAILER',g.title,'confirmed empty metadata');
   }
   assert(candidates.some(g=>g.steamId!==4262460),'non-featured game must return native video metadata');
   if(!process.env.GM_PLAYWRIGHT_MODULE)return;

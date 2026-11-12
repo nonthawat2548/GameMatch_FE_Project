@@ -155,7 +155,7 @@ async function quiz(page) {
       await layout(page);
       pass('Steam motion previews / still toggle / pause');
       const steamGames=games.filter(g=>g.steamId);
-      const checks=[steamGames.find(g=>g.steamId===4262460),steamGames[10],steamGames[40],steamGames[80],steamGames.at(-1)].filter(Boolean);
+      const checks=[steamGames.find(g=>g.steamId===4262460),steamGames[10],steamGames[40],steamGames[80],steamGames.find(g=>g.steamId===70)].filter(Boolean);
       let detailPlayed=0;
       for(const g of checks){
         const trailers=await call('GET','/api/games/'+g.id+'/trailers');
@@ -169,6 +169,11 @@ async function quiz(page) {
             detailPlayed++;
             console.log('DETAIL VIDEO '+g.title);
           }catch(e){console.log('DETAIL FALLBACK '+g.title+' '+e.message.split('\n')[0]);}
+        } else {
+          await page.getByText('ยังไม่มีคลิปที่เล่นบนเว็บได้', {exact:true}).waitFor();
+          assert.equal(await page.locator('.detail-trailer-video').count(), 0);
+          assert(await page.locator('.game-trailer-stage img, .game-trailer-stage .detail-placeholder').count());
+          console.log('DETAIL NO TRAILER '+g.title+' (cover fallback verified)');
         }
         await layout(page);
       }

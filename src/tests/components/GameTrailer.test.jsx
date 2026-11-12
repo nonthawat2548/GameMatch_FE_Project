@@ -50,3 +50,12 @@ test('shows retry for an upstream error without removing the rest of the detail'
   await screen.findByText('คลิปตัวอย่างสั้น');
   await waitFor(()=>expect(api).toHaveBeenCalledTimes(2));
 });
+
+test('a game with no available trailer shows its cover, not an upstream error', async () => {
+  api.mockResolvedValue([]);
+  const {container}=page({...game,steamId:70,title:'Half-Life'});
+  await screen.findByText('ยังไม่มีคลิปที่เล่นบนเว็บได้');
+  expect(screen.getByRole('img')).toBeInTheDocument();
+  expect(container.querySelector('video')).toBeNull();
+  expect(screen.queryByRole('button',{name:'โหลดคลิปใหม่'})).not.toBeInTheDocument();
+});
