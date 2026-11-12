@@ -67,11 +67,11 @@ test('retries a failed detail request', async () => {
 test('disables duplicate favorite writes and reports success only after completion', async () => {
   useAuth.mockReturnValue({ user: { id: 1 } });
   let finish;
-  api.mockResolvedValueOnce(game).mockReturnValueOnce(
-    new Promise((resolve) => {
-      finish = resolve;
-    }),
-  );
+  api.mockImplementation((path) => {
+    if (path.endsWith('/reviews')) return Promise.resolve([]);
+    if (path.includes('/favorites/')) return new Promise((resolve) => { finish = resolve; });
+    return Promise.resolve(game);
+  });
   page();
   fireEvent.click(await screen.findByRole('button', { name: 'เพิ่มในเกมโปรด' }));
   expect(screen.getByRole('button', { name: 'กำลังบันทึก…' })).toBeDisabled();
@@ -105,14 +105,11 @@ test('an old detail response cannot replace the game selected after navigation',
 test('a delayed favorite write for the previous game cannot show success on the next game', async () => {
   useAuth.mockReturnValue({ user: { id: 1 } });
   let finish;
-  api
-    .mockResolvedValueOnce(game)
-    .mockReturnValueOnce(
-      new Promise((resolve) => {
-        finish = resolve;
-      }),
-    )
-    .mockResolvedValueOnce(second);
+  api.mockImplementation((path) => {
+    if (path.endsWith('/reviews')) return Promise.resolve([]);
+    if (path.includes('/favorites/')) return new Promise((resolve) => { finish = resolve; });
+    return Promise.resolve(path === '/api/games/2' ? second : game);
+  });
   page();
   fireEvent.click(await screen.findByRole('button', { name: 'เพิ่มในเกมโปรด' }));
   fireEvent.click(screen.getByRole('link', { name: 'Second game' }));

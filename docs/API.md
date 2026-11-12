@@ -19,7 +19,9 @@ Error ทุก handler: `{ "error": "ข้อความ" }` ยกเว้�
 | PUT | /api/me/password | Member | body currentPassword,newPassword; ยกเลิก session เดิม |
 | GET | /api/games?q=keyword | Public | Game[] ที่เผยแพร่เท่านั้น |
 | GET | /api/games/{id} | Public | Game |
-| GET/POST | /api/games/{id}/reviews | Public/Member | รีวิวของเกม; POST body rating (1-5),comment |
+| GET/POST | /api/games/{id}/reviews | Public/Member | รีวิวของเกม (memberId, rating, comment, createdAt); POST body rating (1-5),comment |
+| PUT | /api/games/{id}/reviews/{reviewId} | Owner | แก้ไข rating,comment |
+| DELETE | /api/games/{id}/reviews/{reviewId} | Owner/Admin | ลบรีวิว |
 | POST | /api/recommendations | Public | Game[] top5 พร้อม matchScore,reasons |
 | GET/PUT | /api/me/preferences | Member | Preference object |
 | GET | /api/me/favorites | Member | Game[] ของตนเองที่ยังเผยแพร่ |

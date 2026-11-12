@@ -4,6 +4,7 @@ import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
 import { genreLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
+import GameReviews from '../components/GameReviews';
 export default function Detail() {
   const { id } = useParams();
   // เปลี่ยนเกมแล้วสร้าง state ใหม่ ป้องกันผลคำขอของเกมก่อนหน้าค้างในหน้าใหม่
@@ -17,9 +18,7 @@ function DetailContent({ id }) {
     [saving, setSaving] = useState(false),
     [reviews, setReviews] = useState([]),
     [reviewLoading, setReviewLoading] = useState(true),
-    [reviewText, setReviewText] = useState(''),
-    [reviewRating, setReviewRating] = useState('5'),
-    [reviewBusy, setReviewBusy] = useState(false),
+    [reviewError, setReviewError] = useState(''),
     [imageFailed, setImageFailed] = useState(false),
     [retry, setRetry] = useState(0);
   useEffect(() => {
@@ -27,6 +26,7 @@ function DetailContent({ id }) {
     setGame(null);
     setReviews([]);
     setReviewLoading(true);
+    setReviewError('');
     setError('');
     setNote('');
     api('/api/games/' + id, { signal: c.signal })
@@ -45,7 +45,7 @@ function DetailContent({ id }) {
               );
           })
           .catch((e) => {
-            if (!c.signal.aborted && e.name !== 'AbortError') setError(e.message);
+            if (!c.signal.aborted && e.name !== 'AbortError') setReviewError(e.message);
           })
           .finally(() => {
             if (!c.signal.aborted) setReviewLoading(false);
@@ -67,24 +67,6 @@ function DetailContent({ id }) {
       setError(e.message);
     } finally {
       setSaving(false);
-    }
-  }
-  async function submitReview(e) {
-    e.preventDefault();
-    setReviewBusy(true);
-    setError('');
-    try {
-      const review = await api('/api/games/' + id + '/reviews', {
-        method: 'POST',
-        body: { rating: Number(reviewRating), comment: reviewText.trim() },
-      });
-      setReviews((current) => [review, ...current]);
-      setReviewText('');
-      setReviewRating('5');
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setReviewBusy(false);
     }
   }
   if (!game)
@@ -167,63 +149,16 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
-      <section className="panel reviews" aria-labelledby="reviews-heading">
-        <h2 id="reviews-heading">รีวิวเกม</h2>
-        {reviewLoading ? (
-          <p role="status">กำลังโหลดรีวิว…</p>
-        ) : reviews.length ? (
-          <div className="review-list">
-            {reviews.map((review) => (
-              <article
-                className="review"
-                key={review.id || `${review.createdAt}-${review.comment}`}
-              >
-                <div className="review-heading">
-                  <strong>{review.displayName || review.user?.displayName || 'สมาชิก'}</strong>
-                  <span aria-label={`คะแนน ${review.rating} จาก 5`}>
-                    {'★'.repeat(Math.max(0, Math.min(5, Number(review.rating))))}
-                    {'☆'.repeat(Math.max(0, 5 - Number(review.rating)))}
-                  </span>
-                </div>
-                <p>{review.comment}</p>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="muted">ยังไม่มีรีวิว เป็นคนแรกที่รีวิวเกมนี้</p>
-        )}
-        {user ? (
-          <form onSubmit={submitReview}>
-            <label>
-              คะแนน
-              <select value={reviewRating} onChange={(e) => setReviewRating(e.target.value)}>
-                {[5, 4, 3, 2, 1].map((rating) => (
-                  <option key={rating} value={rating}>
-                    {rating} / 5
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              ความคิดเห็น
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                required
-                maxLength={2000}
-              />
-            </label>
-            <button disabled={reviewBusy}>{reviewBusy ? 'กำลังส่งรีวิว…' : 'ส่งรีวิว'}</button>
-          </form>
-        ) : (
-          <p>
-            <Link to="/login" state={{ from: '/games/' + id }}>
-              เข้าสู่ระบบ
-            </Link>{' '}
-            เพื่อเขียนรีวิว
-          </p>
-        )}
-      </section>
+      <GameReviews
+        key={user?.id ?? 'guest'}
+        gameId={id}
+        user={user}
+        reviews={reviews}
+        setReviews={setReviews}
+        loading={reviewLoading}
+        loadError={reviewError}
+        onRetry={() => setRetry((n) => n + 1)}
+      />
     </>
   );
 }
