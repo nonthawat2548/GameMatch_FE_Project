@@ -1,0 +1,71 @@
+name: browser-qa
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: gamematch_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:test-only@localhost:5432/gamematch_test?sslmode=disable
+      JWT_SECRET: ci-disposable-not-a-production-secret
+      ALLOWED_ORIGINS: http://localhost:4173
+      REACT_APP_API_URL: http://localhost:8080
+      PORT: 8080
+      GM_PLAYWRIGHT_MODULE: ${{ runner.temp }}/gm-browser/node_modules/playwright
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: nonthawat2548/GameMatch_BE_Project
+          ref: 37d93b7c00cf36d0ac231c221eb331275dea878c
+          path: backend
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE anon; CREATE ROLE authenticated;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/database/schema.sql -f backend/database/seed.sql
+          cd backend
+          go build -o "$RUNNER_TEMP/gm-server" .
+          "$RUNNER_TEMP/gm-server" > "$RUNNER_TEMP/gm-server.log" 2>&1 &
+          for i in {1..40}; do curl --fail --silent http://localhost:8080/healthz && break; sleep 1; done
+          curl --fail --silent http://localhost:8080/healthz
+          curl --fail --silent -H 'Content-Type: application/json' -d '{"email":"admin@example.test","displayName":"QA Admin","password":"Password123!"}' http://localhost:8080/api/auth/register
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "UPDATE gm_members SET role='admin' WHERE email='admin@example.test';"
+      - run: npm ci && npm run build
+      - run: |
+          npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
+          "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - run: node tests/browser/ci-browser.cjs
+  public-smoke:
+    runs-on: ubuntu-latest
+    env:
+      GM_QA_MODE: production
+      GM_PLAYWRIGHT_MODULE: ${{ runner.temp }}/gm-browser/node_modules/playwright
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
+          "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - run: node tests/browser/ci-browser.cjs
