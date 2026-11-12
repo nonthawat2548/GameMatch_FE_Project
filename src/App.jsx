@@ -10,6 +10,7 @@ import Detail from './pages/Detail';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import AdminDashboard from './pages/AdminDashboard';
 import AdminMembers from './pages/AdminMembers';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -110,6 +111,7 @@ function Shell() {
           </Route>
           <Route element={<ProtectedRoute admin />}>
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/members" element={<AdminMembers />} />
           </Route>
           <Route

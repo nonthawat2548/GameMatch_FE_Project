@@ -75,3 +75,6 @@ GET /api/admin/members และ PUT /api/admin/members/{id}/role ใช้ห�
 
 ### Course-aligned account and review rules
 New registration sends email, password and displayName. Login accepts email or legacy username. Existing accounts are retained. Display name 1–50 characters, password 8 characters minimum and 72 UTF-8 bytes maximum. JWT expires after one hour; 401 from protected review mutations invalidates the current session. Reviews require 10 characters minimum and 2000 bytes maximum. Admin game form sends original and Thai descriptions separately.
+
+### Admin dashboard
+GET /api/admin/stats (Admin only) serves /admin/dashboard. Counts come from PostgreSQL; existing /admin and /admin/members remain unchanged.
