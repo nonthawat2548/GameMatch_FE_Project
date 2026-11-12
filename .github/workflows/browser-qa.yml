@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: nonthawat2548/GameMatch_BE_Project
-          ref: 95986dafe4875514301b364557a4b5c7000bff4a
+          ref: c532f27036f5eb4b648d53472208db61f56393b8
           path: backend
       - uses: actions/setup-go@v5
         with:
@@ -67,3 +67,15 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
           "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
       - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/ci-browser.cjs
+  detail-trailers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tests/browser/trailer-metadata.cjs
+      - run: |
+          npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
+          "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/trailer-metadata.cjs
