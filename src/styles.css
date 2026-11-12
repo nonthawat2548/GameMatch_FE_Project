@@ -24,16 +24,13 @@
   font-size: 15px;
 }
 .home-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
+  @apply flex flex-wrap gap-3 mt-6;
 }
 .home-actions .button {
-  margin: 0;
+  @apply m-0;
 }
 .about-page {
-  max-width: 780px;
+  @apply max-w-[780px];
 }
 .about-steps {
   list-style: decimal;
@@ -1702,7 +1699,7 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 }
 
 /* Game Finder / compare / related games: shared theme variables. */
-.finder-progress,.finder-actions {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.finder-progress,.finder-actions {@apply flex items-center justify-between gap-3 flex-wrap;}
 .finder-progress .eyebrow {margin:0}
 .finder-track,.match-track {height:7px;background:var(--gm-line);border-radius:10px;overflow:hidden}
 .finder-track>div,.match-track>div {height:100%;background:var(--gm-accent);border-radius:10px;transition:width .2s}
@@ -1745,7 +1742,7 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 @media(max-width:480px){.finder-steps button{padding:7px;font-size:11px}.finder-steps small{font-size:10px}.finder-option{padding:12px 8px;font-size:13px}}
 
 /* Admin member roles — shared Light/Dark palette. */
-.admin-tabs {display:flex;justify-content:flex-start;gap:8px;flex-wrap:wrap;margin:0 0 24px;padding:7px;border:1px solid var(--gm-line);border-radius:12px;background:var(--gm-surface)}
+.admin-tabs {@apply flex justify-start gap-2 flex-wrap;margin:0 0 24px;padding:7px;border:1px solid var(--gm-line);border-radius:12px;background:var(--gm-surface)}
 .admin-tabs a {padding:10px 18px;border-radius:8px;font-weight:600;font-size:14px;color:var(--gm-muted)}
 .admin-tabs a.active {color:var(--gm-accent);background:var(--gm-raised)}
 .member-metrics {grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -1756,7 +1753,7 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 .member-toolbar input {width:min(100%,270px)}
 .member-table table {min-width:660px}
 .member-table td {vertical-align:middle}
-.member-identity {display:flex;align-items:center;gap:12px;min-width:0}
+.member-identity {@apply flex items-center gap-3 min-w-0;}
 .member-identity>div {min-width:0;overflow-wrap:anywhere}
 .member-identity small {display:block;font-size:12px}
 .member-avatar {display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:12px;background:var(--gm-raised);color:var(--gm-accent);font-weight:700}

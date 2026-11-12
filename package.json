@@ -3,27 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/dom": "10.4.0",
-    "@testing-library/jest-dom": "6.6.3",
-    "@testing-library/react": "16.1.0",
-    "@testing-library/user-event": "14.5.2",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "react-router-dom": "6.30.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^6.30.6",
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "ajv": "8.20.0",
-    "prettier": "3.6.2",
-    "tailwindcss": "3.4.17"
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.19"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "check": "npm run format:check && npm test -- --watchAll=false --runInBand && npm run build",
-    "format": "prettier --write \"src/**/*.{js,jsx,css}\" \"tests/**/*.cjs\" \"public/**/*.html\" \"*.{json,js}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\" \"tests/**/*.cjs\" \"public/**/*.html\" \"*.{json,js}\""
+    "check": "npm test -- --watchAll=false --runInBand && npm run build"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +40,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

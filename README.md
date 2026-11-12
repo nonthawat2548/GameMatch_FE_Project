@@ -6,4 +6,7 @@ The Admin page imports from Steam only. It checks the authenticated `GET /api/ad
 
 Get a key from https://steamcommunity.com/dev/apikey, set `STEAM_API_KEY` in the backend `.env` or hosting environment, and restart the backend. Click **ตรวจสอบสถานะ Steam อีกครั้ง** after configuring it. Key presence does not guarantee validity or remaining quota. Catalog editing is available even without a key or if the status check fails. Deploy the matching backend update before deploying this frontend.
 
-Install dependencies using `npm ci --legacy-peer-deps` for this React Scripts dependency tree. Run `npm test -- --watchAll=false --runInBand` and `npm run build` to verify changes.
+Install dependencies using `npm ci` for this React Scripts dependency tree. Run `npm test -- --watchAll=false --runInBand` and `npm run build` to verify changes.
+
+## Course structure
+React dependencies and lockfile use MovieHub's version snapshot (excluding direct Express/CORS mock-server dependencies). AdminLayout, AdminGameForm and AdminGameList separate navigation, form rendering and table rendering from Admin's state and API calls. Tailwind utility classes and @apply handle common layout, with custom CSS retained for theme/animation. Run npm run check for tests and build.

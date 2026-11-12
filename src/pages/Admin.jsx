@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import AdminNav from '../components/AdminNav';
+import AdminLayout from '../components/AdminLayout';
+import AdminGameForm from '../components/AdminGameForm';
+import AdminGameList from '../components/AdminGameList';
 import { api } from '../api/backend';
 import { utf8Length } from '../utils/validation';
 const blank = {
@@ -117,13 +119,22 @@ export default function Admin() {
       setNote('บันทึกข้อมูลแล้ว');
     });
   }
+  function remove(game) {
+    if (window.confirm(`ลบ ${game.title}?`)) {
+      task(async () => {
+        await api('/api/admin/games/' + game.id, { method: 'DELETE' });
+        if (g.id === game.id) setG(blank);
+        setNote('ลบเกมแล้ว');
+      });
+    }
+  }
   function edit(game) {
     const { matchScore, reasons, ...data } = game;
     setG({ ...data, descriptionTh: data.descriptionTh || '' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   return (
-    <>
+    <AdminLayout header={
       <div className="section-head">
         <div>
           <span className="eyebrow">ADMIN WORKSPACE</span>
@@ -147,7 +158,7 @@ export default function Admin() {
           )}
         </div>
       </div>
-      <AdminNav />
+      }>
       {games && (
         <div className="admin-metrics">
           <div><span>เกมทั้งหมด</span><strong>{games.length}</strong></div>
@@ -198,108 +209,12 @@ export default function Admin() {
         </button>
       )}
       {note && <p role="status">{note}</p>}
-      <form className="panel" onSubmit={save} aria-busy={busy}>
-        <fieldset disabled={busy || games === null}>
-          <h2>{g.id ? 'แก้ไขเกม #' + g.id : 'เพิ่มเกม'}</h2>
-          <div className="quiz-fields">
-            <label>
-              ชื่อเกม
-              <input
-                value={g.title}
-                onChange={(e) => setG({ ...g, title: e.target.value })}
-                required
-                maxLength={250}
-              />
-            </label>
-            <label>
-              รูป HTTPS URL
-              <input
-                type="url"
-                value={g.imageUrl}
-                onChange={(e) => setG({ ...g, imageUrl: e.target.value })}
-              />
-            </label>
-            {[
-              ['genres', 'Genres เช่น rpg, action'],
-              ['tags', 'Tags เช่น singleplayer, story-rich'],
-              ['platforms', 'Platforms เช่น PC'],
-            ].map(([key, label]) => (
-              <label key={key}>
-                {label}
-                <input
-                  value={g[key].join(',')}
-                  onChange={(e) => setG({ ...g, [key]: e.target.value.split(',') })}
-                  onBlur={() => setG({ ...g, [key]: g[key].map((x) => x.trim()).filter(Boolean) })}
-                />
-              </label>
-            ))}
-          </div>
-          <p className="muted">ถ้ามีคำอธิบายไทย ระบบจะแสดงภาษาไทยก่อน โดยเก็บต้นฉบับแยกไว้</p>
-          <label>
-            คำอธิบายภาษาไทย
-            <textarea value={g.descriptionTh} onChange={(e) => setG({ ...g, descriptionTh: e.target.value })} />
-          </label>
-          <label>
-            คำอธิบายต้นฉบับ
-            <textarea value={g.description} onChange={(e) => setG({ ...g, description: e.target.value })} />
-          </label>
-          <label className="inline">
-            <input
-              type="checkbox"
-              checked={g.isPublished}
-              onChange={(e) => setG({ ...g, isPublished: e.target.checked })}
-            />
-            เผยแพร่
-          </label>
-          <button disabled={busy}>บันทึกเกม</button>
-          <button type="button" className="secondary" disabled={busy} onClick={() => setG(blank)}>
-            ล้างฟอร์ม
-          </button>
-        </fieldset>
-      </form>
+      <AdminGameForm g={g} setG={setG} busy={busy} loading={games === null} onSave={save} onReset={() => setG(blank)} />
       {games ? (
-        <div className="panel table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>เกม</th>
-                <th>สถานะ</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {games.map((game) => (
-                <tr key={game.id}>
-                  <td>{game.title}</td>
-                  <td>{game.isPublished ? 'เผยแพร่' : 'ซ่อน'}</td>
-                  <td>
-                    <button disabled={busy} onClick={() => edit(game)}>
-                      แก้ไข
-                    </button>
-                    <button
-                      className="danger"
-                      disabled={busy}
-                      onClick={() => {
-                        if (window.confirm(`ลบ ${game.title}?`))
-                          task(async () => {
-                            await api('/api/admin/games/' + game.id, { method: 'DELETE' });
-                            if (g.id === game.id) setG(blank);
-                            setNote('ลบเกมแล้ว');
-                          });
-                      }}
-                    >
-                      ลบ
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!games.length && <p>ยังไม่มีเกม กดนำเข้าเกม Steam หรือเพิ่มข้อมูลด้านบน</p>}
-        </div>
+        <AdminGameList games={games} busy={busy} onEdit={edit} onDelete={remove} />
       ) : (
         !error && <p role="status">กำลังโหลด…</p>
       )}
-    </>
+    </AdminLayout>
   );
 }

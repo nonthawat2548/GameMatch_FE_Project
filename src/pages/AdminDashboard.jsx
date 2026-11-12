@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/backend';
-import AdminNav from '../components/AdminNav';
+import AdminLayout from '../components/AdminLayout';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -22,13 +22,13 @@ export default function AdminDashboard() {
   }, [retry]);
 
   return (
-    <>
+    <AdminLayout header={
       <div className="page-banner">
         <span className="eyebrow">หลังบ้าน GameMatch</span>
         <h1>ภาพรวมระบบ</h1>
         <p className="muted">ดูจำนวนเกม สมาชิก และรีวิวทั้งหมดจากฐานข้อมูล</p>
       </div>
-      <AdminNav />
+      }>
       {error ? (
         <div className="panel">
           <p role="alert">{error}</p>
@@ -59,6 +59,6 @@ export default function AdminDashboard() {
           <div><strong>จัดการสมาชิก</strong><p>ค้นหาสมาชิกและเปลี่ยนยศ</p></div><span aria-hidden="true">→</span>
         </Link>
       </div>
-    </>
+    </AdminLayout>
   );
 }

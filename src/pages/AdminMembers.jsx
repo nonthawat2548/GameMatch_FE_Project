@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
-import AdminNav from '../components/AdminNav';
+import AdminLayout from '../components/AdminLayout';
 
 export default function AdminMembers() {
   const { user } = useAuth();
@@ -60,13 +60,13 @@ export default function AdminMembers() {
   }
 
   return (
-    <>
+    <AdminLayout header={
       <div className="page-banner">
         <span className="eyebrow">ADMIN WORKSPACE</span>
         <h1>จัดการสมาชิก</h1>
         <p className="muted">จัดการบทบาทและสิทธิ์การเข้าถึงระบบของสมาชิก GameMatch</p>
       </div>
-      <AdminNav />
+      }>
       {members && (
         <div className="admin-metrics member-metrics">
           <div><span>บัญชีทั้งหมด</span><strong>{members.length}</strong></div>
@@ -140,6 +140,6 @@ export default function AdminMembers() {
         </section>
         </div>
       )}
-    </>
+    </AdminLayout>
   );
 }

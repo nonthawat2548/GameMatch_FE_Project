@@ -6,5 +6,5 @@ Session tests dispatch simulated storage events to check cross-tab UI behavior, 
 This folder stays inside `src/` so Create React App discovers tests without ejecting or overriding Jest configuration.
 
 Run from `frontend`: `npm test -- --watchAll=false --runInBand`.
-Run `npm run check` to check formatting, all tests and the production build in sequence.
+Run `npm run check` to run all tests and the production build in sequence.
 Shared Jest setup remains at `src/setupTests.js`, the CRA convention.
