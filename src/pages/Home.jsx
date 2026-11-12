@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/backend';
 import GameGrid from '../components/GameGrid';
+import FeaturedGameCarousel from '../components/FeaturedGameCarousel';
 import { gameDate } from '../utils/gameSource';
 
 export default function Home() {
@@ -31,7 +32,7 @@ export default function Home() {
 
   const steamSync = games.find((game) => game.steamId && game.syncedAt)?.syncedAt;
   const syncedOn = gameDate(steamSync?.slice(0, 10));
-  const featured = games.find((game) => game.imageUrl);
+  const featured = games.filter((game) => game.imageUrl).slice(0, 5);
   const genreCount = new Set(games.flatMap((game) => game.genres)).size;
   return (
     <>
@@ -54,23 +55,7 @@ export default function Home() {
           )}
         </div>
         <div className="hero-visual">
-          {featured ? (
-            <Link className="hero-feature" to={'/games/' + featured.id} aria-label="เปิดรายละเอียดเกมเด่น">
-              <img src={featured.imageUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />
-              <div className="hero-feature-caption">
-                <span className="eyebrow">FEATURED GAME</span>
-                <strong>{featured.title}</strong>
-                <span>สำรวจเกม <span aria-hidden="true">↗</span></span>
-              </div>
-            </Link>
-          ) : (
-            <div className="hero-placeholder" aria-hidden="true">
-              <div className="hero-orbit orbit-one" />
-              <div className="hero-orbit orbit-two" />
-              <span>G<span>+</span></span>
-              <small>DISCOVER · MATCH · PLAY</small>
-            </div>
-          )}
+          <FeaturedGameCarousel games={featured} />
         </div>
       </section>
       <div className="home-paths">

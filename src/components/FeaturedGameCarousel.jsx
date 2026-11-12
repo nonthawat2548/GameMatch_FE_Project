@@ -1,0 +1,105 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+const SLIDE_MS = 6000;
+
+// วนตำแหน่งด้วย modulo เหมือน FeaturedCarousel ใน MovieHub
+export default function FeaturedGameCarousel({ games }) {
+  const [page, setPage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const total = games.length;
+  const index = total ? page % total : 0;
+  const featured = games[index];
+
+  useEffect(() => {
+    if (total < 2 || paused || hovered || focused) return;
+    const timer = setTimeout(() => setPage((p) => (p + 1) % total), SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [total, index, paused, hovered, focused]);
+
+  if (!featured) {
+    return (
+      <div className="hero-placeholder" aria-hidden="true">
+        <div className="hero-orbit orbit-one" />
+        <div className="hero-orbit orbit-two" />
+        <span>G<span>+</span></span>
+        <small>DISCOVER · MATCH · PLAY</small>
+      </div>
+    );
+  }
+
+  function select(next) {
+    setPage((next + total) % total);
+  }
+
+  return (
+    <section
+      className="featured-carousel"
+      aria-label="เกมเด่น"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
+      }}
+    >
+      <Link
+        className="hero-feature"
+        to={'/games/' + featured.id}
+        aria-label="เปิดรายละเอียดเกมเด่น"
+      >
+        <div key={featured.id} className="hero-slide">
+          <img
+            src={featured.imageUrl}
+            alt=""
+            onError={(e) => { e.currentTarget.hidden = true; }}
+          />
+          <div className="hero-feature-caption">
+            <span className="eyebrow">FEATURED GAME</span>
+            <strong>{featured.title}</strong>
+            <span>สำรวจเกม <span aria-hidden="true">↗</span></span>
+          </div>
+        </div>
+      </Link>
+      {total > 1 && (
+        <>
+          <div className="hero-carousel-top">
+            <span className="hero-slide-count" aria-label={`สไลด์ ${index + 1} จาก ${total}`}>
+              {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+            </span>
+            <button
+              type="button"
+              className="hero-carousel-control"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={paused ? 'เล่นสไลด์อัตโนมัติ' : 'หยุดสไลด์อัตโนมัติ'}
+            >
+              <span aria-hidden="true">{paused ? '▶' : 'Ⅱ'}</span>
+            </button>
+          </div>
+          <div className="hero-carousel-nav">
+            <button type="button" className="hero-carousel-control" onClick={() => select(index - 1)} aria-label="เกมก่อนหน้า">
+              <span aria-hidden="true">‹</span>
+            </button>
+            <button type="button" className="hero-carousel-control" onClick={() => select(index + 1)} aria-label="เกมถัดไป">
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
+          <div className="hero-carousel-dots" role="group" aria-label="เลือกสไลด์เกมเด่น">
+            {games.map((game, i) => (
+              <button
+                type="button"
+                key={game.id}
+                className="hero-dot"
+                aria-label={'สไลด์ ' + (i + 1) + ': ' + game.title}
+                aria-pressed={i === index}
+                onClick={() => select(i)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
