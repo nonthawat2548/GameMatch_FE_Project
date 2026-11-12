@@ -1423,11 +1423,19 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 .hero-search-field input:focus { border: 0; outline: none; }
 .hero-search-field button { flex-shrink: 0; margin: 0; }
 .hero-search-results {
-  margin-top: 8px;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: min(340px, 50vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
   padding: 9px;
   border: 1px solid #495675;
   border-radius: 13px;
-  background: #111a2df8;
+  background: #111a2d;
   box-shadow: 0 10px 28px #080b174d;
 }
 .hero-search-result-head {
@@ -1812,4 +1820,19 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 }
 @media (prefers-reduced-motion: reduce) {
   .cinematic-hero .hero-slide .cinematic-art { animation: none; }
+}
+
+/* Keep the search dropdown outside the Hero's layout flow.
+   Clip only the artwork, not the search panel or keyboard focus outlines. */
+.cinematic-hero {
+  overflow: visible;
+  z-index: 2;
+}
+.cinematic-hero .hero-visual {
+  border-radius: inherit;
+  overflow: hidden;
+}
+@media (max-width: 760px) {
+  .cinematic-hero .hero-visual { border-radius: 14px; }
+  .cinematic-hero .hero-search-results { max-height: min(300px, 48vh); }
 }

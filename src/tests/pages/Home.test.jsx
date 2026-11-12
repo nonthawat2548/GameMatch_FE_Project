@@ -91,3 +91,19 @@ test('selects the ten highest ranked Steam Most Played games with images, not to
   fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
   expect(featured).toHaveAttribute('href', '/games/100');
 });
+
+test('dismisses search results on outside interaction without clearing the query', async () => {
+  api.mockResolvedValue(games);
+  page();
+  const input = screen.getByRole('searchbox');
+  await screen.findByRole('link', { name: games[0].title });
+  fireEvent.change(input, { target: { value: 'Home' } });
+  expect(screen.getByText('พบ 6 เกม')).toBeInTheDocument();
+  fireEvent.pointerDown(screen.getByRole('heading', { name: 'หาเกมที่อยากเล่น' }));
+  expect(screen.queryByText('พบ 6 เกม')).not.toBeInTheDocument();
+  expect(input).toHaveValue('Home');
+  fireEvent.click(input);
+  expect(screen.getByText('พบ 6 เกม')).toBeInTheDocument();
+  fireEvent.keyDown(screen.getByRole('button', { name: 'ปิด' }), { key: 'Escape' });
+  expect(screen.queryByText('พบ 6 เกม')).not.toBeInTheDocument();
+});

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { genreLabel } from '../utils/gameLabels';
 
@@ -6,6 +6,15 @@ export default function HomeGameSearch({ games, loading, error }) {
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+  const searchRef = useRef(null);
+  useEffect(() => {
+    if (!expanded) return;
+    function outside(e) {
+      if (!searchRef.current?.contains(e.target)) setExpanded(false);
+    }
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [expanded]);
   const term = query.trim();
   const matches = term ? games.filter((game) => game.title.toLowerCase().includes(term.toLowerCase())) : [];
   const destination = '/discover' + (term ? '?q=' + encodeURIComponent(term) : '');
@@ -13,11 +22,17 @@ export default function HomeGameSearch({ games, loading, error }) {
 
   function submit(e) {
     e.preventDefault();
+    setExpanded(false);
     navigate(destination);
   }
 
   return (
-    <div className="home-game-search">
+    <div
+      className="home-game-search"
+      ref={searchRef}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setExpanded(false); }}
+      onKeyDown={(e) => { if (e.key === 'Escape') setExpanded(false); }}
+    >
       <form role="search" aria-label="ค้นหาเกมจากหน้าแรก" onSubmit={submit} className="hero-search-form">
         <label htmlFor="home-game-query" className="hero-search-label">ค้นหาเกม</label>
         <div className="hero-search-field">
@@ -31,8 +46,8 @@ export default function HomeGameSearch({ games, loading, error }) {
             value={query}
             autoComplete="off"
             onFocus={() => setExpanded(true)}
+            onClick={() => setExpanded(true)}
             onChange={(e) => { setQuery(e.target.value); setExpanded(true); }}
-            onKeyDown={(e) => { if (e.key === 'Escape') setExpanded(false); }}
             aria-controls={showResults ? 'home-search-results' : undefined}
           />
           <button type="submit">ค้นหา</button>
