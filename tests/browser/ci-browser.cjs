@@ -64,6 +64,29 @@ async function quiz(page) {
       const page=await context.newPage();page.setDefaultTimeout(30000);
       page.on('pageerror',e=>errors.push(e.message));
       await page.goto(origin);await page.locator('.game-card').first().waitFor();
+      if(width<=760){
+        const header=page.locator('.header-inner');
+        const closed=await header.boundingBox();
+        assert(closed.height<=72,'mobile navbar must fit one row');
+        const toggle=page.getByRole('button',{name:'เปิดเมนู'});
+        assert(await toggle.isVisible());
+        const nav=page.getByRole('navigation',{name:'เมนูหลัก'});
+        assert(!await nav.getByRole('link',{name:'เกมทั้งหมด'}).isVisible());
+        await toggle.click();
+        assert(await nav.getByRole('link',{name:'เกมทั้งหมด'}).isVisible());
+        await nav.getByRole('link',{name:'เกมทั้งหมด'}).click();
+        await page.waitForURL('**/discover');
+        assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+        await page.goto(origin);
+        await page.locator('.game-card').first().waitFor();
+        const media=await page.locator('.hero-visual').boundingBox();
+        const copy=await page.locator('.hero-copy').boundingBox();
+        assert(media.y<copy.y,'mobile preview must be above the copy');
+        assert(media.y+media.height<=copy.y+2,'preview and copy must not overlap');
+        assert(media.y<200,'preview should be visible near the top');
+        await layout(page);
+        pass('Compact mobile navigation and video-first hero '+width+'px');
+      }
       const search=page.getByRole('searchbox');
       await page.evaluate(() => document.fonts.ready);
       await search.focus();

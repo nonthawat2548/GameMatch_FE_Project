@@ -21,3 +21,6 @@ React fetches /api/games/{id}/trailers on a Steam game's detail page. Go queries
 
 ### Steam player review score
 Game detail fetches /api/games/{id}/steam-rating independently of the member review section and match score. Displays positive percentage (calculated from Steam counts), Steam review description, total and positive/negative counts. Uses Steam's published default purchase filter, all languages, all review types, and default off-topic exclusion. Empty reviews and upstream failures have distinct states. No new package or schema change.
+
+### Mobile layout
+At widths up to 760px, Navbar uses a React state-controlled collapsible navigation (same links and authorization checks); the theme button remains accessible in the single-row header. The existing hero video/cover is shown before the search and actions, with compact stats and responsive touch controls. Catalog cards retain two columns, matching results stay readable in one column on small phones, and admin/compare tables scroll inside their container. CSS/Tailwind only, no new packages or API changes.

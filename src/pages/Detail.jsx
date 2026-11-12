@@ -135,6 +135,7 @@ function DetailContent({ id }) {
               <p className="muted">ยังไม่มีข้อมูลจุดเด่นของเกม</p>
             )}
           </div>
+          <div className="detail-actions">
           {user ? (
             <button onClick={save} disabled={saving}>
               {saving ? 'กำลังบันทึก…' : 'เพิ่มในเกมโปรด'}
@@ -145,6 +146,7 @@ function DetailContent({ id }) {
             </Link>
           )}
           <Link className="button secondary" to={'/compare?game=' + id}>เปรียบเทียบเกม</Link>
+          </div>
           {source && (
             <p className="detail-source">
               ข้อมูลและภาพจาก{' '}

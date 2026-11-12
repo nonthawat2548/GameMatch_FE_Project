@@ -46,6 +46,9 @@ export default function Home({ user } = {}) {
   return (
     <>
       <section className="home-intro cinematic-hero">
+        <div className="hero-visual">
+          <FeaturedGameCarousel games={featured} />
+        </div>
         <div className="hero-copy">
           <span className="eyebrow"><span aria-hidden="true" /> เกมต่อไปของคุณ เริ่มที่นี่</span>
           <h1>หาเกมที่อยากเล่น</h1>
@@ -63,9 +66,6 @@ export default function Home({ user } = {}) {
               <div><strong>3</strong><span>คำถามหาเกม</span></div>
             </div>
           )}
-        </div>
-        <div className="hero-visual">
-          <FeaturedGameCarousel games={featured} />
         </div>
       </section>
       <div className="home-paths">
