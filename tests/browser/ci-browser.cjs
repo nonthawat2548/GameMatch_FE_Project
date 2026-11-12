@@ -154,6 +154,27 @@ async function quiz(page) {
       assert(await page.locator('video').evaluate(v=>v.paused));
       await layout(page);
       pass('Steam motion previews / still toggle / pause');
+      const steamGames=games.filter(g=>g.steamId);
+      const checks=[steamGames.find(g=>g.steamId===4262460),steamGames[10],steamGames[40],steamGames[80],steamGames.at(-1)].filter(Boolean);
+      let detailPlayed=0;
+      for(const g of checks){
+        const trailers=await call('GET','/api/games/'+g.id+'/trailers');
+        assert(Array.isArray(trailers));
+        await page.goto(origin+'/games/'+g.id);
+        await page.getByRole('heading',{name:g.title,exact:true}).waitFor();
+        await page.getByRole('link',{name:/ดู Trailer เต็มบน Steam/}).waitFor();
+        if(trailers.length){
+          try{
+            await page.waitForFunction(()=>{const v=document.querySelector('.detail-trailer-video');return v&&v.videoWidth>0;},undefined,{timeout:15000});
+            detailPlayed++;
+            console.log('DETAIL VIDEO '+g.title);
+          }catch(e){console.log('DETAIL FALLBACK '+g.title+' '+e.message.split('\n')[0]);}
+        }
+        await layout(page);
+      }
+      assert(detailPlayed>0,'at least one detail trailer must load');
+      console.log('DETAIL TRAILERS '+detailPlayed+'/'+checks.length+' sampled playable');
+
       await ctx.close();
     }
     if(!production){

@@ -1853,3 +1853,29 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 }
 
 .cinematic-hero .hero-slide::after { z-index: 1; pointer-events: none; }
+
+/* Game detail: native HTML video, with the original cover as a safe fallback. */
+.game-trailer-stage {
+  @apply relative w-full overflow-hidden;
+  aspect-ratio: 16 / 9;
+  background: #080d19;
+}
+.detail-trailer-video {
+  @apply block w-full h-full object-contain;
+}
+.game-trailer-stage .detail-image,
+.game-trailer-stage .detail-placeholder {
+  @apply w-full h-full;
+  max-height: none;
+  object-fit: cover;
+}
+.game-trailer-info {
+  @apply grid gap-3 p-4;
+  background: var(--gm-surface);
+  border-top: 1px solid var(--gm-line);
+}
+.game-trailer-info p { @apply m-0; overflow-wrap: anywhere; }
+.game-trailer-info a { font-size: 13px; color: var(--gm-accent); }
+.game-trailer-options { @apply flex flex-wrap gap-2; }
+.game-trailer-options button { font-size: 12px; padding: 7px 10px; max-width: 100%; overflow-wrap: anywhere; }
+.game-trailer-options button[aria-pressed='true'] { border-color: var(--gm-accent); }

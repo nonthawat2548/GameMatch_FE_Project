@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { genreLabel, tagLabel } from '../utils/gameLabels';
 import { gameSource, gameDate } from '../utils/gameSource';
 import GameReviews from '../components/GameReviews';
+import GameTrailer from '../components/GameTrailer';
 import SuggestedGames from '../components/SuggestedGames';
 export default function Detail() {
   const { id } = useParams();
@@ -86,6 +87,7 @@ function DetailContent({ id }) {
       </Link>
       <article className="detail-layout">
         <div className="detail-media">
+          <GameTrailer game={game}>
           {game.imageUrl && !imageFailed ? (
             <img
               className="detail-image"
@@ -98,6 +100,7 @@ function DetailContent({ id }) {
               ไม่มีภาพเกม
             </div>
           )}
+          </GameTrailer>
         </div>
         <div className="detail-content">
           <span className="eyebrow">รู้จักเกมนี้</span>
