@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { heroVideoCandidates } from '../utils/heroVideos';
 
-export default function HeroVideo({ game, paused }) {
+export default function HeroVideo({ game, paused, onPlaybackChange }) {
   const urls = heroVideoCandidates(game);
   const [attempt, setAttempt] = useState(0);
   const [ready, setReady] = useState(false);
@@ -24,6 +24,7 @@ export default function HeroVideo({ game, paused }) {
         playing.catch((error) => {
           if (!active || error.name === 'AbortError') return;
           setReady(false);
+          onPlaybackChange?.(false);
         });
       }
     }
@@ -34,7 +35,7 @@ export default function HeroVideo({ game, paused }) {
       document.removeEventListener('visibilitychange', syncPlayback);
       video.pause();
     };
-  }, [src, paused]);
+  }, [src, paused, onPlaybackChange]);
 
   if (!src) return null;
   return (
@@ -49,9 +50,15 @@ export default function HeroVideo({ game, paused }) {
       preload="metadata"
       aria-hidden="true"
       tabIndex={-1}
-      onPlaying={() => setReady(true)}
+      onPlaying={() => {
+        setReady(true);
+        onPlaybackChange?.(true);
+      }}
+      onWaiting={() => onPlaybackChange?.(false)}
+      onStalled={() => onPlaybackChange?.(false)}
       onError={() => {
         setReady(false);
+        onPlaybackChange?.(false);
         setAttempt((n) => n + 1);
       }}
     />

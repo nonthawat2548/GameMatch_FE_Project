@@ -113,7 +113,7 @@ test('plays only the active Steam preview silently and retains HD artwork during
   expect(video).not.toHaveClass('is-playing');
   fireEvent.playing(video);
   expect(video).toHaveClass('is-playing');
-  act(() => jest.advanceTimersByTime(7999));
+  act(() => jest.advanceTimersByTime(11999));
   expect(container.querySelector('video')).toBe(video);
   act(() => jest.advanceTimersByTime(1));
   expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/570/'));
@@ -122,6 +122,9 @@ test('falls back from MP4 to WebM then to the original HD image', () => {
   const { container } = page([{ ...games[0], steamId: 730 }]);
   fireEvent.error(container.querySelector('video'));
   expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('.webm'));
+  fireEvent.error(container.querySelector('video'));
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/612468/'));
+  fireEvent.error(container.querySelector('video'));
   fireEvent.error(container.querySelector('video'));
   expect(container.querySelector('video')).toBeNull();
   expect(container.querySelector('.cinematic-art')).toBeInTheDocument();
@@ -156,4 +159,29 @@ test('manual selection restarts the full video slide duration', () => {
   expect(link).toHaveAttribute('href', '/games/47');
   act(() => jest.advanceTimersByTime(1));
   expect(link).toHaveAttribute('href', '/games/46');
+});
+
+test('prefers dedicated gameplay trailers rather than reveal videos', () => {
+  const { container } = page([{ ...games[0], steamId: 4115450 }, { ...games[1], steamId: 2868840 }]);
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/2061584490/'));
+  fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/640808763/'));
+});
+test('a late-loading clip gets its full viewing time after playing starts', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
+  act(() => jest.advanceTimersByTime(7000));
+  fireEvent.playing(container.querySelector('video'));
+  act(() => jest.advanceTimersByTime(11999));
+  expect(link).toHaveAttribute('href', '/games/46');
+  act(() => jest.advanceTimersByTime(1));
+  expect(link).toHaveAttribute('href', '/games/47');
+});
+test('a stalled clip keeps the image fallback and advances after the loading timeout', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  fireEvent.playing(container.querySelector('video'));
+  act(() => jest.advanceTimersByTime(3000));
+  fireEvent.waiting(container.querySelector('video'));
+  act(() => jest.advanceTimersByTime(8000));
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
 });
