@@ -11,8 +11,12 @@ const games = [
 function page(items = games) {
   return render(<MemoryRouter><FeaturedGameCarousel games={items} /></MemoryRouter>);
 }
-beforeEach(() => jest.useFakeTimers());
-afterEach(() => jest.useRealTimers());
+beforeEach(() => {
+  jest.useFakeTimers();
+  jest.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  jest.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
+});
+afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks(); });
 
 test('moves forward, backward and wraps through real games', () => {
   page();
@@ -95,4 +99,50 @@ test('resets the image fallback when moving to another game', () => {
   fireEvent.error(container.querySelector('.cinematic-art'));
   fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
   expect(container.querySelector('.cinematic-art')).toHaveAttribute('src', expect.stringContaining('06918d1009cc79ffdee853f1ef789cddf8014226/library_hero_2x.jpg'));
+});
+
+test('plays only the active Steam preview silently and retains HD artwork during loading', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
+  const video = container.querySelector('video');
+  expect(video).toHaveAttribute('src', expect.stringContaining('/730/'));
+  expect(video.muted).toBe(true);
+  expect(video.loop).toBe(true);
+  expect(video).toHaveAttribute('playsinline');
+  expect(container.querySelectorAll('video')).toHaveLength(1);
+  expect(container.querySelector('.cinematic-art')).toBeInTheDocument();
+  expect(video).not.toHaveClass('is-playing');
+  fireEvent.playing(video);
+  expect(video).toHaveClass('is-playing');
+  act(() => jest.advanceTimersByTime(7999));
+  expect(container.querySelector('video')).toBe(video);
+  act(() => jest.advanceTimersByTime(1));
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/570/'));
+});
+test('falls back from MP4 to WebM then to the original HD image', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }]);
+  fireEvent.error(container.querySelector('video'));
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('.webm'));
+  fireEvent.error(container.querySelector('video'));
+  expect(container.querySelector('video')).toBeNull();
+  expect(container.querySelector('.cinematic-art')).toBeInTheDocument();
+});
+test('pause stops the active clip and the still-image toggle avoids video loading', () => {
+  const { container } = page([{ ...games[0], steamId: 730 }, games[1]]);
+  fireEvent.click(screen.getByRole('button', { name: 'หยุดสไลด์อัตโนมัติ' }));
+  expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+  act(() => jest.advanceTimersByTime(16000));
+  expect(container.querySelector('video')).toHaveAttribute('src', expect.stringContaining('/730/'));
+  fireEvent.click(screen.getByRole('button', { name: 'ใช้ภาพนิ่ง' }));
+  expect(container.querySelector('video')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'ใช้คลิปตัวอย่าง' }));
+  expect(container.querySelector('video')).toBeInTheDocument();
+});
+test('does not request video when the operating system prefers reduced motion', () => {
+  const previous = window.matchMedia;
+  window.matchMedia = () => ({ matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() });
+  try {
+    const { container } = page([{ ...games[0], steamId: 730 }]);
+    expect(container.querySelector('video')).toBeNull();
+    expect(container.querySelector('.cinematic-art')).toBeInTheDocument();
+  } finally { window.matchMedia = previous; }
 });

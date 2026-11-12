@@ -1833,3 +1833,21 @@ footer { background: #0d1324; border-color: var(--gm-line); }
   .cinematic-hero .hero-visual { border-radius: 14px; }
   .cinematic-hero .hero-search-results { max-height: min(300px, 48vh); }
 }
+
+/* Motion preview sits above the HD image, below the existing gradient and text.
+   Artwork stays visible while a clip is buffering or unavailable. */
+.cinematic-hero .hero-slide .cinematic-video {
+  @apply absolute inset-0 w-full h-full object-cover pointer-events-none;
+  object-position: 72% center;
+  opacity: 0;
+  transition: opacity 450ms ease;
+  z-index: 0;
+}
+.cinematic-hero .hero-slide .cinematic-video.is-playing { opacity: 1; }
+.cinematic-hero .hero-media-toggle { font-size: 15px; }
+@media (max-width: 760px) {
+  .cinematic-hero .hero-slide .cinematic-video { object-position: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-hero .hero-slide .cinematic-video { display: none; transition: none; }
+}
