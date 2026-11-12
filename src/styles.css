@@ -1228,3 +1228,153 @@ footer { background: #0d1324; border-color: var(--gm-line); }
 @media (prefers-reduced-motion: reduce) {
   .hero-slide { animation: none; }
 }
+
+/* Cinematic motion hero — reuse the featured catalog and existing carousel timer.
+   No extra requests, video player, animation framework or backend changes. */
+.cinematic-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+  min-height: 480px;
+  padding: clamp(32px, 4.7vw, 64px);
+  background: linear-gradient(110deg, #10182c, #211b3c);
+}
+.cinematic-hero .hero-copy {
+  position: relative;
+  z-index: 4;
+  width: min(52%, 650px);
+  pointer-events: none;
+}
+.cinematic-hero .hero-copy a { pointer-events: auto; }
+.cinematic-hero .hero-copy h1 {
+  max-width: 12em;
+  text-shadow: 0 3px 24px #05081690;
+}
+.cinematic-hero .hero-description { max-width: 480px; }
+.cinematic-hero .hero-visual {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.cinematic-hero .featured-carousel {
+  position: absolute;
+  inset: 0;
+}
+.cinematic-hero .hero-feature,
+.cinematic-hero .hero-placeholder {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: linear-gradient(120deg, #151c33, #30244e);
+}
+.cinematic-hero .hero-placeholder {
+  padding-left: 48%;
+  min-height: 0;
+}
+.cinematic-hero .hero-placeholder > span { opacity: .45; }
+.cinematic-hero .hero-placeholder .hero-orbit { left: 50%; }
+.cinematic-hero .hero-slide {
+  animation: cinematic-reveal 650ms ease-out both;
+  overflow: hidden;
+}
+.cinematic-hero .hero-slide .cinematic-art {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 76%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: cinematic-camera 4s linear both;
+}
+.cinematic-hero .hero-slide::after {
+  background:
+    linear-gradient(90deg, #10172a 0%, #10172af2 26%, #10172ac7 42%, #10172a40 66%, #10172a08 88%),
+    linear-gradient(0deg, #0a1020e8 0%, #0a102015 49%, #0a102035 100%);
+}
+.cinematic-hero .hero-slide .hero-feature-caption {
+  inset: auto 32px 65px auto;
+  width: min(38%, 520px);
+  max-width: none;
+  text-align: right;
+  justify-items: end;
+  text-shadow: 0 2px 14px #000b;
+}
+.cinematic-hero .hero-feature-caption strong {
+  font-size: clamp(19px, 2.6vw, 36px);
+}
+.cinematic-hero .hero-carousel-top { top: 20px; right: 22px; }
+.cinematic-hero .hero-carousel-nav {
+  top: auto;
+  right: 24px;
+  bottom: 16px;
+  transform: none;
+}
+.cinematic-hero .hero-carousel-dots {
+  position: absolute;
+  right: 130px;
+  bottom: 22px;
+  z-index: 3;
+  margin: 0;
+}
+.cinematic-hero .is-paused .hero-slide,
+.cinematic-hero .is-paused .cinematic-art {
+  animation-play-state: paused;
+}
+@keyframes cinematic-camera {
+  from { transform: scale(1.025) translateX(0); }
+  to { transform: scale(1.14) translateX(-1.5%); }
+}
+@keyframes cinematic-reveal {
+  from { opacity: .15; }
+  to { opacity: 1; }
+}
+@media (max-width: 1000px) {
+  .cinematic-hero { min-height: 460px; }
+  .cinematic-hero .hero-copy { width: 57%; }
+}
+@media (max-width: 760px) {
+  .cinematic-hero {
+    display: grid;
+    gap: 20px;
+    min-height: 0;
+    padding: 24px;
+  }
+  .cinematic-hero .hero-copy { width: 100%; pointer-events: auto; }
+  .cinematic-hero .hero-visual,
+  .cinematic-hero .featured-carousel { position: relative; inset: auto; }
+  .cinematic-hero .hero-feature,
+  .cinematic-hero .hero-placeholder {
+    aspect-ratio: 16 / 10;
+    height: auto;
+    border-radius: 14px;
+    border: 1px solid #625485;
+  }
+  .cinematic-hero .hero-placeholder { padding-left: 0; min-height: 180px; }
+  .cinematic-hero .hero-placeholder .hero-orbit { left: 12%; }
+  .cinematic-hero .hero-slide .cinematic-art { width: 100%; }
+  .cinematic-hero .hero-slide::after {
+    background: linear-gradient(0deg, #0a1020f5 0%, #0a102055 45%, transparent 85%);
+  }
+  .cinematic-hero .hero-slide .hero-feature-caption {
+    inset: auto 14px 53px;
+    width: auto;
+    text-align: left;
+    justify-items: start;
+  }
+  .cinematic-hero .hero-carousel-top { top: 10px; right: 10px; }
+  .cinematic-hero .hero-carousel-nav { bottom: 10px; right: 10px; }
+  .cinematic-hero .hero-carousel-dots { bottom: 16px; right: 92px; }
+}
+@media (max-width: 520px) {
+  .cinematic-hero { padding: 19px; }
+  .cinematic-hero .hero-feature-caption strong { font-size: 18px; }
+  .cinematic-hero .hero-carousel-dots { gap: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-hero .hero-slide,
+  .cinematic-hero .hero-slide .cinematic-art { animation: none; }
+}

@@ -34,7 +34,7 @@ export default function FeaturedGameCarousel({ games }) {
   }
 
   return (
-    <section className="featured-carousel" aria-label="เกมเด่น">
+    <section className={paused ? "featured-carousel is-paused" : "featured-carousel"} aria-label="เกมเด่น">
       <Link
         className="hero-feature"
         to={'/games/' + featured.id}
@@ -42,6 +42,7 @@ export default function FeaturedGameCarousel({ games }) {
       >
         <div key={featured.id} className="hero-slide">
           <img
+            className="cinematic-art"
             src={featured.imageUrl}
             alt=""
             onError={(e) => { e.currentTarget.hidden = true; }}

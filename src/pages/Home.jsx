@@ -36,7 +36,7 @@ export default function Home() {
   const genreCount = new Set(games.flatMap((game) => game.genres)).size;
   return (
     <>
-      <section className="home-intro">
+      <section className="home-intro cinematic-hero">
         <div className="hero-copy">
           <span className="eyebrow"><span aria-hidden="true" /> YOUR NEXT GAME STARTS HERE</span>
           <h1>หาเกมที่อยากเล่น</h1>

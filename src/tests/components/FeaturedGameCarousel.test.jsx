@@ -33,9 +33,11 @@ test('advances automatically and supports pause and resume', () => {
   act(() => jest.advanceTimersByTime(4000));
   expect(link).toHaveAttribute('href', '/games/47');
   fireEvent.click(screen.getByRole('button', { name: 'หยุดสไลด์อัตโนมัติ' }));
+  expect(screen.getByRole('region', { name: 'เกมเด่น' })).toHaveClass('is-paused');
   act(() => jest.advanceTimersByTime(8000));
   expect(link).toHaveAttribute('href', '/games/47');
   fireEvent.click(screen.getByRole('button', { name: 'เล่นสไลด์อัตโนมัติ' }));
+  expect(screen.getByRole('region', { name: 'เกมเด่น' })).not.toHaveClass('is-paused');
   act(() => jest.advanceTimersByTime(4000));
   expect(link).toHaveAttribute('href', '/games/48');
 });
