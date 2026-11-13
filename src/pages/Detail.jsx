@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
-import { genreLabel, tagLabel } from '../utils/gameLabels';
-import { gameSource, gameDate } from '../utils/gameSource';
+import { tagLabel } from '../utils/gameLabels';
+import { gameSource } from '../utils/gameSource';
 import GameReviews from '../components/GameReviews';
 import GameTrailer from '../components/GameTrailer';
+import { GameHero, GameInfo, SystemRequirements, GameDetailSkeleton, GameSeo } from '../components/GameDetails';
+import { gameUrl, gameID } from '../utils/gameUrl';
 import SteamRating from '../components/SteamRating';
 import SuggestedGames from '../components/SuggestedGames';
 export default function Detail() {
   const { id } = useParams();
   // เปลี่ยนเกมแล้วสร้าง state ใหม่ ป้องกันผลคำขอของเกมก่อนหน้าค้างในหน้าใหม่
-  return <DetailContent key={id} id={id} />;
+  const numeric = gameID(id);
+  return <DetailContent key={numeric || id} id={numeric || id} />;
 }
 function DetailContent({ id }) {
+  const location = useLocation();
   const { user } = useAuth(),
     [game, setGame] = useState(null),
     [error, setError] = useState(''),
@@ -23,7 +27,9 @@ function DetailContent({ id }) {
     [reviewLoading, setReviewLoading] = useState(true),
     [reviewError, setReviewError] = useState(''),
     [imageFailed, setImageFailed] = useState(false),
-    [retry, setRetry] = useState(0);
+    [retry, setRetry] = useState(0),
+    [metadata, setMetadata] = useState(null),
+    [metaError, setMetaError] = useState(false);
   useEffect(() => {
     const c = new AbortController();
     setGame(null);
@@ -59,6 +65,15 @@ function DetailContent({ id }) {
       });
     return () => c.abort();
   }, [id, retry]);
+  useEffect(() => {
+    if (!game?.steamId) return;
+    const c = new AbortController();
+    setMetaError(false);
+    api('/api/games/' + id + '/metadata', {signal:c.signal})
+      .then(data => {if(!c.signal.aborted)setMetadata(data);})
+      .catch(() => {if(!c.signal.aborted)setMetaError(true);});
+    return () => c.abort();
+  }, [game?.steamId, id, retry]);
   async function save() {
     setSaving(true);
     setError('');
@@ -75,21 +90,18 @@ function DetailContent({ id }) {
   if (!game)
     return (
       <>
-        <p role={error ? 'alert' : 'status'}>{error || 'กำลังโหลด…'}</p>
+        {error ? <p role="alert">{error}</p> : <GameDetailSkeleton />}
         {error && <button onClick={() => setRetry((n) => n + 1)}>ลองใหม่</button>}
       </>
     );
   const source = gameSource(game);
-  const released = gameDate(game.releaseDate);
   return (
     <>
-      <Link className="back-link" to="/discover">
-        ← กลับไปรายการเกม
-      </Link>
-      <h1 className="game-detail-title">{game.title}</h1>
+      <GameSeo game={game} />
+      <GameHero game={game} metadata={metadata} />
       <article className="detail-layout">
         <div className="detail-media">
-          <GameTrailer game={game}>
+          <GameTrailer game={game} screenshots={metadata?.screenshots} >
           {game.imageUrl && !imageFailed ? (
             <img
               className="detail-image"
@@ -105,43 +117,24 @@ function DetailContent({ id }) {
           </GameTrailer>
         </div>
         <div className="detail-content">
+          <GameInfo game={game} metadata={metadata} error={metaError} onRetry={()=>setRetry(n=>n+1)} />
           <SteamRating key={game.id} game={game} />
-          <p className="detail-description">
-            {game.descriptionTh || game.description || 'ยังไม่มีคำอธิบายเพิ่มเติม'}
-          </p>
-          <dl className="game-facts">
-            {released && (
-              <div>
-                <dt>วางจำหน่าย</dt>
-                <dd>
-                  <time dateTime={game.releaseDate}>{released}</time>
-                </dd>
-              </div>
-            )}
-            <div>
-              <dt>แนวเกม</dt>
-              <dd>{game.genres.map(genreLabel).join(' / ') || 'ยังไม่มีข้อมูล'}</dd>
-            </div>
-            <div>
-              <dt>เล่นบน</dt>
-              <dd>{game.platforms.join(' / ') || 'ยังไม่มีข้อมูล'}</dd>
-            </div>
-          </dl>
           <div className="game-tags" aria-label="จุดเด่นของเกม">
             {game.tags.length ? (
-              game.tags.map((tag) => <span key={tag}>{tagLabel(tag)}</span>)
+              game.tags.filter(tag=>tag!=='free-to-play').map((tag) => <span key={tag}>{tagLabel(tag)}</span>)
             ) : (
               <p className="muted">ยังไม่มีข้อมูลจุดเด่นของเกม</p>
             )}
           </div>
           <div className="detail-actions">
+          {source && <a className="button store-cta" href={source.href} target="_blank" rel="noopener noreferrer">ดูเกมบน {source.name} ↗</a>}
           {user ? (
             <button onClick={save} disabled={saving}>
               {saving ? 'กำลังบันทึก…' : 'เพิ่มในเกมโปรด'}
             </button>
           ) : (
-            <Link className="button" to="/login" state={{ from: '/games/' + id }}>
-              เข้าสู่ระบบเพื่อบันทึกเกม
+            <Link className="button" to="/login" state={{ from: gameUrl(game) }}>
+              ♡ บันทึกเกม
             </Link>
           )}
           <Link className="button secondary" to={'/compare?game=' + id}>เปรียบเทียบเกม</Link>
@@ -149,7 +142,7 @@ function DetailContent({ id }) {
           {source && (
             <p className="detail-source">
               ข้อมูลและภาพจาก{' '}
-              <a href={source.href} target="_blank" rel="noreferrer">
+              <a href={source.href} target="_blank" rel="noopener noreferrer">
                 {source.name}
               </a>
             </p>
@@ -158,9 +151,13 @@ function DetailContent({ id }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </article>
+      <section className="game-overview"><h2>เกี่ยวกับเกม</h2><p className="detail-description">{game.descriptionTh || game.description || "ยังไม่มีคำอธิบายเพิ่มเติม"}</p></section>
+      <SystemRequirements metadata={metadata} />
       <GameReviews
         key={user?.id ?? 'guest'}
         gameId={id}
+        returnTo={gameUrl(game)}
+        autoWrite={location.state?.intent === "review"}
         user={user}
         reviews={reviews}
         setReviews={setReviews}

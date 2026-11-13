@@ -3,15 +3,15 @@ import { api } from '../api/backend';
 import { gameSource } from '../utils/gameSource';
 
 const labels = {
-  'Overwhelmingly Positive': 'แง่บวกอย่างท่วมท้น',
-  'Very Positive': 'แง่บวกเป็นอย่างมาก',
+  'Overwhelmingly Positive': 'รีวิวดีเยี่ยม',
+  'Very Positive': 'ผู้เล่นส่วนใหญ่แนะนำ',
   'Positive': 'แง่บวก',
   'Mostly Positive': 'แง่บวกเป็นส่วนมาก',
-  'Mixed': 'ผสมกัน',
+  'Mixed': 'รีวิวทั้งดีและไม่ดี',
   'Mostly Negative': 'แง่ลบเป็นส่วนมาก',
   'Negative': 'แง่ลบ',
   'Very Negative': 'แง่ลบเป็นอย่างมาก',
-  'Overwhelmingly Negative': 'แง่ลบอย่างท่วมท้น',
+  'Overwhelmingly Negative': 'รีวิวเชิงลบสูงมาก',
 };
 const number = new Intl.NumberFormat('th-TH');
 
@@ -45,7 +45,7 @@ export default function SteamRating({ game }) {
     <section className="steam-rating" aria-label="คะแนนจาก Steam">
       <div className="steam-rating-header">
         <strong>คะแนนจาก Steam</strong>
-        <a href={source.href + '#app_reviews_hash'} target="_blank" rel="noreferrer">ดูรีวิวบน Steam ↗</a>
+        <a href={source.href + '#app_reviews_hash'} target="_blank" rel="noopener noreferrer">ดูรีวิวบน Steam ↗</a>
       </div>
       {loading ? <p className="muted">กำลังโหลดคะแนนจาก Steam…</p> : error ? (
         <div className="flex flex-wrap items-center gap-3">

@@ -22,23 +22,8 @@ export function genreLabel(slug) {
   return genres[slug] || slug.replace(/-/g, ' ');
 }
 
-const tags = {
-  singleplayer: 'เล่นคนเดียว', 'single-player': 'เล่นคนเดียว',
-  multiplayer: 'เล่นหลายคน', 'multi-player': 'เล่นหลายคน',
-  'co-op': 'เล่นกับเพื่อน', cooperative: 'เล่นกับเพื่อน',
-  'online-co-op': 'เล่นกับเพื่อนออนไลน์', 'local-co-op': 'เล่นด้วยกันบนเครื่องเดียว',
-  'co-op-campaign': 'เล่นเนื้อเรื่องกับเพื่อน', pvp: 'แข่งกับคนอื่น',
-  'online-pvp': 'แข่งออนไลน์', 'local-pvp': 'แข่งกันบนเครื่องเดียว',
-  'story-rich': 'เนื้อเรื่องเข้มข้น', 'story-driven': 'เน้นเนื้อเรื่อง',
-  'open-world': 'โลกกว้าง', 'first-person': 'มุมมองบุคคลที่หนึ่ง',
-  'third-person': 'มุมมองบุคคลที่สาม', competitive: 'เน้นแข่งขัน',
-  relaxing: 'เล่นชิล ๆ', cozy: 'บรรยากาศสบาย ๆ', difficult: 'เกมยาก',
-  challenging: 'ท้าทายฝีมือ', 'souls-like': 'แนว Souls-like',
-  shooter: 'เกมยิง', sandbox: 'เล่นได้อิสระ', 'free-to-play': 'เล่นฟรี',
-  crafting: 'สร้างของ', exploration: 'สำรวจโลก', building: 'สร้างบ้าน / ฐาน',
-};
 export function tagLabel(slug) {
-  return tags[slug] || genreLabel(slug);
+  return ({fps:'FPS',pvp:'PvP',moba:'MOBA',rpg:'RPG',mmorpg:'MMORPG',esports:'Esports','co-op':'Co-op','online-co-op':'Online Co-op','local-co-op':'Local Co-op'})[slug] || slug.split('-').map(s=>s.charAt(0).toUpperCase()+s.slice(1)).join(' ');
 }
 
 export function matchPartLabel(label) {
