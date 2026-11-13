@@ -46,7 +46,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   const [sort, setSort] = useState('newest');
   const [comment, setComment] = useState('');
   const [editing, setEditing] = useState(false);
-  const [writing, setWriting] = useState(autoWrite);
+  const [writing, setWriting] = useState(false);
   const [votedIDs,setVotedIDs]=useState([]);
   const [voteReady,setVoteReady]=useState(false);
   const [voteBusy,setVoteBusy]=useState(false);
@@ -66,6 +66,9 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   const commentLength = characterCount(comment.trim());
   const commentValid = commentLength >= 10 && utf8Length(comment.trim()) <= 2000;
 
+  useEffect(()=>{
+    if(autoWrite&&user&&!loading&&!loadError&&!own)setWriting(true);
+  },[autoWrite,user,loading,loadError,own]);
   const hasVotes=reviews.some(r=>r.helpfulCount!==undefined);
   useEffect(()=>{
     if(!user||!hasVotes)return;

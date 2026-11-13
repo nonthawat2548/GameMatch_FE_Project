@@ -30,3 +30,6 @@ The homepage is media-first: the game preview occupies its own 16:9 area, search
 
 ### Community and secondary pages
 Member reviews use a flat community layout with a separate average/distribution and real client-side star filtering/sorting. The signed-in user's review remains visible and editable independently of filters. Steam ratings remain separate. Account, comparison, favorites, match wizard and admin pages share restrained surfaces, compact controls and consistent navigation. No API changes or dependencies.
+
+## Gaming detail refactor
+The charcoal/lime detail page uses the Go metadata endpoint for real Steam screenshots, publisher/developer, Thailand pricing, system requirements and release context. Game links use ID + slug while the API still receives numeric IDs. Global Search loads the catalog only on demand. Helpful votes require a signed-in member, are persisted in PostgreSQL and exclude own reviews. The CS2 fixture JSON in src/tests/fixtures is illustrative test-only material; it is not imported by production or inserted into Supabase. Client-side Open Graph tags may not be visible to crawlers that do not run JavaScript.
