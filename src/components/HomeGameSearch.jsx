@@ -1,3 +1,4 @@
+import { gameUrl } from '../utils/gameUrl';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { genreLabel } from '../utils/gameLabels';
@@ -65,7 +66,7 @@ export default function HomeGameSearch({ games, loading, error }) {
                 <ul className="hero-search-list">
                   {matches.slice(0, 4).map((game) => (
                     <li key={game.id}>
-                      <Link to={'/games/' + game.id} className="hero-search-item" aria-label={'เปิดเกม ' + game.title}>
+                      <Link to={gameUrl(game)} className="hero-search-item" aria-label={'เปิดเกม ' + game.title}>
                         <div className="hero-search-thumb" aria-hidden="true">
                           {game.imageUrl && <img src={game.imageUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />}
                         </div>

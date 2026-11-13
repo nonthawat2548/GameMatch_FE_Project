@@ -1,3 +1,4 @@
+import { gameUrl } from '../utils/gameUrl';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { genreLabel, friendlyReason, matchPartLabel } from '../utils/gameLabels';
@@ -11,7 +12,7 @@ export default function GameCard({ game, action }) {
     <article className="game-card">
       <Link
         className="card-image-link"
-        to={'/games/' + game.id}
+        to={gameUrl(game)}
         aria-label={'ดูรายละเอียด ' + game.title}
       >
         {game.imageUrl && failedImage !== game.imageUrl ? (
@@ -29,7 +30,7 @@ export default function GameCard({ game, action }) {
       </Link>
       <div className="card-body">
         <h2>
-          <Link to={'/games/' + game.id}>{game.title}</Link>
+          <Link to={gameUrl(game)}>{game.title}</Link>
         </h2>
         <p className="card-genres">{game.genres.map(genreLabel).join(' / ') || 'ไม่ระบุแนว'}</p>
         {game.descriptionTh && <p className="card-description">{game.descriptionTh}</p>}

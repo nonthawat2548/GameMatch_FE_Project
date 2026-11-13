@@ -1,3 +1,4 @@
+import { gameUrl } from '../utils/gameUrl';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '../api/backend';
@@ -72,7 +73,7 @@ export default function Compare() {
                 <thead><tr><th scope="col">ข้อมูลเกม</th>{chosen.map((g) => (
                   <th scope="col" key={g.id}>
                     {g.imageUrl && <img src={g.imageUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />}
-                    <Link to={'/games/' + g.id}>{g.title}</Link>
+                    <Link to={gameUrl(g)}>{g.title}</Link>
                     {gameSource(g) && <a className="source-link" href={gameSource(g).href} target="_blank" rel="noreferrer">ข้อมูลจาก {gameSource(g).name} ↗</a>}
                   </th>
                 ))}</tr></thead>

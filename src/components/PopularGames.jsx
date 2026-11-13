@@ -1,3 +1,4 @@
+import { gameUrl } from '../utils/gameUrl';
 import { Link } from 'react-router-dom';
 import { genreLabel } from '../utils/gameLabels';
 
@@ -12,7 +13,7 @@ export default function PopularGames({ games }) {
       <ol>
         {games.slice(0, 5).map(game => (
           <li key={game.id}>
-            <Link to={'/games/' + game.id} aria-label={'อันดับ ' + game.popularityOrder + ': ' + game.title}>
+            <Link to={gameUrl(game)} aria-label={'อันดับ ' + game.popularityOrder + ': ' + game.title}>
               <span className="popular-rank">{game.popularityOrder}</span>
               <img src={game.imageUrl} alt="" loading="lazy" onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
               <span className="popular-name"><strong>{game.title}</strong><small>{game.genres.slice(0, 2).map(genreLabel).join(' · ')}</small></span>

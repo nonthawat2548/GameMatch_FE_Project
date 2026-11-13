@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/backend';
 import { useAuth } from '../auth/AuthContext';
 import { tagLabel } from '../utils/gameLabels';
@@ -18,6 +18,7 @@ export default function Detail() {
 }
 function DetailContent({ id }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth(),
     [game, setGame] = useState(null),
     [error, setError] = useState(''),
@@ -74,6 +75,9 @@ function DetailContent({ id }) {
       .catch(() => {if(!c.signal.aborted)setMetaError(true);});
     return () => c.abort();
   }, [game?.steamId, id, retry]);
+  useEffect(()=>{
+    if(game && location.pathname!==gameUrl(game)) navigate(gameUrl(game),{replace:true,state:location.state});
+  },[game,location.pathname,location.state,navigate]);
   async function save() {
     setSaving(true);
     setError('');

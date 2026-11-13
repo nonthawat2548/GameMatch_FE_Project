@@ -1,3 +1,4 @@
+import { gameUrl } from '../utils/gameUrl';
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import HeroArtwork from './HeroArtwork';
@@ -90,7 +91,7 @@ export default function FeaturedGameCarousel({ games }) {
     <section className={paused ? "featured-carousel is-paused" : "featured-carousel"} aria-label="เกมเด่น">
       <Link
         className="hero-feature"
-        to={'/games/' + featured.id}
+        to={gameUrl(featured)}
         aria-label="เปิดรายละเอียดเกมเด่น"
       >
         <div key={featured.id} className="hero-slide">
