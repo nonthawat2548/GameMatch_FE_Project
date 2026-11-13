@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/backend';
 import { characterCount, utf8Length } from '../utils/validation';
@@ -11,14 +11,14 @@ function Stars({ rating }) {
   );
 }
 
-function ReviewCard({ item, own, canDelete, busy, onEdit, onDelete }) {
+function ReviewCard({ item, own, canDelete, busy, onEdit, onDelete, voted, onVote, voteReady, voteBusy, returnTo, user }) {
   const name = item.displayName || 'สมาชิก';
   return (
     <article className={`review-card${own ? ' review-own' : ''}`}>
       <div className="review-heading">
         <div className="review-avatar" aria-hidden="true">{name.slice(0, 1).toUpperCase()}</div>
         <div className="review-author">
-          <strong>{name}</strong>
+          <strong>{name}</strong><small className="muted review-member">สมาชิก GameMatch</small>
           {own && <span className="review-you">คุณ</span>}
           <div><Stars rating={item.rating} /> <span className="muted">{item.rating}/5</span></div>
         </div>
@@ -29,6 +29,7 @@ function ReviewCard({ item, own, canDelete, busy, onEdit, onDelete }) {
         )}
       </div>
       <p className="review-comment">{item.comment}</p>
+      {!own && item.helpfulCount !== undefined && <div className="review-helpful"><span className="muted">รีวิวนี้มีประโยชน์ไหม?</span>{user ? <button className="secondary" aria-pressed={voted} disabled={!voteReady||voteBusy} onClick={()=>onVote(item)}>👍 มีประโยชน์ {item.helpfulCount}</button> : <Link className="button secondary" to="/login" state={{from:returnTo}}>👍 มีประโยชน์ {item.helpfulCount}</Link>}</div>}
       {(own || canDelete) && (
         <div className="review-actions">
           {own && <button type="button" className="review-secondary" disabled={busy} onClick={() => onEdit(item)}>แก้ไขรีวิว</button>}
@@ -39,13 +40,16 @@ function ReviewCard({ item, own, canDelete, busy, onEdit, onDelete }) {
   );
 }
 
-export default function GameReviews({ gameId, user, reviews, setReviews, loading, loadError, onRetry }) {
+export default function GameReviews({ gameId, user, reviews, setReviews, loading, loadError, onRetry, returnTo = '/games/' + gameId, autoWrite = false }) {
   const [rating, setRating] = useState(5);
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('newest');
   const [comment, setComment] = useState('');
   const [editing, setEditing] = useState(false);
-  const [writing, setWriting] = useState(false);
+  const [writing, setWriting] = useState(autoWrite);
+  const [votedIDs,setVotedIDs]=useState([]);
+  const [voteReady,setVoteReady]=useState(false);
+  const [voteBusy,setVoteBusy]=useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -62,6 +66,22 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
   const commentLength = characterCount(comment.trim());
   const commentValid = commentLength >= 10 && utf8Length(comment.trim()) <= 2000;
 
+  const hasVotes=reviews.some(r=>r.helpfulCount!==undefined);
+  useEffect(()=>{
+    if(!user||!hasVotes)return;
+    const c=new AbortController();
+    api('/api/me/review-votes/'+gameId,{signal:c.signal}).then(ids=>{if(!c.signal.aborted){setVotedIDs(Array.isArray(ids)?ids:[]);setVoteReady(true);}}).catch(()=>{if(!c.signal.aborted)setError('ยังโหลดสถานะโหวตไม่ได้');});
+    return()=>c.abort();
+  },[user,gameId,hasVotes]);
+  async function vote(item){
+    if(!voteReady||voteBusy)return;
+    setVoteBusy(true);setError('');
+    try{
+      const result=await api(base+'/'+item.id+'/helpful',{method:votedIDs.includes(item.id)?'DELETE':'PUT'});
+      setVotedIDs(ids=>result.voted?[...new Set([...ids,item.id])]:ids.filter(id=>id!==item.id));
+      setReviews(items=>items.map(r=>r.id===item.id?{...r,helpfulCount:result.helpfulCount}:r));
+    }catch(e){setError(e.message);}finally{setVoteBusy(false);}
+  }
   function begin(item) {
     setEditing(Boolean(item));
     setWriting(true);
@@ -84,7 +104,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
         body: { rating, comment: comment.trim() },
       });
       setReviews((current) => editing
-        ? current.map((r) => r.id === saved.id ? saved : r)
+        ? current.map((r) => r.id === saved.id ? { ...saved, helpfulCount: r.helpfulCount ?? saved.helpfulCount } : r)
         : [saved, ...current.filter((r) => r.id !== saved.id)]);
       setWriting(false);
       setEditing(false);
@@ -121,6 +141,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
       <ReviewCard key={item.id} item={item} own={item.id === own?.id}
         canDelete={Boolean(user && (item.memberId === user.id || user.role === 'admin'))}
         busy={busy || writing || Boolean(deleteTarget)}
+        user={user} returnTo={returnTo} voted={votedIDs.includes(item.id)} voteReady={voteReady} voteBusy={voteBusy} onVote={vote}
         onEdit={begin} onDelete={(target) => { setDeleteTarget(target); setError(''); setNotice(''); }} />
     );
   }
@@ -196,7 +217,7 @@ export default function GameReviews({ gameId, user, reviews, setReviews, loading
               </div>
             </form>
           )}
-          {!user && <div className="review-signin"><span>อยากแชร์ความคิดเห็นเกี่ยวกับเกมนี้?</span><Link className="button secondary" to="/login" state={{ from: '/games/' + gameId }}>เข้าสู่ระบบ</Link></div>}
+          {!user && <div className="review-signin"><span>เคยเล่นเกมนี้แล้วหรือยัง? มาเขียนรีวิวแบ่งปันเพื่อน ๆ กัน</span><Link className="button secondary" to="/login" state={{ from: returnTo, intent:'review' }}>เขียนรีวิว</Link></div>}
           <div className="review-list-toolbar">
             <h3 className="review-list-title">รีวิว{own ? 'จากสมาชิกคนอื่น' : 'ทั้งหมด'} ({shown.length})</h3>
             {others.length > 0 && <div className="review-filters">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import GlobalSearch from './GlobalSearch';
 
 // Navigation is presentational; Shell owns the auth session and theme.
 export default function Navbar({ user, logout, theme, onToggle }) {
@@ -22,6 +23,7 @@ export default function Navbar({ user, logout, theme, onToggle }) {
             <span className="brand-mark" aria-hidden="true">G<span>+</span></span>
             <span>Game<span className="brand-accent">Match</span></span>
           </Link>
+          <GlobalSearch />
           <button type="button" ref={menuButton} className="mobile-menu-toggle"
             aria-label={menuOpen ? 'ปิดเมนู' : 'เปิดเมนู'}
             aria-expanded={menuOpen} aria-controls="main-navigation"

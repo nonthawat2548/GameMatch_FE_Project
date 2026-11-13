@@ -48,6 +48,7 @@ export default function Login({ register = false }) {
             state: {
               notice: 'สมัครสมาชิกสำเร็จแล้ว กรุณาลองเข้าสู่ระบบอีกครั้ง',
               from: destination,
+              intent: location.state?.intent,
             },
           });
           return;
@@ -55,7 +56,7 @@ export default function Login({ register = false }) {
       } else {
         await login(identity, password);
       }
-      nav(destination, { replace: true });
+      nav(destination, { replace: true, state: {intent: location.state?.intent === 'review' ? 'review' : undefined} });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -91,7 +92,7 @@ export default function Login({ register = false }) {
         </label>
         {error && <p role="alert">{error}</p>}
         <div className="auth-actions">
-          <Link to={register ? '/login' : '/register'} state={{ from: destination }}>
+          <Link to={register ? '/login' : '/register'} state={{ from: destination, intent: location.state?.intent }}>
             {register ? 'มีบัญชีแล้ว' : 'สร้างบัญชีใหม่'}
           </Link>
           <button disabled={busy}>

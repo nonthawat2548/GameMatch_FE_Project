@@ -24,7 +24,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     path.startsWith('/api/me/') ||
     path.startsWith('/api/admin/') ||
     path === '/api/auth/logout' ||
-    (method !== 'GET' && /^\/api\/games\/\d+\/reviews(?:\/\d+)?$/.test(path));
+    (method !== 'GET' && /^\/api\/games\/\d+\/reviews(?:\/\d+(?:\/helpful)?)?$/.test(path));
   // คำขอเก่าที่เพิ่งตอบ 401 ต้องไม่ล้าง session ใหม่ที่ล็อกอินไปแล้ว
   if (
     response.status === 401 &&
