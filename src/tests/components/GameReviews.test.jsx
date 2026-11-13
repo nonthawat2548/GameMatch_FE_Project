@@ -18,7 +18,7 @@ test('guest can read scores but cannot write or delete', () => {
   render(<Harness user={null} initial={[mine, other]} />);
   expect(screen.getByText('4.0')).toBeInTheDocument();
   expect(screen.getByText('สนุกมากเล่นกับเพื่อนได้')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'เข้าสู่ระบบ' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'เขียนรีวิว' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'เขียนรีวิว' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'ลบรีวิว' })).not.toBeInTheDocument();
 });
@@ -114,4 +114,18 @@ test('filtering other reviews never hides the signed-in member review or its con
   expect(screen.getByText(mine.comment)).toBeInTheDocument();
   expect(screen.getByRole('button',{name:'แก้ไขรีวิว'})).toBeInTheDocument();
   expect(screen.queryByText(other.comment)).not.toBeInTheDocument();
+});
+
+test('helpful vote uses the protected API and updates the count from the server', async () => {
+  api.mockResolvedValueOnce([]).mockResolvedValueOnce({helpfulCount:3,voted:true}).mockResolvedValueOnce({helpfulCount:2,voted:false});
+  render(<Harness initial={[{...other,helpfulCount:2}]}/>);
+  const button=await screen.findByRole('button',{name:'👍 มีประโยชน์ 2'});
+  await waitFor(()=>expect(button).toBeEnabled());
+  fireEvent.click(button);
+  const voted=await screen.findByRole('button',{name:'👍 มีประโยชน์ 3'});
+  expect(voted).toHaveAttribute('aria-pressed','true');
+  expect(api).toHaveBeenCalledWith('/api/games/46/reviews/8/helpful',{method:'PUT'});
+  fireEvent.click(voted);
+  await waitFor(()=>expect(screen.getByRole('button',{name:'👍 มีประโยชน์ 2'})).toHaveAttribute('aria-pressed','false'));
+  expect(api).toHaveBeenLastCalledWith('/api/games/46/reviews/8/helpful',{method:'DELETE'});
 });

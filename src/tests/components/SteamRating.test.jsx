@@ -9,7 +9,7 @@ test('shows the official review summary and separate positive and negative count
   api.mockResolvedValue(summary);
   render(<SteamRating game={game}/>);
   expect(await screen.findByText('87%')).toBeInTheDocument();
-  expect(screen.getByText('แง่บวกเป็นอย่างมาก')).toBeInTheDocument();
+  expect(screen.getByText('ผู้เล่นส่วนใหญ่แนะนำ')).toBeInTheDocument();
   expect(screen.getByText(/10,000 รีวิว/)).toBeInTheDocument();
   expect(screen.getByText('แนะนำ 8,700 คน')).toBeInTheDocument();
   expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow','87');

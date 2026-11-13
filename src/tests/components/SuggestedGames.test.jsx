@@ -9,7 +9,7 @@ test('loads similar games, handles failure and retries the exact API', async () 
   render(<MemoryRouter><SuggestedGames path="/api/games/1/similar" title="เกมที่คล้ายกัน" description="จากแนวที่ชอบ" emptyText="ยังไม่มีเกม" /></MemoryRouter>);
   expect(await screen.findByText(/Offline/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'โหลดคำแนะนำอีกครั้ง' }));
-  expect(await screen.findByRole('link', { name: 'Similar game' })).toHaveAttribute('href', '/games/2');
+  expect(await screen.findByRole('link', { name: 'Similar game' })).toHaveAttribute('href', '/games/2-similar-game');
   expect(api).toHaveBeenCalledTimes(2);
   expect(api).toHaveBeenLastCalledWith('/api/games/1/similar', expect.objectContaining({ signal: expect.anything() }));
 });

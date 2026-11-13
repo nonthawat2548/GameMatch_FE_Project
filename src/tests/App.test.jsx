@@ -65,7 +65,7 @@ test('guest matches games, logs in, saves a favorite, updates profile and logs o
   expect(await screen.findByText('ตรงกับความชอบ 100/100')).toBeInTheDocument();
   expect(screen.getByText('ตรงตามความชอบใน fixture')).toBeInTheDocument();
   await user.click(screen.getByRole('link', { name: game.title }));
-  await user.click(await screen.findByRole('link', { name: 'เข้าสู่ระบบเพื่อบันทึกเกม' }));
+  await user.click(await screen.findByRole('link', { name: '♡ บันทึกเกม' }));
   await user.type(screen.getByLabelText('อีเมลหรือชื่อผู้ใช้'), member.email);
   await user.type(screen.getByLabelText('รหัสผ่าน'), 'password123');
   await user.click(screen.getByRole('button', { name: 'เข้าสู่ระบบ' }));

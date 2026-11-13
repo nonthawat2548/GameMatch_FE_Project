@@ -50,7 +50,7 @@ test('retries catalog loading while keeping the home navigation available', asyn
 test('uses a real catalog image for the featured game and links to its detail', async () => {
   api.mockResolvedValue([{ ...games[0], imageUrl: 'https://example.com/cover.jpg' }, ...games.slice(1)]);
   page();
-  expect(await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/1');
+  expect(await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/1-demo-home-1');
   expect(screen.getByText('6', { selector: '.hero-stats strong' })).toBeInTheDocument();
 });
 
@@ -60,7 +60,7 @@ test('searches the existing catalog immediately and links to a matching game', a
   await screen.findByRole('link', { name: games[0].title });
   fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  HOME 6  ' } });
   expect(screen.getByText('พบ 1 เกม')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'เปิดเกม Demo: Home 6' })).toHaveAttribute('href', '/games/6');
+  expect(screen.getByRole('link', { name: 'เปิดเกม Demo: Home 6' })).toHaveAttribute('href', '/games/6-demo-home-6');
   expect(screen.getByRole('link', { name: 'ดูผลการค้นหาทั้งหมด' })).toHaveAttribute('href', '/discover?q=HOME%206');
   expect(api).toHaveBeenCalledTimes(1);
   fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'not found' } });
@@ -81,15 +81,15 @@ test('selects the ten highest ranked Steam Most Played games with images, not to
   ]);
   page();
   const featured = await screen.findByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
-  expect(featured).toHaveAttribute('href', '/games/100');
+  expect(featured).toHaveAttribute('href', '/games/100-ranked-1');
   expect(screen.getByText('เกมฮิตบน Steam · #1')).toBeInTheDocument();
   expect(screen.getByLabelText('สไลด์ 1 จาก 10')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /สไลด์ .*Top Seller/ })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /สไลด์ .*Ranked 11/ })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'เกมก่อนหน้า' }));
-  expect(featured).toHaveAttribute('href', '/games/109');
+  expect(featured).toHaveAttribute('href', '/games/109-ranked-10');
   fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
-  expect(featured).toHaveAttribute('href', '/games/100');
+  expect(featured).toHaveAttribute('href', '/games/100-ranked-1');
 });
 
 test('dismisses search results on outside interaction without clearing the query', async () => {
@@ -111,6 +111,6 @@ test('dismisses search results on outside interaction without clearing the query
 test('shows a Steam ranking and links real genre shortcuts to the catalog', async () => {
   api.mockResolvedValue([{...games[0],steamId:730,imageUrl:'https://example.com/cs.jpg',popularityOrder:1,popularitySource:'Steam Most Played'}]);
   page();
-  expect(await screen.findByRole('link',{name:'อันดับ 1: '+games[0].title})).toHaveAttribute('href','/games/1');
+  expect(await screen.findByRole('link',{name:'อันดับ 1: '+games[0].title})).toHaveAttribute('href','/games/1-demo-home-1');
   expect(screen.getByRole('link',{name:'RPG'})).toHaveAttribute('href','/discover?genre=rpg');
 });

@@ -21,13 +21,13 @@ afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks(); });
 test('moves forward, backward and wraps through real games', () => {
   page();
   const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
   fireEvent.click(screen.getByRole('button', { name: 'เกมก่อนหน้า' }));
-  expect(link).toHaveAttribute('href', '/games/48');
+  expect(link).toHaveAttribute('href', '/games/48-game-c');
   fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
   fireEvent.click(screen.getByRole('button', { name: 'สไลด์ 2: Game B' }));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
   expect(screen.getByRole('button', { name: 'สไลด์ 2: Game B' })).toHaveAttribute('aria-pressed', 'true');
 });
 
@@ -35,15 +35,15 @@ test('advances automatically and supports pause and resume', () => {
   page();
   const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
   act(() => jest.advanceTimersByTime(4000));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
   fireEvent.click(screen.getByRole('button', { name: 'หยุดสไลด์อัตโนมัติ' }));
   expect(screen.getByRole('region', { name: 'เกมเด่น' })).toHaveClass('is-paused');
   act(() => jest.advanceTimersByTime(8000));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
   fireEvent.click(screen.getByRole('button', { name: 'เล่นสไลด์อัตโนมัติ' }));
   expect(screen.getByRole('region', { name: 'เกมเด่น' })).not.toHaveClass('is-paused');
   act(() => jest.advanceTimersByTime(4000));
-  expect(link).toHaveAttribute('href', '/games/48');
+  expect(link).toHaveAttribute('href', '/games/48-game-c');
 });
 
 test('keeps rotating while the mouse is over the carousel or a navigation button is focused', () => {
@@ -53,22 +53,22 @@ test('keeps rotating while the mouse is over the carousel or a navigation button
   fireEvent.mouseEnter(carousel);
   fireEvent.focus(screen.getByRole('button', { name: 'เกมถัดไป' }));
   act(() => jest.advanceTimersByTime(4000));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
   act(() => jest.advanceTimersByTime(4000));
-  expect(link).toHaveAttribute('href', '/games/48');
+  expect(link).toHaveAttribute('href', '/games/48-game-c');
   act(() => jest.advanceTimersByTime(4000));
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
 });
 
 test('automatically advances across multiple intervals without a click', () => {
   page();
   act(() => jest.advanceTimersByTime(8000));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/48');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/48-game-c');
 });
 
 test('does not show carousel controls when there is only one game', () => {
   page(games.slice(0, 1));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/46');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/46-game-a');
   expect(screen.queryByRole('button', { name: 'เกมถัดไป' })).not.toBeInTheDocument();
 });
 
@@ -156,9 +156,9 @@ test('manual selection restarts the full video slide duration', () => {
   fireEvent.click(screen.getByRole('button', { name: 'เกมถัดไป' }));
   const link = screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' });
   act(() => jest.advanceTimersByTime(7999));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
   act(() => jest.advanceTimersByTime(1));
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
 });
 
 test('prefers dedicated gameplay trailers rather than reveal videos', () => {
@@ -173,9 +173,9 @@ test('a late-loading clip gets its full viewing time after playing starts', () =
   act(() => jest.advanceTimersByTime(7000));
   fireEvent.playing(container.querySelector('video'));
   act(() => jest.advanceTimersByTime(11999));
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
   act(() => jest.advanceTimersByTime(1));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
 });
 test('a stalled clip after playback starts does not extend the viewing deadline', () => {
   const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
@@ -183,9 +183,9 @@ test('a stalled clip after playback starts does not extend the viewing deadline'
   act(() => jest.advanceTimersByTime(3000));
   fireEvent.waiting(container.querySelector('video'));
   act(() => jest.advanceTimersByTime(8999));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/46');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/46-game-a');
   act(() => jest.advanceTimersByTime(1));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47-game-b');
 });
 
 test('repeated loop and buffering events cannot postpone auto-advance indefinitely', () => {
@@ -198,12 +198,12 @@ test('repeated loop and buffering events cannot postpone auto-advance indefinite
     fireEvent.waiting(video);
     fireEvent.stalled(video);
     fireEvent.playing(video);
-    expect(link).toHaveAttribute('href', '/games/46');
+    expect(link).toHaveAttribute('href', '/games/46-game-a');
   }
   act(() => jest.advanceTimersByTime(1999));
-  expect(link).toHaveAttribute('href', '/games/46');
+  expect(link).toHaveAttribute('href', '/games/46-game-a');
   act(() => jest.advanceTimersByTime(1));
-  expect(link).toHaveAttribute('href', '/games/47');
+  expect(link).toHaveAttribute('href', '/games/47-game-b');
 });
 test('an unstarted or unavailable video advances within eight seconds despite repeated stalls', () => {
   const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
@@ -214,7 +214,7 @@ test('an unstarted or unavailable video advances within eight seconds despite re
     fireEvent.stalled(video);
   }
   act(() => jest.advanceTimersByTime(2000));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47-game-b');
 });
 test('fallback source after first playback does not grant another viewing deadline', () => {
   const { container } = page([{ ...games[0], steamId: 730 }, { ...games[1], steamId: 570 }]);
@@ -223,5 +223,5 @@ test('fallback source after first playback does not grant another viewing deadli
   fireEvent.error(container.querySelector('video'));
   fireEvent.playing(container.querySelector('video'));
   act(() => jest.advanceTimersByTime(5000));
-  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47');
+  expect(screen.getByRole('link', { name: 'เปิดรายละเอียดเกมเด่น' })).toHaveAttribute('href', '/games/47-game-b');
 });
