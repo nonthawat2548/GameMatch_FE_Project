@@ -38,7 +38,7 @@ export function GameInfo({game,metadata,error,onRetry}) {
  const format=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(n/100);
  return <section className="game-info-panel">
   {(metadata?.headerImage||game.imageUrl)&&<img className="game-info-cover" src={metadata?.headerImage||game.imageUrl} alt=""/>}
-  <div className="game-price">{free?<strong className="free-price">เล่นฟรี <small>Free to Play</small></strong>:price?.currency==='THB'?<><strong>{format(price.final)}</strong>{price.discount>0&&<><del>{format(price.initial)}</del><span className="discount">−{price.discount}%</span></>}</>:<span className="muted">{metadata?.comingSoon?'ยังไม่วางจำหน่าย':'game.steamId?'ดูราคาบน Steam':'ยังไม่มีข้อมูลราคา'}</span>}</div>
+  <div className="game-price">{free?<strong className="free-price">เล่นฟรี <small>Free to Play</small></strong>:price?.currency==='THB'?<><strong>{format(price.final)}</strong>{price.discount>0&&<><del>{format(price.initial)}</del><span className="discount">−{price.discount}%</span></>}</>:<span className="muted">{metadata?.comingSoon?'ยังไม่วางจำหน่าย':game.steamId?'ดูราคาบน Steam':'ยังไม่มีข้อมูลราคา'}</span>}</div>
   {price&&!free&&<small className="muted">ราคา Steam ประเทศไทย · อาจเปลี่ยนแปลง</small>}
   <dl className="game-facts">
     {metadata?.developers?.length>0&&<div><dt>ผู้พัฒนา</dt><dd>{metadata.developers.join(', ')}</dd></div>}

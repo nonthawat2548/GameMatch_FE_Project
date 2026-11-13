@@ -13,8 +13,8 @@ test('compares actual catalog data and prevents duplicate selection', async () =
   expect(screen.getByText('เลือกอย่างน้อย 2 เกมเพื่อเริ่มเปรียบเทียบ')).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('เกมที่ 2'), { target: { value: '2' } });
   expect(screen.getByRole('table')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'A' })).toHaveAttribute('href', '/games/1');
-  expect(screen.getByRole('link', { name: 'B' })).toHaveAttribute('href', '/games/2');
+  expect(screen.getByRole('link', { name: 'A' })).toHaveAttribute('href', '/games/1-a');
+  expect(screen.getByRole('link', { name: 'B' })).toHaveAttribute('href', '/games/2-b');
   expect(screen.getAllByText('เล่นได้')).toHaveLength(2);
   fireEvent.click(screen.getByRole('button', { name: 'ล้างการเลือก' }));
   expect(screen.queryByRole('table')).not.toBeInTheDocument();
