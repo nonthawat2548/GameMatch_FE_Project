@@ -1,0 +1,81 @@
+# npm audit report
+
+deepmerge  >=4.2.0
+deepmerge mergeObject() allows prototype poisoning of returned objects - https://github.com/advisories/GHSA-gcqx-w48m-w2h4
+fix available via `npm audit fix --force`
+Will install react-scripts@0.0.0, which is a breaking change
+node_modules/deepmerge
+  @rollup/plugin-node-resolve  >=8.0.0
+  Depends on vulnerable versions of deepmerge
+  node_modules/@rollup/plugin-node-resolve
+    workbox-build  >=6.0.0-alpha.0
+    Depends on vulnerable versions of @rollup/plugin-node-resolve
+    node_modules/workbox-build
+      workbox-webpack-plugin  >=6.0.0-alpha.0
+      Depends on vulnerable versions of workbox-build
+      node_modules/workbox-webpack-plugin
+        react-scripts  >=0.1.0
+        Depends on vulnerable versions of @svgr/webpack
+        Depends on vulnerable versions of jest
+        Depends on vulnerable versions of jest-watch-typeahead
+        Depends on vulnerable versions of react-dev-utils
+        Depends on vulnerable versions of webpack-dev-server
+        Depends on vulnerable versions of workbox-webpack-plugin
+        node_modules/react-scripts
+  @svgr/plugin-svgo  >=5.5.0
+  Depends on vulnerable versions of deepmerge
+  node_modules/@svgr/plugin-svgo
+    @svgr/webpack  >=5.5.0
+    Depends on vulnerable versions of @svgr/plugin-svgo
+    node_modules/@svgr/webpack
+  fork-ts-checker-webpack-plugin  >=5.0.0-alpha.1
+  Depends on vulnerable versions of deepmerge
+  node_modules/fork-ts-checker-webpack-plugin
+    react-dev-utils  >=12.0.0-next.31
+    Depends on vulnerable versions of fork-ts-checker-webpack-plugin
+    node_modules/react-dev-utils
+  jest-config  >=25.2.0-alpha.86
+  Depends on vulnerable versions of deepmerge
+  node_modules/jest-config
+    @jest/core  >=25.2.0-alpha.86
+    Depends on vulnerable versions of jest-config
+    node_modules/@jest/core
+      jest  >=25.2.0-alpha.86
+      Depends on vulnerable versions of @jest/core
+      Depends on vulnerable versions of jest-cli
+      node_modules/jest
+        jest-watch-typeahead  >=0.6.0
+        Depends on vulnerable versions of jest
+        node_modules/jest-watch-typeahead
+      jest-cli  >=25.2.0-alpha.86
+      Depends on vulnerable versions of @jest/core
+      Depends on vulnerable versions of jest-config
+      node_modules/jest-cli
+
+react-router  6.0.0 - 7.17.0
+Severity: moderate
+React Router: Open redirect via backslash in <Link> and useNavigate (CVE-2025-68470 bypass) - https://github.com/advisories/GHSA-wrjc-x8rr-h8h6
+React Router: Arbitrary Constructor Injection via deserializeErrors() in React Router SSR Hydration - https://github.com/advisories/GHSA-337j-9hxr-rhxg
+fix available via `npm audit fix --force`
+Will install react-router-dom@7.18.5, which is a breaking change
+node_modules/react-router
+  react-router-dom  6.0.0-alpha.0 - 7.17.0
+  Depends on vulnerable versions of react-router
+  node_modules/react-router-dom
+
+webpack-dev-server  <=5.2.5
+Severity: moderate
+webpack-dev-server users' source code may be stolen when they access a malicious web site with non-Chromium based browser - https://github.com/advisories/GHSA-9jgg-88mc-972h
+webpack-dev-server users' source code may be stolen when they access a malicious web site - https://github.com/advisories/GHSA-4v9v-hfq4-rm2v
+webpack-dev-server vulnerable to cross-origin source code exposure on non-HTTPS origins - https://github.com/advisories/GHSA-79cf-xcqc-c78w
+webpack-dev-server vulnerable to HMR WebSocket interception via permissive user proxies - https://github.com/advisories/GHSA-mx8g-39q3-5c79
+webpack-dev-server vulnerable to cross-site request forgery via internal developer endpoints - https://github.com/advisories/GHSA-f5vj-f2hx-8m93
+webpack-dev-server vulnerable to denial of service via a malformed Host or Origin header - https://github.com/advisories/GHSA-m28w-2pqf-7qgj
+fix available via `npm audit fix --force`
+Will install react-scripts@0.0.0, which is a breaking change
+node_modules/webpack-dev-server
+
+17 vulnerabilities (13 low, 4 moderate)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force

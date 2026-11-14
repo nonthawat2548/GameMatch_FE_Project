@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api/backend';
+import { getGames } from '../api/endpoints';
 import GameGrid from '../components/GameGrid';
 import FeaturedGameCarousel from '../components/FeaturedGameCarousel';
 import HomeGameSearch from '../components/HomeGameSearch';
@@ -8,6 +8,7 @@ import SuggestedGames from '../components/SuggestedGames';
 import { gameDate } from '../utils/gameSource';
 import { genreLabel } from '../utils/gameLabels';
 import PopularGames from '../components/PopularGames';
+import GameGridSkeleton from '../components/GameGridSkeleton';
 
 export default function Home({ user } = {}) {
   const [games, setGames] = useState([]);
@@ -19,7 +20,7 @@ export default function Home({ user } = {}) {
     let ignore = false;
     setLoading(true);
     setError('');
-    api('/api/games')
+    getGames()
       .then((list) => {
         if (!ignore) setGames(list);
       })
@@ -36,13 +37,11 @@ export default function Home({ user } = {}) {
 
   const steamSync = games.find((game) => game.steamId && game.syncedAt)?.syncedAt;
   const syncedOn = gameDate(steamSync?.slice(0, 10));
-  // แสดงอันดับผู้เล่นจาก Steam Most Played เท่านั้น ไม่ปะปนกับ Top Sellers
   const withImages = games.filter((game) => game.imageUrl?.trim() && game.isPublished !== false);
   const mostPlayed = withImages
     .filter((game) => game.steamId && game.popularitySource === 'Steam Most Played' &&
       Number.isInteger(game.popularityOrder) && game.popularityOrder > 0)
     .sort((a, b) => a.popularityOrder - b.popularityOrder || a.id - b.id);
-  // หากยังไม่มีข้อมูลอันดับ ให้แสดงเกมเด่นจากคลังโดยไม่อ้างว่าเป็นอันดับผู้เล่น
   const featured = (mostPlayed.length ? mostPlayed : withImages).slice(0, 10);
   const genreCount = new Set(games.flatMap((game) => game.genres)).size;
   const browseGenres = [...new Set(games.flatMap(game => game.genres))].sort((a,b) => games.filter(g => g.genres.includes(b)).length - games.filter(g => g.genres.includes(a)).length || a.localeCompare(b)).slice(0, 8);
@@ -75,7 +74,7 @@ export default function Home({ user } = {}) {
           {browseGenres.map(genre => <Link key={genre} to={"/discover?genre=" + encodeURIComponent(genre)}>{genreLabel(genre)}</Link>)}
         </nav>
       )}
-      {user && <SuggestedGames key={user.id} path="/api/me/recommendations" title="จากเกมโปรดของคุณ" description="เกมแนวเดียวกับที่คุณบันทึกไว้" emptyText="ลองเก็บเกมที่ชอบไว้ก่อน เราจะได้หาเกมแนวคล้ายกันให้" />}
+      {user && <SuggestedGames key={user.id} title="จากเกมโปรดของคุณ" description="เกมแนวเดียวกับที่คุณบันทึกไว้" emptyText="ลองเก็บเกมที่ชอบไว้ก่อน เราจะได้หาเกมแนวคล้ายกันให้" />}
       <section className="home-catalog" aria-labelledby="home-games-heading" aria-busy={loading}>
         <div className="section-head">
           <div>
@@ -96,9 +95,12 @@ export default function Home({ user } = {}) {
           </Link>
         </div>
         {loading ? (
-          <p role="status" className="catalog-message">
-            กำลังโหลดเกม…
-          </p>
+          <>
+            <p role="status" className="catalog-message">
+              กำลังโหลดเกม…
+            </p>
+            <GameGridSkeleton count={4} />
+          </>
         ) : error ? (
           <>
             <p role="alert">{error}</p>

@@ -1,4 +1,3 @@
-// Read-only focused production trailer check. No writes to the catalog.
 const assert=require('node:assert/strict');
 const api='https://gamematch-api-hzv6.onrender.com';
 const origin='https://gamematch-projectweb-befe.vercel.app';

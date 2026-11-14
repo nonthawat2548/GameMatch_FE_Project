@@ -1,7 +1,7 @@
 import { gameUrl } from '../utils/gameUrl';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { api } from '../api/backend';
+import { getGames } from '../api/endpoints';
 import { genreLabel, tagLabel } from '../utils/gameLabels';
 import { gameDate, gameSource } from '../utils/gameSource';
 
@@ -18,7 +18,7 @@ export default function Compare() {
     const c = new AbortController();
     setError('');
     setGames(null);
-    api('/api/games', { signal: c.signal }).then((data) => {
+    getGames({ signal: c.signal }).then((data) => {
       if (!c.signal.aborted) setGames(data);
     }).catch((e) => {
       if (!c.signal.aborted && e.name !== 'AbortError') setError(e.message);
@@ -74,7 +74,7 @@ export default function Compare() {
                   <th scope="col" key={g.id}>
                     {g.imageUrl && <img src={g.imageUrl} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />}
                     <Link to={gameUrl(g)}>{g.title}</Link>
-                    {gameSource(g) && <a className="source-link" href={gameSource(g).href} target="_blank" rel="noreferrer">ข้อมูลจาก {gameSource(g).name} ↗</a>}
+                    {gameSource(g) && <a className="source-link" href={gameSource(g).href} target="_blank" rel="noopener noreferrer">ข้อมูลจาก {gameSource(g).name} ↗</a>}
                   </th>
                 ))}</tr></thead>
                 <tbody>{rows.map(([label, value]) => <tr key={label}><th scope="row">{label}</th>{chosen.map((g) => <td key={g.id}>{value(g)}</td>)}</tr>)}</tbody>

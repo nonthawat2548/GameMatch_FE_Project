@@ -2,8 +2,6 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 
-// ทดสอบ React ทั้งชุดจริง: Router -> Context -> fetch -> JSON -> UI
-// จำลองเฉพาะ HTTP responses ใน test; ไม่ได้เป็นผลเชื่อม Go/DB จริง
 const game = {
   id: 7,
   title: 'Demo: Journey fixture',
@@ -53,6 +51,26 @@ beforeEach(() => {
   });
 });
 afterEach(() => jest.restoreAllMocks());
+
+test('password-change notice survives a revoked-token logout and protected-route unmount', async () => {
+  localStorage.setItem('gamematch_token', token);
+  window.history.replaceState({}, '', '/me/profile');
+  const original = fetch.getMockImplementation();
+  fetch.mockImplementation(async (url, options) => {
+    const path = new URL(url).pathname;
+    if (path === '/api/me/password') return response(200, { ok: true });
+    if (path === '/api/auth/logout') return response(401, { error: 'Token revoked after password change' });
+    return original(url, options);
+  });
+  render(<App />);
+  await screen.findByRole('heading', { name: 'โปรไฟล์', exact: true });
+  fireEvent.change(screen.getByLabelText('รหัสผ่านปัจจุบัน'), { target: { value: 'oldpassword123' } });
+  fireEvent.change(screen.getByLabelText('รหัสผ่านใหม่'), { target: { value: 'newpassword123' } });
+  fireEvent.click(screen.getByRole('button', { name: 'เปลี่ยนและเข้าสู่ระบบใหม่' }));
+  expect(await screen.findByRole('heading', { name: 'เข้าสู่ระบบ', exact: true })).toBeInTheDocument();
+  expect(screen.getByText('เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่')).toBeInTheDocument();
+  await waitFor(() => expect(localStorage.getItem('gamematch_token')).toBeNull());
+});
 
 test('guest matches games, logs in, saves a favorite, updates profile and logs out', async () => {
   const user = userEvent.setup();

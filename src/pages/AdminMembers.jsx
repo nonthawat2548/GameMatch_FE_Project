@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { api } from '../api/backend';
+import { useEffect, useRef, useState } from 'react';
+import { getAdminMembers, setMemberRole } from '../api/endpoints';
 import { useAuth } from '../auth/AuthContext';
 import AdminLayout from '../components/AdminLayout';
 
@@ -14,12 +14,24 @@ export default function AdminMembers() {
   const [notice, setNotice] = useState('');
   const [target, setTarget] = useState(null);
   const [busy, setBusy] = useState(false);
+  const dialog = useRef(null);
+
+  useEffect(() => {
+    if (!target) return;
+    const previous = document.activeElement;
+    const modal = dialog.current;
+    modal.showModal();
+    return () => {
+      modal.close();
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [target]);
 
   useEffect(() => {
     const controller = new AbortController();
     setMembers(null);
     setError('');
-    api('/api/admin/members', { signal: controller.signal })
+    getAdminMembers({ signal: controller.signal })
       .then((data) => {
         if (!controller.signal.aborted) {
           if (!Array.isArray(data)) throw new Error('ข้อมูลสมาชิกไม่ถูกต้อง');
@@ -45,10 +57,7 @@ export default function AdminMembers() {
     setActionError('');
     setNotice('');
     try {
-      const updated = await api('/api/admin/members/' + target.id + '/role', {
-        method: 'PUT',
-        body: { role: nextRole },
-      });
+      const updated = await setMemberRole(target.id, nextRole);
       setMembers((items) => items.map((m) => m.id === updated.id ? updated : m));
       setNotice('เปลี่ยนบทบาท ' + updated.displayName + ' เป็น ' + updated.role.toUpperCase() + ' แล้ว');
       setTarget(null);
@@ -124,8 +133,8 @@ export default function AdminMembers() {
         </section>
       )}
       {target && (
-        <div className="member-confirm-overlay">
-        <section className="panel member-confirm" role="dialog" aria-modal="true" aria-labelledby="role-confirm-title">
+        <dialog ref={dialog} className="panel member-confirm" aria-modal="true" aria-labelledby="role-confirm-title"
+          onCancel={(event) => { event.preventDefault(); if (!busy) setTarget(null); }}>
           <h2 id="role-confirm-title">ยืนยันการเปลี่ยนบทบาท</h2>
           <p><strong>{target.displayName}</strong> · {target.email}</p>
           <div className="member-role-change"><span className={'member-role ' + target.role}>{target.role}</span><span aria-hidden="true">→</span><span className={'member-role ' + nextRole}>{nextRole}</span></div>
@@ -136,8 +145,7 @@ export default function AdminMembers() {
             <button type="button" className="secondary" disabled={busy} onClick={() => setTarget(null)}>ยกเลิก</button>
             <button type="button" className={nextRole === 'member' ? 'danger' : ''} disabled={busy} onClick={changeRole}>{busy ? 'กำลังบันทึก…' : 'ยืนยันเปลี่ยนบทบาท'}</button>
           </div>
-        </section>
-        </div>
+        </dialog>
       )}
     </AdminLayout>
   );

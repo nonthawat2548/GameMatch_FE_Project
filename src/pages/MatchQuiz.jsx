@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/backend';
+import { getPreferences, recommendGames, savePreferences } from '../api/endpoints';
 import { useAuth } from '../auth/AuthContext';
 import GameGrid from '../components/GameGrid';
 import { Link } from 'react-router-dom';
@@ -60,7 +60,7 @@ export default function MatchQuiz() {
     setError('');
     setRestoring(Boolean(memberID));
     if (memberID)
-      api('/api/me/preferences')
+      getPreferences()
         .then((d) => {
           if (active) setP(d);
         })
@@ -85,7 +85,7 @@ export default function MatchQuiz() {
     setGames(null);
     setNote('');
     try {
-      setGames(await api('/api/recommendations', { method: 'POST', body: p }));
+      setGames(await recommendGames(p));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -97,7 +97,7 @@ export default function MatchQuiz() {
     setError('');
     setNote('');
     try {
-      await api('/api/me/preferences', { method: 'PUT', body: p });
+      await savePreferences(p);
       setNote('บันทึกความชอบแล้ว');
     } catch (e) {
       setError(e.message);
@@ -154,7 +154,7 @@ export default function MatchQuiz() {
         </div>
       </form>
       {!loading && !user && (
-        <p className="muted">
+        <p className="muted match-login-hint">
           <Link className="inline-link" to="/login" state={{ from: '/match' }}>
             เข้าสู่ระบบ
           </Link>{' '}

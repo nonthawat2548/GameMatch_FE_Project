@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { api } from '../api/backend';
+import { getMe, login as loginMember, logout as logoutMember } from '../api/endpoints';
 import { SESSION_EXPIRED_EVENT, TOKEN_KEY } from './session';
 const AuthContext = createContext();
 export function AuthProvider({ children }) {
@@ -10,14 +10,13 @@ export function AuthProvider({ children }) {
     [restoreAttempt, setRestoreAttempt] = useState(0);
   async function refresh() {
     const token = localStorage.getItem(TOKEN_KEY);
-    const data = await api('/api/me');
+    const data = await getMe();
     if (localStorage.getItem(TOKEN_KEY) === token) {
       setUser(data);
       setError('');
     }
     return data;
   }
-  // fetch แจ้ง 401 ในแท็บนี้ ส่วน storage event แจ้งการเปลี่ยน session จากแท็บอื่น
   useEffect(() => {
     function expired() {
       setUser(null);
@@ -42,7 +41,6 @@ export function AuthProvider({ children }) {
       window.removeEventListener('storage', storageChanged);
     };
   }, []);
-  // ขอข้อมูลผู้ใช้จาก Go เสมอ ไม่อ่าน role จาก JWT ฝั่ง React
   useEffect(() => {
     let active = true;
     if (!restoreToken) {
@@ -51,7 +49,7 @@ export function AuthProvider({ children }) {
     }
     setLoading(true);
     setError('');
-    api('/api/me')
+    getMe()
       .then((u) => {
         if (active && localStorage.getItem(TOKEN_KEY) === restoreToken) setUser(u);
       })
@@ -77,7 +75,7 @@ export function AuthProvider({ children }) {
   }
   async function login(identity, password) {
     const previousToken = localStorage.getItem(TOKEN_KEY);
-    const d = await api('/api/auth/login', { method: 'POST', body: { email: identity, password } });
+    const d = await loginMember(identity, password);
     if (localStorage.getItem(TOKEN_KEY) !== previousToken) {
       throw new Error('มีการเปลี่ยนบัญชีระหว่างเข้าสู่ระบบ กรุณาลองใหม่');
     }
@@ -90,7 +88,7 @@ export function AuthProvider({ children }) {
   async function logout() {
     const token = localStorage.getItem(TOKEN_KEY);
     try {
-      await api('/api/auth/logout', { method: 'POST' });
+      await logoutMember();
     } finally {
       if (localStorage.getItem(TOKEN_KEY) === token || !localStorage.getItem(TOKEN_KEY)) {
         localStorage.removeItem(TOKEN_KEY);

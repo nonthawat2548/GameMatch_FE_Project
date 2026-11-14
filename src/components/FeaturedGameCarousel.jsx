@@ -15,7 +15,6 @@ function allowVideo() {
   return !window.matchMedia?.(MOTION_QUERY).matches && !navigator.connection?.saveData;
 }
 
-// วนตำแหน่งด้วย modulo เหมือน FeaturedCarousel ใน MovieHub
 export default function FeaturedGameCarousel({ games }) {
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -31,8 +30,6 @@ export default function FeaturedGameCarousel({ games }) {
   const featuredID = featured?.id;
   const playing = showVideo && startedID === featuredID;
   const slideDuration = showVideo ? (playing ? VIDEO_SLIDE_MS : VIDEO_LOAD_TIMEOUT_MS) : SLIDE_MS;
-  // Latch the first successful playback. Buffering and loop events must never
-  // extend this slide's deadline. Only navigation or an explicit mode change resets it.
   const playbackStarted = useCallback(() => {
     setStartedID(featuredID);
   }, [featuredID]);
@@ -51,8 +48,6 @@ export default function FeaturedGameCarousel({ games }) {
 
   useEffect(() => {
     if (total < 2 || paused) return;
-    // An unstarted video has 8s to load. After its first playing event, give it
-    // exactly 12s, including any subsequent buffering or loops.
     const timer = setInterval(() => {
       if (!document.hidden) {
         setStartedID(null);
@@ -62,7 +57,6 @@ export default function FeaturedGameCarousel({ games }) {
     return () => clearInterval(timer);
   }, [total, paused, slideDuration, rotation, featuredID, playing]);
 
-  // Preload only the next slide, so all ten large images are not fetched at once.
   const nextImage = total > 1 ? heroImageCandidates(games[(index + 1) % total])[0] : '';
   useEffect(() => {
     if (!nextImage || paused) return;
@@ -72,11 +66,13 @@ export default function FeaturedGameCarousel({ games }) {
 
   if (!featured) {
     return (
-      <div className="hero-placeholder" aria-hidden="true">
-        <div className="hero-orbit orbit-one" />
-        <div className="hero-orbit orbit-two" />
-        <span>G<span>+</span></span>
-        <small>DISCOVER · MATCH · PLAY</small>
+      <div className="hero-feature" aria-hidden="true">
+        <div className="hero-placeholder">
+          <div className="hero-orbit orbit-one" />
+          <div className="hero-orbit orbit-two" />
+          <span>G<span>+</span></span>
+          <small>DISCOVER · MATCH · PLAY</small>
+        </div>
       </div>
     );
   }

@@ -17,7 +17,6 @@ export default function HeroVideo({ game, paused, onPlaybackStarted }) {
         video.pause();
         return;
       }
-      // Autoplay may be blocked in some browsers. Keep the artwork visible.
       video.muted = true;
       const playing = video.play();
       if (playing && playing.catch) {

@@ -6,7 +6,7 @@ jest.mock('../../api/backend', () => ({ api: jest.fn() }));
 beforeEach(() => jest.resetAllMocks());
 test('loads similar games, handles failure and retries the exact API', async () => {
   api.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce([{ id: 2, title: 'Similar game', genres: ['action'], platforms: ['PC'] }]);
-  render(<MemoryRouter><SuggestedGames path="/api/games/1/similar" title="เกมที่คล้ายกัน" description="จากแนวที่ชอบ" emptyText="ยังไม่มีเกม" /></MemoryRouter>);
+  render(<MemoryRouter><SuggestedGames gameId={1} title="เกมที่คล้ายกัน" description="จากแนวที่ชอบ" emptyText="ยังไม่มีเกม" /></MemoryRouter>);
   expect(await screen.findByText(/Offline/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'โหลดคำแนะนำอีกครั้ง' }));
   expect(await screen.findByRole('link', { name: 'Similar game' })).toHaveAttribute('href', '/games/2-similar-game');

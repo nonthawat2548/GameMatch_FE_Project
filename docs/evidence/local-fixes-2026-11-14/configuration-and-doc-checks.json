@@ -1,0 +1,35 @@
+{
+  "configurations": [
+    {
+      "case": "missing API URL",
+      "exitCode": 1,
+      "output": "ตั้ง REACT_APP_API_URL ก่อน build เช่น https://api.example.com\n"
+    },
+    {
+      "case": "HTTPS backend",
+      "exitCode": 0,
+      "output": "API URL configuration passed\n"
+    }
+  ],
+  "documentExamples": [
+    {
+      "case": "HTML error",
+      "status": 401,
+      "message": "server ไม่ได้ตอบเป็น JSON"
+    },
+    {
+      "case": "JSON null",
+      "status": 500,
+      "message": "server ตอบกลับ 500"
+    },
+    {
+      "case": "structured error without message",
+      "status": 400,
+      "message": "server ตอบกลับ 400"
+    }
+  ],
+  "tooling": {
+    "svgLoader": "passed",
+    "craDevServer": "HTTP 200 with webpack-dev-middleware 7.4.5"
+  }
+}

@@ -136,3 +136,13 @@ test('rejects a Thai display name exceeding the 50-character limit', async () =>
   expect(await screen.findByRole('alert')).toHaveTextContent('50 ตัวอักษร');
   expect(api).not.toHaveBeenCalled();
 });
+
+test('toggles password visibility without altering password label association', () => {
+  page();
+  const pw = screen.getByLabelText('รหัสผ่าน');
+  expect(pw).toHaveAttribute('type', 'password');
+  fireEvent.click(screen.getByRole('button', { name: 'แสดงรหัสผ่าน' }));
+  expect(pw).toHaveAttribute('type', 'text');
+  fireEvent.click(screen.getByRole('button', { name: 'ซ่อนรหัสผ่าน' }));
+  expect(pw).toHaveAttribute('type', 'password');
+});

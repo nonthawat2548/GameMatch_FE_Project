@@ -1,4 +1,3 @@
-// Read-only regression: verify that opening the homepage search does not change layout.
 const path = require('path');
 const assert = require('assert/strict');
 const root = path.resolve(__dirname, '../..');

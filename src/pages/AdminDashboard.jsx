@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api/backend';
+import { getAdminStats } from '../api/endpoints';
 import AdminLayout from '../components/AdminLayout';
 
 export default function AdminDashboard() {
@@ -11,7 +11,7 @@ export default function AdminDashboard() {
     const controller = new AbortController();
     setStats(null);
     setError('');
-    api('/api/admin/stats', { signal: controller.signal })
+    getAdminStats({ signal: controller.signal })
       .then((data) => {
         if (!controller.signal.aborted) setStats(data);
       })
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
         <h1>ภาพรวมระบบ</h1>
         <p className="muted">ดูจำนวนเกม สมาชิก และรีวิวทั้งหมดจากฐานข้อมูล</p>
       </div>
-      }>
+    }>
       {error ? (
         <div className="panel">
           <p role="alert">{error}</p>

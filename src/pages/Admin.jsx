@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import AdminGameForm from '../components/AdminGameForm';
 import AdminGameList from '../components/AdminGameList';
-import { api } from '../api/backend';
+import { getSteamSyncStatus, importSteamGames, getAdminGames, createGame, updateGame, deleteGame } from '../api/endpoints';
 import { utf8Length } from '../utils/validation';
 const blank = {
   title: '',
@@ -25,7 +25,7 @@ export default function Admin() {
   const checkSteam = useCallback(async (signal) => {
     setSteam({ loading: true, configured: false, error: '' });
     try {
-      const data = await api('/api/admin/sync/status', { signal });
+      const data = await getSteamSyncStatus({ signal });
       if (typeof data?.steamConfigured !== 'boolean') throw new Error('รูปแบบสถานะไม่ถูกต้อง');
       if (!signal?.aborted)
         setSteam({ loading: false, configured: data.steamConfigured, error: '' });
@@ -35,9 +35,7 @@ export default function Admin() {
   }, []);
   async function importSteam(after = 0) {
     await task(async () => {
-      const data = await api('/api/admin/sync/steam' + (after ? '?after=' + after : ''), {
-        method: 'POST',
-      });
+      const data = await importSteamGames(after);
       setPage({ nextAppId: data.nextAppId, hasMore: data.hasMore === true });
       setNote(
         `นำเข้าจาก Steam ${data.imported} เกมแล้ว` +
@@ -46,12 +44,12 @@ export default function Admin() {
     });
   }
   async function load() {
-    setGames(await api('/api/admin/games'));
+    setGames(await getAdminGames());
   }
   useEffect(() => {
     const controller = new AbortController();
     checkSteam(controller.signal);
-    api('/api/admin/games', { signal: controller.signal })
+    getAdminGames({ signal: controller.signal })
       .then((data) => {
         if (!controller.signal.aborted) setGames(data);
       })
@@ -98,7 +96,6 @@ export default function Admin() {
         return;
       }
     }
-    // ทำความสะอาดตอน submit เสมอ แม้ผู้ใช้กด Enter โดยไม่ blur ช่องข้อมูล
     const list = (values) => values.map((value) => value.trim()).filter(Boolean);
     const body = {
       title,
@@ -111,10 +108,7 @@ export default function Admin() {
       isPublished: g.isPublished,
     };
     await task(async () => {
-      await api('/api/admin/games' + (g.id ? '/' + g.id : ''), {
-        method: g.id ? 'PUT' : 'POST',
-        body,
-      });
+      await (g.id ? updateGame(g.id, body) : createGame(body));
       setG(blank);
       setNote('บันทึกข้อมูลแล้ว');
     });
@@ -122,7 +116,7 @@ export default function Admin() {
   function remove(game) {
     if (window.confirm(`ลบ ${game.title}?`)) {
       task(async () => {
-        await api('/api/admin/games/' + game.id, { method: 'DELETE' });
+        await deleteGame(game.id);
         if (g.id === game.id) setG(blank);
         setNote('ลบเกมแล้ว');
       });
@@ -193,7 +187,7 @@ export default function Admin() {
           <summary>วิธีตั้งค่า Steam API key</summary>
           <p>
             ขอ key จาก{' '}
-            <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noreferrer">
+            <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noopener noreferrer">
               Steam Web API
             </a>
             แล้วตั้ง STEAM_API_KEY ในไฟล์ .env ของ Backend หรือ Environment Variables ของโฮสต์

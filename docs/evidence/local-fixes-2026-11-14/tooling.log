@@ -1,0 +1,2 @@
+PASS CRA SVG loader chain with security override
+PASS CRA development server + webpack-dev-middleware 7 override (HTTP 200)

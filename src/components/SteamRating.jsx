@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/backend';
+import { getSteamRating } from '../api/endpoints';
 import { gameSource } from '../utils/gameSource';
 
 const labels = {
@@ -29,7 +29,7 @@ export default function SteamRating({ game }) {
     setLoading(true);
     setRating(null);
     setError(false);
-    api('/api/games/' + game.id + '/steam-rating', { signal: controller.signal })
+    getSteamRating(game.id, { signal: controller.signal })
       .then(data => {
         if (!controller.signal.aborted) setRating(data);
       })
@@ -62,7 +62,7 @@ export default function SteamRating({ game }) {
             </div>
           </div>
           <div className="steam-rating-track" role="progressbar" aria-label="สัดส่วนรีวิวเชิงบวก" aria-valuemin={0} aria-valuemax={100} aria-valuenow={rating.positivePercent}>
-            <span style={{width: rating.positivePercent + '%'}} />
+            <span style={{ width: rating.positivePercent + '%' }} />
           </div>
           <div className="steam-rating-counts">
             <span>แนะนำ {number.format(rating.positive)} คน</span>

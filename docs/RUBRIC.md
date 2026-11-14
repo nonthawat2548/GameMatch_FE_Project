@@ -41,16 +41,16 @@
 4. แบ่งเวลาให้เหมาะกับจำนวนสมาชิก
 5. ประเมินความเข้าใจและหลักฐาน ไม่ได้ให้คะแนนความสวยของคลิป
 
-ดูบทซ้อมและการแบ่งเวลา 14:30 นาทีใน `docs/DEMO.md`
+สมาชิกต้องจัดทำคลิปและอธิบายโค้ดของตนเองตามเกณฑ์ข้างต้น ปัจจุบันไม่มีบทซ้อม DEMO.md ใน FE repo นี้
 
 ## หลักฐานของ GameMatch ที่ยังต้องแยกให้ชัด
 
 | รายการ | สถานะปัจจุบัน |
 |---|---|
-| React UI, state/effect/context, fetch, Router, tests/assertions, production build | มีผลตรวจในเครื่อง ดู `docs/VALIDATION.md` และ `docs/evidence/` |
-| Guest ดูเกม/Quiz, Member Favorites/Preference/Profile, Admin CRUD | React tests และ headless Chromium desktop/mobile ผ่านโดยจำลอง API; ยังไม่ใช่ผลระบบ Deploy จริง |
-| Go → Supabase, persistence, ownership สองบัญชี, Backend 401/403, RAWG rollback | ผ่าน integration tests กับ Supabase จริงและ headless React → Go → DB ในเครื่อง; upstream RAWG ในเทส rollback เป็น fixture ยังไม่มี key นำเข้าจริง |
-| Vercel + Render เชื่อม Repo + Supabase พร้อม URLs | Deploy และตรวจเส้นทางจริงผ่านแล้ว ดู docs/DEPLOYMENT.md และ evidence/cloud-browser; ข้อมูลเริ่มต้นยังเป็น Demo ไม่ใช่ RAWG จริง |
-| คลิปแต่ละคนและหลักฐานปัญหาที่ตนแก้จริง | มีคู่มือซ้อม ยังต้องให้สมาชิกทำความเข้าใจและบันทึกเอง |
+| React UI, state/effect/context, fetch, Router, tests/assertions, production build | ผลตรวจปัจจุบันดู [VALIDATION.md](VALIDATION.md) |
+| Guest, Member, Admin และ Browser desktop/mobile | ตรวจด้วย API fixtures ตามขอบเขตใน VALIDATION.md ไม่แทนการตรวจสิทธิ์ Go/DB จริง |
+| Go → DB, persistence, ownership และ private production flows | ไม่ได้ทดสอบซ้ำในงานแก้ FE รอบนี้ ประวัติอยู่ repo ต้นทาง ไม่ใช้รับรองโค้ดที่ยังไม่เผยแพร่ |
+| URLs / hosting | ดู [DEPLOYMENT.md](DEPLOYMENT.md); โค้ดแก้รอบนี้ยังอยู่ในเครื่อง |
+| คลิปแต่ละคนและหลักฐานปัญหาที่ตนแก้จริง | สมาชิกยังต้องจัดทำและบันทึกเอง |
 
 การปรับหน้าตาช่วยให้งานใช้ง่าย แต่ไม่ทดแทนหลักฐาน Fetch → Go → DB, สิทธิ์ Backend, การ Deploy และการอธิบายรายบุคคล

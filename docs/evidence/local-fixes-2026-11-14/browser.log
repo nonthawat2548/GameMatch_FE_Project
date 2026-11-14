@@ -1,0 +1,15 @@
+PASS desktop public routes, local filtering, quiz, detail, forms and overflow
+PASS desktop light-theme Quiz stages and results fit the viewport
+PASS mobile public routes, local filtering, quiz, detail, forms and overflow
+PASS mobile light-theme Quiz stages and results fit the viewport
+PASS narrow public routes, local filtering, quiz, detail, forms and overflow
+PASS narrow light-theme Quiz stages and results fit the viewport
+PASS native login return, authenticated favorite save and reload (mock store)
+PASS preference save and restoration after browser reload (mock store)
+PASS profile refresh and password-change session cleanup (mock API)
+PASS admin CRUD, publication and sync-error UI (mock API)
+PASS native role dialog focus containment, Escape and focus restoration
+PASS member/admin layouts and a valid 100-byte display name
+PASS real cross-tab storage logout in an isolated headless browser context
+PASS vote-status retry recovers helpful voting without reloading reviews
+PASS loading, API error, retry and empty UI in native Chromium

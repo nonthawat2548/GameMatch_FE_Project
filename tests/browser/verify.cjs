@@ -4,13 +4,13 @@ const http = require('http');
 const assert = require('assert/strict');
 
 const root = path.resolve(__dirname, '../..');
-process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(root, '.cache/playwright');
-const { chromium } = require(path.join(root, '.tools/frontend-qa/node_modules/playwright'));
+process.env.PLAYWRIGHT_BROWSERS_PATH ||= path.join(root, '.cache/playwright');
+const { chromium } = require(process.env.GM_PLAYWRIGHT_MODULE || path.join(root, '.tools/frontend-qa/node_modules/playwright'));
 const build = path.join(root, 'build');
-const output = path.join(root, 'docs/evidence/frontend-browser');
+const output = process.env.GM_QA_OUTPUT_DIR || path.join(root, 'docs/evidence/frontend-browser');
 fs.mkdirSync(output, { recursive: true });
 const report = {
-  clientDate: '2026-11-10 Asia/Bangkok',
+  clientDate: new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()) + ' Asia/Bangkok',
   scope:
     'Production React build in isolated headless Chromium; HTTP API and image fixtures only. No real Go, DB, RAWG, deployment or user browser session.',
   tool: 'Playwright 1.65.0, headless shell, temporary browser contexts',
@@ -91,6 +91,9 @@ function model() {
     listMode: 'normal',
     delay: 0,
     syncError: false,
+    reviews: [],
+    voteError: false,
+    voted: false,
     sequence: 10,
     requests: [],
   };
@@ -157,6 +160,8 @@ async function routes(context, state, origin) {
       );
       return game ? send(200, game) : send(404, { error: 'QA: game not found' });
     }
+    if (/^\/api\/games\/\d+\/reviews$/.test(endpoint) && method === 'GET') return send(200, state.reviews);
+    if (/^\/api\/games\/\d+\/similar$/.test(endpoint)) return send(200, []);
     if (endpoint === '/api/recommendations')
       return send(
         200,
@@ -174,6 +179,15 @@ async function routes(context, state, origin) {
     if (!role) return send(401, { error: 'QA: session expired' });
     if (endpoint.startsWith('/api/admin/') && role !== 'admin')
       return send(403, { error: 'QA: admin only' });
+    if (endpoint === '/api/me/recommendations') return send(200, []);
+    if (/^\/api\/me\/review-votes\/\d+$/.test(endpoint)) return state.voteError
+      ? send(503, {error:'QA: temporary vote outage'}) : send(200, state.voted ? [7] : []);
+    if (/^\/api\/games\/\d+\/reviews\/7\/helpful$/.test(endpoint)) {
+      state.voted = method === 'PUT';
+      return send(200, {voted:state.voted,helpfulCount:state.voted ? 3 : 2});
+    }
+    if (endpoint === '/api/admin/members') return send(200, Object.values(state.members));
+    if (endpoint === '/api/admin/sync/status') return send(200, {steamConfigured:true});
     if (endpoint === '/api/me') {
       if (method === 'PUT') state.members[role].displayName = data.displayName;
       return send(200, method === 'PUT' ? { ok: true } : state.members[role]);
@@ -201,9 +215,9 @@ async function routes(context, state, origin) {
       method === 'PUT' ? state.favorite.add(id) : state.favorite.delete(id);
       return send(200, { ok: true });
     }
-    if (endpoint === '/api/admin/sync')
+    if (endpoint === '/api/admin/sync/steam')
       return state.syncError
-        ? send(502, { error: 'QA: RAWG unavailable' })
+        ? send(502, { error: 'QA: Steam unavailable' })
         : send(200, { imported: 6 });
     if (endpoint === '/api/admin/games') {
       if (method === 'POST') {
@@ -303,6 +317,11 @@ async function run() {
       await page.getByRole('button', { name: 'ทุกแนว' }).click();
       await capture(page, label + '-catalog');
       await page.goto(origin + '/match');
+      await capture(page, label + '-quiz-genre');
+      await page.getByRole('button', { name: 'ถัดไป', exact:true }).click();
+      await capture(page, label + '-quiz-mode');
+      await page.getByRole('button', { name: 'ถัดไป', exact:true }).click();
+      await capture(page, label + '-quiz-style');
       await page.getByRole('button', { name: 'แนะนำเกมให้ฉัน' }).click();
       await page.getByRole('heading', { name: 'เกมที่น่าจะถูกใจคุณ' }).waitFor();
       assert.equal(await page.locator('.game-card').count(), 5);
@@ -310,7 +329,7 @@ async function run() {
       await page.goto(origin + '/games/1');
       await page.getByRole('heading', { name: state.games[0].title }).waitFor();
       await capture(page, label + '-detail');
-      await page.getByRole('link', { name: 'เข้าสู่ระบบเพื่อบันทึกเกม' }).click();
+      await page.getByRole('link', { name: /บันทึกเกม/ }).click();
       await capture(page, label + '-login');
       await page.getByRole('link', { name: 'สร้างบัญชีใหม่' }).click();
       await capture(page, label + '-register');
@@ -324,6 +343,18 @@ async function run() {
       pass(label + ' public routes, local filtering, quiz, detail, forms and overflow', {
         viewport,
       });
+      await page.evaluate(() => localStorage.setItem('gamematch_theme', 'light'));
+      await page.goto(origin + '/match');
+      assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+      await capture(page, label + '-light-quiz-genre');
+      await page.getByRole('button', {name:'ถัดไป',exact:true}).click();
+      await capture(page, label + '-light-quiz-mode');
+      await page.getByRole('button', {name:'ถัดไป',exact:true}).click();
+      await capture(page, label + '-light-quiz-style');
+      await page.getByRole('button', {name:'แนะนำเกมให้ฉัน',exact:true}).click();
+      await page.getByRole('heading', {name:'เกมที่น่าจะถูกใจคุณ'}).waitFor();
+      await capture(page, label + '-light-quiz-results');
+      pass(label + ' light-theme Quiz stages and results fit the viewport');
       await context.close();
     }
 
@@ -336,13 +367,14 @@ async function run() {
     );
     const memberPage = await memberContext.newPage();
     await memberPage.goto(origin + '/games/1');
-    await memberPage.getByRole('link', { name: 'เข้าสู่ระบบเพื่อบันทึกเกม' }).click();
-    await memberPage.getByLabel('อีเมล').fill(memberState.members.member.email);
+    await memberPage.getByRole('link', { name: /บันทึกเกม/ }).click();
+    await memberPage.getByLabel('อีเมลหรือชื่อผู้ใช้').fill(memberState.members.member.email);
     await memberPage.getByLabel('รหัสผ่าน', { exact: true }).fill(memberState.password);
     await memberPage.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
     await memberPage.getByRole('heading', { name: memberState.games[0].title }).waitFor();
     await memberPage.getByRole('button', { name: 'เพิ่มในเกมโปรด' }).click();
     await memberPage.getByText('เพิ่มในเกมโปรดแล้ว', { exact: true }).waitFor();
+    await memberPage.getByRole('button', {name:'เปิดเมนู',exact:true}).click();
     await memberPage.getByRole('link', { name: 'เกมโปรด', exact: true }).click();
     await memberPage.getByRole('link', { name: memberState.games[0].title, exact: true }).waitFor();
     await memberPage.reload();
@@ -350,15 +382,18 @@ async function run() {
     await capture(memberPage, 'mobile-favorites');
     pass('native login return, authenticated favorite save and reload (mock store)');
     await memberPage.goto(origin + '/match');
-    await memberPage.getByRole('combobox').first().selectOption('strategy');
+    await memberPage.locator('input[name="genre"][value="strategy"]').check();
+    await memberPage.getByRole('button', {name:'ถัดไป',exact:true}).click();
+    await memberPage.getByRole('button', {name:'ถัดไป',exact:true}).click();
     await memberPage.getByRole('button', { name: 'บันทึกความชอบ', exact: true }).click();
     await memberPage.getByText('บันทึกความชอบแล้ว', { exact: true }).waitFor();
     await memberPage.reload();
-    await memberPage.waitForFunction(() => document.querySelector('select')?.value === 'strategy');
+    await memberPage.locator('input[name="genre"][value="strategy"]:checked').waitFor();
     pass('preference save and restoration after browser reload (mock store)');
     await memberPage.goto(origin + '/me/profile');
     await memberPage.getByLabel('ชื่อที่แสดง').fill('Demo Member Updated');
     await memberPage.getByRole('button', { name: 'บันทึกโปรไฟล์' }).click();
+    await memberPage.getByRole('button', {name:'เปิดเมนู',exact:true}).click();
     await memberPage
       .getByRole('navigation')
       .getByRole('link', { name: 'Demo Member Updated' })
@@ -401,10 +436,26 @@ async function run() {
     await adminPage.getByText('ลบเกมแล้ว', { exact: true }).waitFor();
     assert.equal(await row.count(), 0);
     adminState.syncError = true;
-    await adminPage.getByRole('button', { name: 'Sync RAWG (40 เกม)' }).click();
-    await adminPage.getByRole('alert').filter({ hasText: 'QA: RAWG unavailable' }).waitFor();
+    await adminPage.getByRole('button', { name: 'นำเข้าเกม Steam', exact:true }).click();
+    await adminPage.getByRole('alert').filter({ hasText: 'QA: Steam unavailable' }).waitFor();
     assert.equal(await adminPage.getByRole('row').count(), 7);
     pass('admin CRUD, publication and sync-error UI (mock API)');
+    await adminPage.goto(origin + '/admin/members');
+    const roleTrigger = adminPage.getByRole('button', {name:'เลื่อนเป็น Admin: Demo Member',exact:true});
+    await roleTrigger.click();
+    const roleDialog = adminPage.getByRole('dialog');
+    await roleDialog.waitFor();
+    assert(await roleDialog.evaluate(el=>el.contains(document.activeElement)), 'role dialog must receive focus');
+    await capture(adminPage, 'mobile-role-dialog');
+    for (let tab=0; tab<6; tab++) {
+      await adminPage.keyboard.press('Tab');
+      assert(await adminPage.evaluate(()=>document.activeElement===document.body || Boolean(document.activeElement.closest('dialog[open]'))), 'focus must not reach controls behind the modal');
+    }
+    await adminPage.keyboard.press('Escape');
+    assert.equal(await roleDialog.count(),0);
+    assert(await roleTrigger.evaluate(el=>el===document.activeElement), 'focus must return to the role trigger');
+    pass('native role dialog focus containment, Escape and focus restoration');
+    await adminPage.goto(origin + '/admin');
     for (const [label, viewport] of [
       ['desktop', { width: 1366, height: 900 }],
       ['narrow', { width: 320, height: 720 }],
@@ -454,6 +505,24 @@ async function run() {
     assert.equal(await first.locator('.game-card').count(), 0);
     pass('real cross-tab storage logout in an isolated headless browser context');
     await sharedContext.close();
+
+    const voteState = model();
+    voteState.reviews=[{id:7,memberId:2,displayName:'Demo Other Member',rating:4,comment:'Demo review for retry coverage.',helpfulCount:2}];
+    voteState.voteError=true;
+    const voteContext=await contextFor(browser,{width:390,height:844},origin,voteState,'member');
+    const votePage=await voteContext.newPage();
+    await votePage.goto(origin+'/games/1');
+    await votePage.getByText('ยังโหลดสถานะโหวตไม่ได้',{exact:true}).waitFor();
+    assert(await votePage.getByRole('button',{name:'👍 มีประโยชน์ 2'}).isDisabled());
+    const reviewReads=voteState.requests.filter(r=>r.path==='/api/games/1/reviews').length;
+    voteState.voteError=false;
+    await votePage.getByRole('button',{name:'ลองโหลดสถานะโหวตใหม่',exact:true}).click();
+    await votePage.getByRole('button',{name:'👍 มีประโยชน์ 2'}).click();
+    await votePage.getByRole('button',{name:'👍 มีประโยชน์ 3',pressed:true}).waitFor();
+    await capture(votePage, 'mobile-review-vote-recovered');
+    assert.equal(voteState.requests.filter(r=>r.path==='/api/games/1/reviews').length,reviewReads);
+    pass('vote-status retry recovers helpful voting without reloading reviews');
+    await voteContext.close();
 
     const errorState = model();
     errorState.listMode = 'error';

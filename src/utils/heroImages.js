@@ -1,7 +1,3 @@
-// Banner artwork is independent of the Steam header used by GameCard.
-// Steam Library Hero assets: https://partner.steamgames.com/doc/store/assets/libraryassets
-// Asset paths verified against the corresponding SteamDB app metadata.
-// Use the known hash, not the hash from header.jpg (different assets).
 const heroPaths = {
   730: 'library_hero_2x.jpg',
   570: '06918d1009cc79ffdee853f1ef789cddf8014226/library_hero_2x.jpg',
@@ -14,9 +10,7 @@ const heroPaths = {
   236390: 'c0c9924bdb608cd5a03b44d878e187545c8e1dc5/library_hero_2x.jpg',
 };
 const cdn = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/';
-// Official full-size cinematic trailer still, listed under ROB RUN's Steam metadata.
 const robRunStill = cdn + '257396463/b6ff073fe516f2ec74fb0e4fe05ea88994c740a8/movie_full.jpg';
-// Full-size screenshot from Steam appdetails, for Call of Duty's alternate fallback.
 const codScreenshot = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1938090/ee5f6b6aebe4dc9e86b49c4e309d361b132df308/ss_ee5f6b6aebe4dc9e86b49c4e309d361b132df308.1920x1080.jpg?t=1784850874';
 
 export function heroImageCandidates(game) {
@@ -30,7 +24,6 @@ export function heroImageCandidates(game) {
     if (game.steamId === 4262460) urls.push(robRunStill);
     if (game.steamId === 1938090) urls.push(codScreenshot);
     urls.push(base + 'library_hero_2x.jpg', base + 'library_hero.jpg');
-    // For a new game, a larger header is an intermediate fallback before the original.
     try {
       const header = new URL(game.imageUrl);
       if (header.protocol === 'https:' && header.hostname.endsWith('.steamstatic.com') &&
@@ -39,7 +32,6 @@ export function heroImageCandidates(game) {
         urls.push(header.href);
       }
     } catch {
-      // Unknown image URL: keep the original fallback below.
     }
   }
   if (game.imageUrl) urls.push(game.imageUrl);

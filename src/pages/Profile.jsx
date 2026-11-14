@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { api } from '../api/backend';
+import { updateProfile, changePassword } from '../api/endpoints';
 import { passwordError, characterCount } from '../utils/validation';
 import { TOKEN_KEY } from '../auth/session';
 export default function Profile() {
   const { user, refresh, logout } = useAuth(),
     [name, setName] = useState(user.displayName),
+    [currentPassword, setCurrentPassword] = useState(''),
+    [newPassword, setNewPassword] = useState(''),
     [note, setNote] = useState(''),
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false),
     nav = useNavigate();
   async function save(e) {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError('');
     setNote('');
@@ -23,7 +26,7 @@ export default function Profile() {
       return;
     }
     try {
-      await api('/api/me', { method: 'PUT', body: { displayName } });
+      await updateProfile(displayName);
       await refresh();
       setNote('บันทึกชื่อแล้ว');
     } catch (e) {
@@ -34,25 +37,20 @@ export default function Profile() {
   }
   async function password(e) {
     e.preventDefault();
-    const f = new FormData(e.target);
+    if (busy) return;
     const token = localStorage.getItem(TOKEN_KEY);
     setBusy(true);
     setError('');
     setNote('');
-    const validationError = passwordError(f.get('new'));
+    const validationError = passwordError(newPassword);
     if (validationError) {
       setError(validationError);
       setBusy(false);
       return;
     }
     try {
-      await api('/api/me/password', {
-        method: 'PUT',
-        body: { currentPassword: f.get('current'), newPassword: f.get('new') },
-      });
-      // หากสลับบัญชีระหว่างรอ อย่าส่ง logout ของบัญชีใหม่จากคำขอเก่า
+      await changePassword(currentPassword, newPassword);
       if (localStorage.getItem(TOKEN_KEY) !== token) return;
-      await logout().catch(() => {});
       nav('/login', {
         replace: true,
         state: {
@@ -60,6 +58,7 @@ export default function Profile() {
           notice: 'เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่',
         },
       });
+      await logout().catch(() => {});
     } catch (e) {
       setError(e.message);
     } finally {
@@ -91,13 +90,15 @@ export default function Profile() {
             <h2>เปลี่ยนรหัสผ่าน</h2>
             <label>
               รหัสผ่านปัจจุบัน
-              <input name="current" type="password" autoComplete="current-password" required />
+              <input name="current" type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
             </label>
             <label>
               รหัสผ่านใหม่
               <input
                 name="new"
                 type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 minLength={8}
                 autoComplete="new-password"
                 required

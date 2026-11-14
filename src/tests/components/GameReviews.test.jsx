@@ -129,3 +129,21 @@ test('helpful vote uses the protected API and updates the count from the server'
   await waitFor(()=>expect(screen.getByRole('button',{name:'👍 มีประโยชน์ 2'})).toHaveAttribute('aria-pressed','false'));
   expect(api).toHaveBeenLastCalledWith('/api/games/46/reviews/8/helpful',{method:'DELETE'});
 });
+
+test('retries a failed vote-status read without reloading reviews, then allows voting', async () => {
+  api.mockRejectedValueOnce(new Error('Temporary outage'))
+    .mockResolvedValueOnce([])
+    .mockResolvedValueOnce({ helpfulCount: 3, voted: true });
+  render(<Harness initial={[{ ...other, helpfulCount: 2 }]} />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('ยังโหลดสถานะโหวตไม่ได้');
+  expect(screen.getByText(other.comment)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '👍 มีประโยชน์ 2' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'ลองโหลดสถานะโหวตใหม่' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '👍 มีประโยชน์ 2' })).toBeEnabled());
+  expect(screen.queryByText('ยังโหลดสถานะโหวตไม่ได้')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '👍 มีประโยชน์ 2' }));
+  expect(await screen.findByRole('button', { name: '👍 มีประโยชน์ 3' })).toHaveAttribute('aria-pressed', 'true');
+  expect(api.mock.calls.map(([path]) => path)).toEqual([
+    '/api/me/review-votes/46', '/api/me/review-votes/46', '/api/games/46/reviews/8/helpful',
+  ]);
+});

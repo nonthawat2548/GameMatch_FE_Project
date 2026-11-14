@@ -1,80 +1,77 @@
-## Popular catalog snapshot (10 November 2026)
+# API ที่ GameMatch Frontend ใช้งาน
 
-`GET /api/games` now defaults to `popularity_order ASC NULLS LAST`, then release date/id descending. Optional JSON fields: `popularityOrder` (selection position), `popularitySource` (Most Played or Top Sellers TH), `popularityUpdatedAt` (import time). These describe a manually refreshed subset, not live player counts or global ranks. The frontend fetches once and derives search/genre/sort plus 24-item pagination locally.
+อัปเดต 14 พฤศจิกายน 2569 จาก src/api/endpoints.js และพฤติกรรม frontend เอกสารนี้ระบุสิ่งที่ FE ต้องการ ไม่รับรองว่า backend clone ทุกชุดหรือ deployment ทุกตัวอยู่รุ่นเดียวกัน
 
-The manual server-side maintenance command `go run ./cmd/import-popular` requires the dedicated GameMatch DATABASE_URL; it is not a public HTTP endpoint. It verifies 100 eligible entries before one DB transaction, rolls back the entire write on failure, and preserves descriptions/publication. Existing Admin Steam endpoint remains a separate 12-New-Releases action.
+Base URL: REACT_APP_API_URL; JSON request/response; wrapper เติม Authorization: Bearer เมื่อมี token. Backend เป็นผู้บังคับ authentication/authorization/ownership จริง
 
-# API Contract
-Base: REACT_APP_API_URL (เช่น http://localhost:8080). JSON body/response. Auth: `Authorization: Bearer TOKEN`.
-Error ทุก handler: `{ "error": "ข้อความ" }` ยกเว้น ServeMux default 404/405 และ CORS rejection อาจเป็น text; FE มี fallback JSON handling.
+## สมาชิก
 
-| Method | Path | สิทธิ์ | ผลลัพธ์ |
-|---|---|---|---|
-| GET | /healthz | Public | status ok (503 หาก DB ไม่พร้อม) |
-| POST | /api/auth/register | Public | id; body username,password,displayName |
-| POST | /api/auth/login | Public | token,user; body username,password |
-| POST | /api/auth/logout | Member | ยกเลิก JWT ของบัญชีทุก session |
-| GET | /api/me | Member | id,email,displayName,role |
-| PUT | /api/me | Member | body displayName |
-| PUT | /api/me/password | Member | body currentPassword,newPassword; ยกเลิก session เดิม |
-| GET | /api/games?q=keyword | Public | Game[] ที่เผยแพร่เท่านั้น |
-| GET | /api/games/{id} | Public | Game |
-| GET/POST | /api/games/{id}/reviews | Public/Member | รีวิวของเกม (memberId, rating, comment, createdAt); POST body rating (1-5),comment |
-| PUT | /api/games/{id}/reviews/{reviewId} | Owner | แก้ไข rating,comment |
-| DELETE | /api/games/{id}/reviews/{reviewId} | Owner/Admin | ลบรีวิว |
-| POST | /api/recommendations | Public | Game[] top5 พร้อม matchScore,reasons |
-| GET/PUT | /api/me/preferences | Member | Preference object |
-| GET | /api/me/favorites | Member | Game[] ของตนเองที่ยังเผยแพร่ |
-| PUT/DELETE | /api/me/favorites/{id} | Member | ok; id คือ game id |
-| GET | /api/admin/games | Admin | Game[] รวมเกมซ่อน |
-| POST | /api/admin/games | Admin | Game body -> id |
-| PUT | /api/admin/games/{id} | Admin | Game body -> id |
-| DELETE | /api/admin/games/{id} | Admin | ok; ลบ favorites ที่อ้างอิงด้วย cascade |
-| POST | /api/admin/sync | Admin | imported,note; RAWG first page 40 |
-| POST | /api/admin/sync/steam | Admin | imported,note; Steam New Releases up to 12 eligible games, no RAWG key |
+| Method | Path | Request / response ที่ frontend ใช้ |
+|---|---|---|
+| POST | /api/auth/register | {email,password,displayName}; success แล้ว FE login ให้อัตโนมัติ |
+| POST | /api/auth/login | {email,password}; email อาจเป็น legacy username; คืน {token,user} |
+| POST | /api/auth/logout | ยกเลิก session ฝั่ง backend; FE ล้าง session ของบัญชีที่ตรงกับคำขอ |
+| GET | /api/me | user: id,email,username?,displayName,role |
+| PUT | /api/me | {displayName} แล้ว FE refresh /api/me |
+| PUT | /api/me/password | {currentPassword,newPassword}; สำเร็จแล้วกลับ Login |
+| GET/PUT | /api/me/preferences | {genre,mode,style} |
+| GET | /api/me/favorites | Game[] ของบัญชีที่ยืนยันแล้ว |
+| PUT/DELETE | /api/me/favorites/{gameId} | เพิ่ม/ลบ favorite; FE เปลี่ยน state หลัง API สำเร็จ |
+| GET | /api/me/recommendations | Game[] จากเกมโปรด |
+| GET | /api/me/review-votes/{gameId} | review ID[] ที่โหวตแล้ว; มีปุ่ม retry เฉพาะคำขอนี้ |
 
-Member includes Admin. No endpoint accepts member_id from frontend for ownership.
+ชื่อที่แสดง 1–50 Unicode code points; รหัสผ่านใหม่อย่างน้อย 8 ตัวอักษรและไม่เกิน 72 UTF-8 bytes. Backend ต้องตรวจซ้ำเสมอ
 
-Preference example:
-```json
-{"genre":"rpg","mode":"solo","style":"story"}
-```
-Allowed genre: rpg/action/strategy/simulation/adventure; mode: solo/coop/pvp; style: story/competitive/relax/challenge.
-Mode is a **soft preference** worth 25, not a hard filter. Game with RPG+story but no confirmed solo tag can score 75. Generic multiplayer does not count as coop.
+## เกมและคำแนะนำ
 
-Game create example:
-```json
-{"title":"Example","description":"Example description","descriptionTh":"คำอธิบายเกมภาษาไทย","imageUrl":"","genres":["rpg"],"tags":["singleplayer","story-rich"],"platforms":["PC"],"isPublished":true}
-```
-Game response adds id, optional rawgId, matchScore, optional reasons. On PUT backend uses path id; role/owner never inferred from client body. Image URL if supplied must be HTTPS.
+| Method | Path | Response |
+|---|---|---|
+| GET | /api/games | Game[] ทั้งชุดที่เผยแพร่; FE กรอง/เรียงและแบ่งหน้า 24 เกมในเครื่อง |
+| GET | /api/games/{id} | Game; URL อ่านง่ายใช้ numeric ID เดิมเรียก API |
+| GET | /api/games/{id}/similar | Game[] |
+| GET | /api/games/{id}/metadata | Optional Steam metadata เช่น headerImage, screenshots, developers, publishers, releaseDate, price |
+| GET | /api/games/{id}/trailers | [{id,title,thumbnail?,sources:URL[]}] |
+| GET | /api/games/{id}/steam-rating | คะแนน/จำนวนรีวิว Steam; แยกจากสมาชิก GameMatch |
+| POST | /api/recommendations | body {genre,mode,style}; Game[] พร้อม matchScore/reasons/matchBreakdown ถ้ามี |
 
-Steam responses also include `steamId`, ISO `releaseDate` (YYYY-MM-DD), and `syncedAt` (UTC timestamp). Catalog sorts release date descending, then id, with undated manual/RAWG records last. Steam sync reads the public Store New Releases feed for Thailand/English, inspects at most 20 candidates, and imports at most 12 released full games with valid Steam image/date and Store tags. Excludes DLC, coming-soon/future/ambiguous dates, missing tag pages and explicit sexual-content tags. Generic multiplayer never becomes co-op. HTML descriptions are converted to text; React never renders unsafe HTML. These public Store endpoints are not a documented/versioned Steamworks contract, so parsing/upstream failures return 502 and retain existing data. All writes use one transaction and unique steam_id; existing descriptions/publication are preserved. Sync is manual, not scheduled, and does not claim all new releases worldwide.
+FE ไม่กำหนดจำนวนผลแนะนำตายตัว: ผลตรวจ API สาธารณะก่อนแก้รอบนี้คืน 10 เกม ขณะที่ fixtures บางชุดคืน 5 เกม ทั้งสองรูปแบบแสดงได้โดยไม่สร้างคะแนนเพิ่มเอง
 
-HTTP: 400 validation, 401 missing/expired/revoked token, 403 wrong role/origin, 404 missing record, 409 duplicate/concurrent operation, 500 DB failure, 502 upstream failure, 503 RAWG key missing/DB unavailable.
+Quiz ส่ง genre ตาม options ปัจจุบัน: rpg, action, strategy, simulation, adventure, indie, casual, sports, racing, massively-multiplayer, early-access, free-to-play, fps, survival, horror, puzzle, moba; mode: solo/coop/pvp; style: story/competitive/relax/challenge
 
-Login/Register share a limit of 30 attempts per TCP peer per minute. Limit responses are JSON 429 with `Retry-After` seconds. Forwarded headers cannot bypass the bucket; NAT/Render proxy users may share it. The limiter is in-memory for one process, resets on restart, and is not a distributed production limiter. Map capacity is bounded to 10,000 peers and expired entries are reclaimed.
+ผลตรวจสาธารณะวันที่ 14 พฤศจิกายน 2569: rpg/indie/fps/free-to-play ตอบ 200. Backend clone เก่าบางชุดยังรับเพียง 5 genres จึงต้องใช้ backend รุ่นที่ตรงกับ FE เมื่อทดสอบในเครื่อง ไม่เปลี่ยน options โดยอาศัย clone เก่าเพียงอย่างเดียว
 
-RAWG sync rejects upstream error statuses, missing/null `results`, invalid/trailing JSON, bodies over 8 MiB, and responses with more than 40 entries. The SQL transaction is atomic; a database failure after an earlier insert rolls the entire import back. `RawgClient` is an optional Go test seam; production still calls the fixed RAWG HTTPS endpoint and uses a 20-second client timeout. The server DB pool is limited to five connections.
+Game ที่ UI ใช้มี id,title,description?,descriptionTh?,imageUrl?,genres[],tags[],platforms[],isPublished?,steamId?,rawgId?,releaseDate? และ popularityOrder/popularitySource/popularityUpdatedAt? การจัดอันดับยอดนิยมเป็น catalog snapshot จาก backend ไม่ใช่ live player count
 
-Scoring: Genre45 + Mode25 + Style30, sort score desc then title then id, exclude hidden and score0. PostgreSQL games -> Go rank -> JSON -> React. Not ML, not probability.
+## รีวิว
 
-Frontend transport: `src/api/backend.js` ใช้ native fetch แนบ Bearer token เมื่อมี และส่ง Content-Type JSON เฉพาะเมื่อมี body; รองรับ AbortSignal, ลบ slash ท้าย base URL และแสดงข้อความเมื่อ network/non-JSON error เกิดขึ้น HTTP status ยังคงส่งต่อให้ AuthContext แยก 401 จาก server outage ได้ API หลังบ้านยังไม่เปลี่ยน contract ในรอบนี้
+| Method | Path | Contract |
+|---|---|---|
+| GET | /api/games/{id}/reviews | Review[] หรือ {reviews:Review[]} สำหรับการอ่าน |
+| POST | /api/games/{id}/reviews | {rating,comment}; Member; คืน Review ที่บันทึก |
+| PUT | /api/games/{id}/reviews/{reviewId} | {rating,comment}; Owner; คืน Review |
+| DELETE | /api/games/{id}/reviews/{reviewId} | Owner/Admin; FE ลบจาก state เมื่อสำเร็จ |
+| PUT/DELETE | /api/games/{id}/reviews/{reviewId}/helpful | โหวต/ถอน; คืน {voted,helpfulCount} |
 
-JSON ที่อ่านไม่สำเร็จจะ throw แม้ HTTP 200 เพื่อไม่ส่ง object ข้อผิดพลาดไปยังหน้าที่รอ Game[] และคง AbortError หากยกเลิกระหว่างอ่าน body หน้า Admin ส่งเฉพาะฟิลด์ที่แก้ไขได้และ trim arrays ตอน submit เสมอ ไม่ส่ง matchScore/reasons; หากเขียนสำเร็จแต่โหลดรายการใหม่ไม่ได้ ปุ่มโหลดรายการอีกครั้งเรียก GET โดยไม่ทำ POST/PUT/DELETE ซ้ำ
+Review มี id,memberId,displayName,rating,comment,createdAt?,helpfulCount?. rating 1–5; comment อย่างน้อย 10 ตัวอักษรและสูงสุด 2000 UTF-8 bytes. สถานะโหวตอ่านไม่ได้จะปิดปุ่มโหวตไว้และให้ retry โดยไม่โหลดรีวิวทั้งหมดซ้ำ
 
-Frontend มีการตรวจ UTF-8 byte limits เพื่อแจ้งผู้ใช้ก่อนส่งฟอร์ม: displayName 100 bytes, title 250 bytes, password สูงสุด 72 bytes (พร้อม minLength 8 ของฟอร์มเดิม) Backend validation เป็นผู้บังคับข้อกำหนดจริงเสมอ
+## Admin
 
-Session ฝั่ง frontend: 401 ของ protected API ล้าง token เฉพาะเมื่อยังตรงกับ token ตอนเริ่มคำขอ แล้วแจ้ง AuthContext ให้ล้าง user; public login 401 และ wrong-role 403 ไม่ล้าง session ที่มีอยู่ การเปลี่ยน token จากแท็บอื่นใช้ storage event เพื่อซ่อนข้อมูลเดิมและเรียก /api/me ใหม่ การตรวจบัญชีที่ได้ 5xx เก็บ token ไว้พร้อม retry ไม่ถือว่าเป็น revoked session ทั้งหมดเป็นพฤติกรรม UI เสริมจากการตรวจสิทธิ์ใน Go
+| Method | Path | Contract |
+|---|---|---|
+| GET/POST | /api/admin/games | Game[] / fields ของเกมใหม่ |
+| PUT/DELETE | /api/admin/games/{id} | fields ที่แก้ไขได้ / ลบเกม |
+| GET | /api/admin/stats | สถิติที่ backend คำนวณ |
+| GET | /api/admin/members | Member[] |
+| PUT | /api/admin/members/{id}/role | {role:admin/member}; คืน Member ที่อัปเดต |
+| GET | /api/admin/sync/status | {steamConfigured:boolean} |
+| POST | /api/admin/sync/steam?after={AppID} | {imported,nextAppId,hasMore,note?} |
 
-Navigation หลังล็อกอิน: หน้าที่ขอเข้าสู่ระบบส่ง pathname ผ่าน Router state.from; สลับไปสมัครสมาชิกแล้วกลับ Login ยังคงหน้าปลายทางเดิม `auth/returnPath.js` ยอมรับเฉพาะ route ภายในที่มีจริง หากเป็น URL ภายนอกหรือ state ผิดรูปแบบจะกลับหน้าแรก ไม่เปลี่ยน API contract หรือเส้นทาง authorization ของ Go
+Create/Edit ส่งเฉพาะ title,description,descriptionTh,imageUrl,genres,tags,platforms,isPublished. ชื่อเกมไม่เกิน 250 UTF-8 bytes; imageUrl ถ้ามีต้องเป็น HTTPS. หลัง write สำเร็จแต่ reload ล้มเหลว การ retry รายการทำ GET โดยไม่เขียนซ้ำ
 
-Frontend routing: `/` เป็นหน้าแรก, `/discover` เป็นรายการเกม, `/about` อธิบายการใช้และแหล่งข้อมูล หน้า Home/Discover เรียก `GET /api/games` เพื่อโหลดรายการ published; ค้นหาชื่อและเลือกแนวในหน้า Discover เป็นการกรองจาก state ในเครื่อง Backend ยังรองรับ `?q=keyword` ตาม contract สำหรับผู้เรียกอื่นเหมือนเดิม ค่า return path ที่ไม่ผ่านการตรวจจะกลับ `/` (หน้าแรก)
+Steam import ตรวจไม่เกิน 12 candidates ต่อ batch เรียงตาม AppID; จำนวนที่นำเข้าสำเร็จอาจน้อยกว่า 12. Cursor เป็น state ของหน้า ไม่มีการเรียก RAWG จาก Admin UI ปัจจุบัน
 
-### Admin Members
-GET /api/admin/members และ PUT /api/admin/members/{id}/role ใช้หน้า /admin/members; Admin เท่านั้น; body {"role":"admin"} หรือ {"role":"member"}; ห้ามแก้บทบาทตัวเอง; เมื่อเปลี่ยนบทบาท Session เดิมของบัญชีที่ถูกแก้จะหมดอายุ
+## Errors และ session
 
-### Course-aligned account and review rules
-New registration sends email, password and displayName. Login accepts email or legacy username. Existing accounts are retained. Display name 1–50 characters, password 8 characters minimum and 72 UTF-8 bytes maximum. JWT expires after one hour; 401 from protected review mutations invalidates the current session. Reviews require 10 characters minimum and 2000 bytes maximum. Admin game form sends original and Thai descriptions separately.
+ปกติ backend คืน {error:string} หรือ {error:{message:string}}; proxy/default handler อาจคืน text/HTML. Wrapper คง HTTP status แม้อ่าน JSON ไม่ได้, รองรับ JSON null, คืน null สำหรับ 204 และคง AbortError
 
-### Admin dashboard
-GET /api/admin/stats (Admin only) serves /admin/dashboard. Counts come from PostgreSQL; existing /admin and /admin/members remain unchanged.
+Protected 401 ล้าง token เฉพาะเมื่อยังตรงกับ token ที่เริ่มคำขอ; login 401 และ role 403 ไม่ล้าง session ที่ใช้อยู่. Restore 5xx เก็บ token และให้ retry. Storage event ซ่อนข้อมูลบัญชีเดิมแล้วตรวจ /api/me ใหม่

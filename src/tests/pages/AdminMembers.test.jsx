@@ -14,6 +14,20 @@ beforeEach(() => {
   useAuth.mockReturnValue({ user: members[0] });
 });
 function page() { render(<MemoryRouter initialEntries={['/admin/members']}><AdminMembers /></MemoryRouter>); }
+
+test('cancel closes the native role dialog and restores the trigger without writing', async () => {
+  api.mockResolvedValue(members);
+  page();
+  const trigger = await screen.findByRole('button', { name: 'เลื่อนเป็น Admin: Player B' });
+  trigger.focus();
+  fireEvent.click(trigger);
+  const modal = screen.getByRole('dialog');
+  expect(modal).toHaveAttribute('open');
+  fireEvent(modal, new Event('cancel', { bubbles: true, cancelable: true }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(trigger).toHaveFocus();
+  expect(api).toHaveBeenCalledTimes(1);
+});
 test('lists members, blocks own role change, confirms promotion and reflects server result', async () => {
   api.mockResolvedValueOnce(members).mockResolvedValueOnce({ ...members[1], role: 'admin' });
   page();

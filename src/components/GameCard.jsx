@@ -60,7 +60,7 @@ export default function GameCard({ game, action }) {
           </p>
         )}
         {source && (
-          <a className="source-link" href={source.href} target="_blank" rel="noreferrer">
+          <a className="source-link" href={source.href} target="_blank" rel="noopener noreferrer">
             ข้อมูลและภาพจาก {source.name} ↗
           </a>
         )}

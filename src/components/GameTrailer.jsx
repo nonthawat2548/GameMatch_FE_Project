@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { api } from '../api/backend';
+import { getGameTrailers } from '../api/endpoints';
 import { gameSource } from '../utils/gameSource';
 import { heroVideoCandidates } from '../utils/heroVideos';
 
@@ -29,7 +29,7 @@ export default function GameTrailer({ game, children, screenshots = [] }) {
       const sources = heroVideoCandidates(game);
       return sources.length ? [{ id: 0, title: 'ตัวอย่างเกม', sources, preview: true }] : [];
     };
-    api('/api/games/' + game.id + '/trailers', { signal: controller.signal })
+    getGameTrailers(game.id, { signal: controller.signal })
       .then((data) => {
         if (controller.signal.aborted) return;
         const list = Array.isArray(data) ? data.filter(t => Array.isArray(t.sources) && t.sources.length) : [];
@@ -56,7 +56,7 @@ export default function GameTrailer({ game, children, screenshots = [] }) {
   return (
     <section className="game-trailer" aria-label="ตัวอย่างเกม">
       <div className="game-trailer-stage">
-        {shot ? <button className="gallery-image-button" onClick={()=>lightbox.current?.showModal()} aria-label="ขยายภาพ"><img src={shot.path_full} alt="ภาพจากเกม"/></button> : src && !loading ? (
+        {shot ? <button className="gallery-image-button" onClick={() => lightbox.current?.showModal()} aria-label="ขยายภาพ"><img src={shot.path_full} alt="ภาพจากเกม" /></button> : src && !loading ? (
           <video
             key={src + ':' + selected}
             className="detail-trailer-video"
@@ -85,17 +85,17 @@ export default function GameTrailer({ game, children, screenshots = [] }) {
               <div className="game-trailer-options media-thumbnails" aria-label="เลือกคลิปตัวอย่าง">
                 {trailers.map((item, i) => (
                   <button key={item.id + ':' + i} type="button" className="secondary" aria-label={item.title} aria-pressed={!shot && i === selected} onClick={() => select(i)}>
-                    <img src={item.thumbnail || game.imageUrl} alt=""/><span className="media-play">▶</span><span>{item.title}</span>
+                    <img src={item.thumbnail || game.imageUrl} alt="" /><span className="media-play">▶</span><span>{item.title}</span>
                   </button>
                 ))}
-                {screenshots.map((s,i)=><button type="button" key={s.path_full} className="secondary" aria-label={'ภาพเกม '+(i+1)} aria-pressed={shot===s} onClick={()=>setShot(s)}><img src={s.path_thumbnail} alt=""/><span>ภาพ {i+1}</span></button>)}
+                {screenshots.map((s, i) => <button type="button" key={s.path_full} className="secondary" aria-label={'ภาพเกม ' + (i + 1)} aria-pressed={shot === s} onClick={() => setShot(s)}><img src={s.path_thumbnail} alt="" /><span>ภาพ {i + 1}</span></button>)}
               </div>
             )}
             {(error || (trailer && !src)) && <button type="button" className="secondary" onClick={() => setRetry(n => n + 1)}>โหลดคลิปใหม่</button>}
           </>
         )}
       </div>
-      <dialog ref={lightbox} className="media-lightbox" onClick={e=>{if(e.target===e.currentTarget)lightbox.current.close();}}><button onClick={()=>lightbox.current.close()} aria-label="ปิดภาพ">×</button>{shot&&<img src={shot.path_full} alt="ภาพจากเกมขนาดเต็ม"/>}</dialog>
+      <dialog ref={lightbox} className="media-lightbox" onClick={e => { if (e.target === e.currentTarget) lightbox.current.close(); }}><button onClick={() => lightbox.current.close()} aria-label="ปิดภาพ">×</button>{shot && <img src={shot.path_full} alt="ภาพจากเกมขนาดเต็ม" />}</dialog>
     </section>
   );
 }

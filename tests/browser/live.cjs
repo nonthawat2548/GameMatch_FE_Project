@@ -1,5 +1,3 @@
-// Explicit opt-in: creates disposable QA members/game in the configured GameMatch DB.
-// No HTTP mocks. Owns and closes only its child API, static server and headless browser.
 const fs = require('fs');
 const path = require('path');
 const http = require('http');

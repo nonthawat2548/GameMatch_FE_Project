@@ -8,7 +8,7 @@ export default function PopularGames({ games }) {
     <aside className="popular-list" aria-labelledby="popular-list-heading">
       <div className="popular-list-heading">
         <h2 id="popular-list-heading">คนเล่นเยอะบน Steam</h2>
-        <a href="https://store.steampowered.com/charts/mostplayed" target="_blank" rel="noreferrer">Steam ↗</a>
+        <a href="https://store.steampowered.com/charts/mostplayed" target="_blank" rel="noopener noreferrer">Steam ↗</a>
       </div>
       <ol>
         {games.slice(0, 5).map(game => (

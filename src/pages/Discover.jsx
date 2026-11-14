@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { api } from '../api/backend';
+import { getGames } from '../api/endpoints';
 import GameGrid from '../components/GameGrid';
+import GameGridSkeleton from '../components/GameGridSkeleton';
 import { genreLabel } from '../utils/gameLabels';
 
 export default function Discover() {
@@ -28,8 +29,7 @@ export default function Discover() {
     let ignore = false;
     setLoading(true);
     setError('');
-    // ตามรูปแบบหน้ารายการ MovieHub: โหลดจาก Go แล้วกรองด้วย state ในเครื่อง
-    api('/api/games')
+    getGames()
       .then((list) => {
         if (!ignore) setGames(list);
       })
@@ -75,8 +75,8 @@ export default function Discover() {
         <div className="catalog-toolbar">
           <h2 id="discover-heading">รายการเกม</h2>
           <div className="catalog-view" role="group" aria-label="รูปแบบรายการเกม">
-            <button type="button" className="secondary" aria-pressed={view === "grid"} onClick={() => setView("grid")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><rect x="2" y="2" width="6" height="6"/><rect x="12" y="2" width="6" height="6"/><rect x="2" y="12" width="6" height="6"/><rect x="12" y="12" width="6" height="6"/></svg>ตาราง</button>
-            <button type="button" className="secondary" aria-pressed={view === "list"} onClick={() => setView("list")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><path d="M2 4h16M2 10h16M2 16h16"/></svg>รายการ</button>
+            <button type="button" className="secondary" aria-pressed={view === "grid"} onClick={() => setView("grid")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><rect x="2" y="2" width="6" height="6" /><rect x="12" y="2" width="6" height="6" /><rect x="2" y="12" width="6" height="6" /><rect x="12" y="12" width="6" height="6" /></svg>ตาราง</button>
+            <button type="button" className="secondary" aria-pressed={view === "list"} onClick={() => setView("list")}><svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor"><path d="M2 4h16M2 10h16M2 16h16" /></svg>รายการ</button>
           </div>
           <label className="sort-label">
             เรียงตาม
@@ -133,9 +133,12 @@ export default function Discover() {
           </div>
         )}
         {loading ? (
-          <p className="catalog-message" role="status">
-            กำลังโหลดเกม…
-          </p>
+          <>
+            <p className="catalog-message" role="status">
+              กำลังโหลดเกม…
+            </p>
+            <GameGridSkeleton count={8} />
+          </>
         ) : error ? (
           <div>
             <p role="alert">{error}</p>

@@ -1,4 +1,3 @@
-# Same test sequence as the course MovieHub repository.
 name: test
 on: [push, pull_request]
 permissions:
@@ -13,9 +12,12 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=high
       - run: npm test -- --watchAll=false --runInBand
         env:
           CI: true
       - run: npm run build
         env:
           CI: true
+          REACT_APP_API_URL: http://localhost:8080
+          GM_ALLOW_LOCAL_API: '1'

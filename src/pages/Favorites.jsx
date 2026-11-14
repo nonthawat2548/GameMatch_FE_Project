@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/backend';
+import { getFavorites, removeFavorite } from '../api/endpoints';
 import GameGrid from '../components/GameGrid';
+import GameGridSkeleton from '../components/GameGridSkeleton';
 import { Link } from 'react-router-dom';
 export default function Favorites() {
   const [games, setGames] = useState(null),
@@ -10,7 +11,7 @@ export default function Favorites() {
   useEffect(() => {
     const c = new AbortController();
     setError('');
-    api('/api/me/favorites', { signal: c.signal })
+    getFavorites({ signal: c.signal })
       .then(setGames)
       .catch((e) => {
         if (e.name !== 'AbortError') setError(e.message);
@@ -21,7 +22,7 @@ export default function Favorites() {
     setError('');
     setRemoving(id);
     try {
-      await api('/api/me/favorites/' + id, { method: 'DELETE' });
+      await removeFavorite(id);
       setGames((g) => g.filter((x) => x.id !== id));
     } catch (e) {
       setError(e.message);
@@ -59,7 +60,12 @@ export default function Favorites() {
           )}
         />
       ) : (
-        !error && <p role="status">กำลังโหลด…</p>
+        !error && (
+          <>
+            <p role="status">กำลังโหลด…</p>
+            <GameGridSkeleton count={4} />
+          </>
+        )
       )}
       {games?.length === 0 && (
         <Link className="button" to="/discover">

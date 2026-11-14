@@ -1,9 +1,12 @@
 import { SESSION_EXPIRED_EVENT, TOKEN_KEY } from '../auth/session';
 
-// ทุกหน้าคุยกับ Go ผ่าน fetch ที่นี่ ไม่มี database/API secret ใน React
 export async function api(path, { method = 'GET', body, signal } = {}) {
   const token = localStorage.getItem(TOKEN_KEY);
-  const base = (process.env.REACT_APP_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+  const configured = process.env.REACT_APP_API_URL?.trim();
+  if (!configured && process.env.NODE_ENV === 'production') {
+    throw new Error('ยังไม่ได้ตั้งค่า REACT_APP_API_URL สำหรับเว็บนี้ กรุณา build ใหม่พร้อม API URL');
+  }
+  const base = (configured || 'http://localhost:8080').replace(/\/+$/, '');
   let response;
   try {
     response = await fetch(`${base}${path}`, {
@@ -25,7 +28,6 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     path.startsWith('/api/admin/') ||
     path === '/api/auth/logout' ||
     (method !== 'GET' && /^\/api\/games\/\d+\/reviews(?:\/\d+(?:\/helpful)?)?$/.test(path));
-  // คำขอเก่าที่เพิ่งตอบ 401 ต้องไม่ล้าง session ใหม่ที่ล็อกอินไปแล้ว
   if (
     response.status === 401 &&
     protectedRequest &&
@@ -47,7 +49,8 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   }
   if (!response.ok) {
     const error = new Error(
-      typeof data?.error === 'string' ? data.error : data?.error?.message || `HTTP ${response.status}`,
+      typeof data?.error === 'string' ? data.error
+        : typeof data?.error?.message === 'string' ? data.error.message : `HTTP ${response.status}`,
     );
     error.status = response.status;
     throw error;

@@ -138,3 +138,8 @@ test('supports course-style 204 and nested JSON errors', async () => {
   fetch.mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: { message: 'Invalid' } }) });
   await expect(api('/api/games')).rejects.toMatchObject({ message: 'Invalid', status: 400 });
 });
+
+test.each([null, { error: { code: 'INVALID' } }, { error: { message: { unexpected: true } } }])('preserves status and a readable fallback for unexpected error bodies: %p', async (body) => {
+  fetch.mockResolvedValue({ ok: false, status: 500, json: async () => body });
+  await expect(api('/api/games')).rejects.toMatchObject({ status: 500, message: 'HTTP 500' });
+});

@@ -21,12 +21,19 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "check": "npm test -- --watchAll=false --runInBand && npm run build"
+    "check": "npm test -- --watchAll=false --runInBand && npm run build",
+    "prebuild": "node scripts/validate-env.cjs"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
+    ]
+  },
+  "jest": {
+    "testMatch": [
+      "**/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+      "**/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
     ]
   },
   "browserslist": {
@@ -42,6 +49,16 @@
     ]
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "overrides": {
+    "resolve-url-loader": "5.0.0",
+    "serialize-javascript": "7.1.4",
+    "@svgr/webpack": "8.1.0",
+    "@tootallnate/once": "2.0.1",
+    "sockjs": {
+      "uuid": "11.1.1"
+    },
+    "webpack-dev-middleware": "7.4.5"
   }
 }

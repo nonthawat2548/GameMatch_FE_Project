@@ -1,9 +1,8 @@
-// Browser QA only; Playwright is installed outside the application dependency tree.
-// Local mode uses disposable PostgreSQL and a real Go server. Production mode is read-only.
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const { chromium } = require(process.env.GM_PLAYWRIGHT_MODULE);
 const production = process.env.GM_QA_MODE === 'production';
 const origin = production ? 'https://gamematch-projectweb-befe.vercel.app' : 'http://localhost:4173';
@@ -34,16 +33,45 @@ async function login(page, email, password) {
   await page.getByRole('button', {name:'เข้าสู่ระบบ',exact:true}).click();
   await page.getByRole('button', {name:'ออกจากระบบ'}).waitFor();
 }
-async function layout(page) {
-  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+2), 'horizontal overflow '+page.url());
+async function layout(page, stage = 'page') {
+  await page.evaluate(() => document.fonts.ready);
+  const size = await page.evaluate(() => ({
+    viewport: innerWidth,
+    scroll: document.documentElement.scrollWidth,
+  }));
+  if (size.scroll <= size.viewport + 2) return;
+
+  const details = await page.evaluate(() => ({
+    url: location.href,
+    theme: document.documentElement.getAttribute('data-theme'),
+    stylesheets: [...document.styleSheets].map(sheet => sheet.href).filter(Boolean),
+    elements: [...document.querySelectorAll('body *')].map(element => {
+      const rect = element.getBoundingClientRect();
+      return {
+        tag: element.tagName, className: element.getAttribute('class'),
+        left: rect.left, right: rect.right, width: rect.width,
+      };
+    }).filter(rect => rect.right > innerWidth + 2 || rect.left < -2).slice(0, 30),
+  }));
+  const output = path.join(process.env.RUNNER_TEMP || os.tmpdir(), 'gamematch-browser-qa');
+  fs.mkdirSync(output, { recursive: true });
+  const name = `${size.viewport}-${stage}-${new URL(page.url()).pathname.replace(/[^a-z0-9-]/gi, '_')}`;
+  fs.writeFileSync(path.join(output, name + '.json'), JSON.stringify({ stage, ...size, ...details }, null, 2));
+  await page.screenshot({ path: path.join(output, name + '.png'), fullPage: true });
+  assert.fail(`horizontal overflow ${page.url()} (${stage}): ${size.scroll}px > ${size.viewport}px; details: ${output}`);
 }
 async function quiz(page) {
   await page.goto(origin+'/match');
+  await page.getByRole('button',{name:'ถัดไป'}).waitFor();
+  await layout(page, 'quiz-genre');
   await page.getByRole('button',{name:'ถัดไป'}).click();
+  await layout(page, 'quiz-mode');
   await page.getByRole('button',{name:'ถัดไป'}).click();
+  await layout(page, 'quiz-style');
   await page.getByRole('button',{name:'แนะนำเกมให้ฉัน'}).click();
   await page.getByRole('heading',{name:'เกมที่น่าจะถูกใจคุณ'}).waitFor();
   assert((await page.locator('.game-card').count()) > 0);
+  await layout(page, 'quiz-results');
 }
 (async()=>{
   let browser;
@@ -110,11 +138,9 @@ async function quiz(page) {
       await context.close();
     }
     if(production){
-      // Do not let the earlier reduced-motion layout checks hide video errors.
       const ctx=await browser.newContext({viewport:{width:1366,height:900},reducedMotion:'no-preference'});
       const page=await ctx.newPage();
       page.on('pageerror',e=>errors.push(e.message));
-      // The CI workflow may start before Vercel finishes the new deployment.
       for(let i=0;i<10;i++){
         await page.goto(origin);
         await page.locator('.game-card').first().waitFor();
@@ -141,7 +167,6 @@ async function quiz(page) {
           console.log('VIDEO '+initialSrc+' '+info.width+'x'+info.height);
           played++;
         }catch(e){
-          // A missing external clip must never remove the existing game artwork.
           assert(await page.locator('.cinematic-art').count());
           console.log('FALLBACK '+initialSrc+' '+e.message.split('\n')[0]);
           fallback++;
@@ -149,7 +174,6 @@ async function quiz(page) {
       }
       assert(played>0,'at least one official preview must play');
       console.log('PREVIEWS '+played+'/'+count+' playing, '+fallback+' still fallbacks');
-      // Regression: actual playback plus repeated loop/buffering events must advance.
       await dots.first().click();
       const firstLink = await page.locator('.hero-feature').getAttribute('href');
       await page.waitForFunction(() => {

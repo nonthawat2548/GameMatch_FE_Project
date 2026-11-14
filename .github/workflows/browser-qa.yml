@@ -23,6 +23,7 @@ jobs:
       JWT_SECRET: ci-disposable-not-a-production-secret
       ALLOWED_ORIGINS: http://localhost:4173
       REACT_APP_API_URL: http://localhost:8080
+      GM_ALLOW_LOCAL_API: '1'
       PORT: 8080
     steps:
       - uses: actions/checkout@v4
@@ -54,6 +55,12 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
           "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
       - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/ci-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: isolated-browser-layout
+          path: ${{ runner.temp }}/gamematch-browser-qa
+          if-no-files-found: ignore
   public-smoke:
     runs-on: ubuntu-latest
     env:
@@ -67,6 +74,12 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/gm-browser" --no-save playwright@1.65.0
           "$RUNNER_TEMP/gm-browser/node_modules/.bin/playwright" install --with-deps chromium
       - run: GM_PLAYWRIGHT_MODULE="$RUNNER_TEMP/gm-browser/node_modules/playwright" node tests/browser/ci-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: public-browser-layout
+          path: ${{ runner.temp }}/gamematch-browser-qa
+          if-no-files-found: ignore
   detail-trailers:
     runs-on: ubuntu-latest
     steps:
