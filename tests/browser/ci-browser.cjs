@@ -124,7 +124,10 @@ async function quiz(page) {
       const after=await page.locator('.cinematic-hero').boundingBox();
       assert(Math.abs(after.height-before.height)<=2, 'search dropdown must not resize hero: '+before.height+' → '+after.height);
       await search.press('Escape');await layout(page);
-      await page.getByRole('button',{name:'สลับเป็นธีมสว่าง'}).click();await page.reload();
+      if(width<=760) await page.getByRole('button',{name:'เปิดเมนู'}).click();
+      await page.getByRole('button',{name:'สลับเป็นธีมสว่าง'}).click();
+      assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
+      await page.reload();
       await page.locator('.game-card').first().waitFor();
       assert.equal(await page.locator('html').getAttribute('data-theme'),'light');await layout(page);
       await page.goto(origin+'/discover');await page.locator('.game-card').first().waitFor();
