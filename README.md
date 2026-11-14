@@ -22,7 +22,7 @@ GameMatch เป็นเว็บแอปพลิเคชันสำหร�
 | Frontend (React) | [GameMatch_FE_Project](https://github.com/nonthawat2548/GameMatch_FE_Project) |
 | Backend (Go) | [GameMatch_BE_Project](https://github.com/nonthawat2548/GameMatch_BE_Project) |
 | Backend API | [Health Check](https://gamematch-api-hzv6.onrender.com/healthz) |
-| ผลการทดสอบ Frontend | [GitHub Actions](https://github.com/nonthawat2548/GameMatch_FE_Project/actions) |
+
 
 ## เทคโนโลยีที่ใช้
 
